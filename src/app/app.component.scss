@@ -1,0 +1,174 @@
+/* MENU LATERAL */
+
+.custom-side-menu {
+  --width: 82%;
+  --max-width: 320px;
+
+  .menu-content {
+    --background: var(--color-primary);
+    color: var(--color-white);
+  }
+
+  .menu-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 1.5rem 1.25rem 1.25rem 1.25rem;
+    box-sizing: border-box;
+  }
+
+  /* --- HEADER COM LOGO --- */
+  .menu-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 2rem;
+    padding-top: 0.5rem;
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      .menu-logo {
+        height: 60px;
+        max-width: 180px;
+        width: auto;
+        object-fit: contain;
+      }
+    }
+
+    .btn-close {
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+
+      background: rgba(255, 255, 255, 0.18);
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-white);
+      cursor: pointer;
+      transition: background 0.2s ease;
+
+      ion-icon {
+        font-size: 1.25rem;
+      }
+
+      &:active {
+        background: rgba(255, 255, 255, 0.3);
+      }
+    }
+  }
+
+  /* --- LISTA DE CARDS --- */
+  .menu-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    flex: 1;
+
+    .menu-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.85rem 1rem;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.12);
+      cursor: pointer;
+      transition: opacity 0.2s ease, transform 0.1s ease;
+
+      &.mb-extended {
+        margin-bottom: 0.75rem;
+      }
+
+      .card-left {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+
+        .icon-wrapper {
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.15);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          ion-icon {
+            font-size: 1.1rem;
+            color: var(--color-white);
+          }
+        }
+
+        span {
+          font-size: 0.95rem;
+          font-weight: 600;
+          color: var(--color-white);
+        }
+      }
+
+      .arrow-icon {
+        font-size: 1rem;
+        opacity: 0.65;
+        color: var(--color-white);
+      }
+
+      &:active {
+        opacity: 0.85;
+        transform: scale(0.99);
+      }
+
+      /* Card Entrar (Laranja Secundário) */
+      &.card-highlight {
+        background-color: var(--color-secondary) !important;
+
+        .icon-wrapper {
+          background: rgba(255, 255, 255, 0.22);
+        }
+
+        .arrow-icon {
+          opacity: 0.9;
+        }
+      }
+
+      /* Card Criar Conta */
+      &.card-outline {
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        background: transparent;
+      }
+    }
+
+    /* LINHA DIVISÓRIA */
+    ion-item-divider.menu-divider {
+      --background: transparent !important;
+      --color: transparent !important;
+      min-height: 1px !important;
+      height: 1px !important;
+      background-color: transparent !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      margin: 0.25rem 0 1rem 0;
+      padding: 0 !important;
+    }
+  }
+
+  /* --- FOOTER --- */
+  .menu-footer {
+    padding-top: 1rem;
+    text-align: center;
+
+    p {
+      font-size: 0.78rem;
+      color: var(--color-white);
+      opacity: 0.55;
+      margin: 0;
+    }
+  }
+}

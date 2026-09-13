@@ -1,2 +1,44 @@
 // For information on how to create your own theme, please refer to:
 // https://ionicframework.com/docs/theming/
+
+
+:root {
+  --color-primary: #0F5D63; /*cor primária*/
+  --color-primary-rgb: 15, 93, 99;
+  --color-primary-shade: #0B474C;
+  --color-primary-tint: #147178;
+
+  --color-secondary: #FF8A00; /*cor secundária*/
+  --color-secondary-rgb: 255, 138, 0;
+  --color-secondary-shade: #E07A00;
+  --color-secondary-tint: #FF961A;
+
+  --color-bg: #E7F3FF; /*cor fundo*/
+  --color-bg-rgb: 231, 243, 255;
+
+  --color-text: #2D3B53; /*cor texto*/
+  --color-text-rgb: 45, 59, 83;
+  --color-text-muted: #64748B;
+
+  --color-highlight: #4CC2FF; /*cor destaque*/
+  --color-highlight-rgb: 76, 194, 255;
+
+  /* --- CORES AUXILIARES --- */
+  --color-white: #FFFFFF;
+  --color-card-border: #D0E4F7;
+  --color-status-published: #00A86B;
+
+  /* --- MAPEAMENTO PARA COMPONENTES DO IONIC --- */
+  --ion-color-primary: var(--color-primary);
+  --ion-color-primary-rgb: var(--color-primary-rgb);
+  --ion-color-primary-shade: var(--color-primary-shade);
+  --ion-color-primary-tint: var(--color-primary-tint);
+
+  --ion-color-secondary: var(--color-secondary);
+  --ion-color-secondary-rgb: var(--color-secondary-rgb);
+  --ion-color-secondary-shade: var(--color-secondary-shade);
+  --ion-color-secondary-tint: var(--color-secondary-tint);
+
+  --ion-background-color: var(--color-bg);
+  --ion-text-color: var(--color-text);
+}

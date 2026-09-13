@@ -1,0 +1,153 @@
+<ion-content [fullscreen]="true" class="bg-app">
+  <header class="hero-section bg-primary text-white">
+    <div class="hero-header">
+      <!-- Botão que abre o Menu Lateral -->
+      <ion-menu-button color="light" class="menu-button"></ion-menu-button>
+      <div class="hero-logo-box">
+        <img src="/assets/image/logo.png" alt="DesplugAI Logo" class="hero-logo" />
+      </div>
+    </div>
+
+    <div class="hero-body text-center">
+      <h1 class="hero-title text-white">Transforme suas aulas com ideias incríveis!</h1>
+      <p class="hero-description text-white">
+        Explore atividades prontas, recursos desplugados e sequências didáticas inspiradoras.
+      </p>
+    </div>
+
+    <div class="search-box bg-white">
+      <button class="filter-btn text-primary" type="button" (click)="openFilters()"
+        aria-label="Abrir filtros combináveis (RF04)">
+        <ion-icon name="options-outline"></ion-icon>
+      </button>
+
+      <ion-modal [isOpen]="isFilterOpen" (didDismiss)="closeFilters()" class="filter-modal">
+        <ng-template>
+          <ion-header class="ion-no-border">
+            <ion-toolbar>
+              <ion-title class="font-weight-bold text-main">Filtros</ion-title>
+              <ion-buttons slot="end">
+                <ion-button (click)="closeFilters()">
+                  <ion-icon name="close-outline"></ion-icon>
+                </ion-button>
+              </ion-buttons>
+            </ion-toolbar>
+          </ion-header>
+
+          <ion-content class="ion-padding">
+            <div class="filter-group">
+              <h4>Etapa de Ensino</h4>
+              <ion-item lines="none"><ion-checkbox labelPlacement="end">Educação Infantil</ion-checkbox></ion-item>
+              <ion-item lines="none"><ion-checkbox labelPlacement="end">Anos Iniciais</ion-checkbox></ion-item>
+              <ion-item lines="none"><ion-checkbox labelPlacement="end">Anos Finais</ion-checkbox></ion-item>
+              <ion-item lines="none"><ion-checkbox labelPlacement="end">Ensino Médio</ion-checkbox></ion-item>
+            </div>
+
+            <div class="filter-group">
+              <h4>Eixos BNCC Computação</h4>
+              <ion-item lines="none"><ion-checkbox labelPlacement="end">Pensamento
+                  Computacional</ion-checkbox></ion-item>
+              <ion-item lines="none"><ion-checkbox labelPlacement="end">Mundo Digital</ion-checkbox></ion-item>
+              <ion-item lines="none"><ion-checkbox labelPlacement="end">Cultura Digital</ion-checkbox></ion-item>
+            </div>
+
+            <div class="filter-group">
+              <h4>Tipo de Atividade</h4>
+              <ion-item lines="none"><ion-checkbox labelPlacement="end">Desplugada</ion-checkbox></ion-item>
+              <ion-item lines="none"><ion-checkbox labelPlacement="end">Maker</ion-checkbox></ion-item>
+              <ion-item lines="none"><ion-checkbox labelPlacement="end">Digital</ion-checkbox></ion-item>
+              <ion-item lines="none"><ion-checkbox labelPlacement="end">Plano de Aula</ion-checkbox></ion-item>
+            </div>
+
+            <div class="filter-group">
+              <h4>Disciplina</h4>
+              <ion-item lines="none"><ion-checkbox labelPlacement="end">Matemática</ion-checkbox></ion-item>
+              <ion-item lines="none"><ion-checkbox labelPlacement="end">Língua Portuguesa</ion-checkbox></ion-item>
+              <ion-item lines="none"><ion-checkbox labelPlacement="end">Ciências</ion-checkbox></ion-item>
+              <ion-item lines="none"><ion-checkbox labelPlacement="end">Computação</ion-checkbox></ion-item>
+              <ion-item lines="none"><ion-checkbox labelPlacement="end">Geografia</ion-checkbox></ion-item>
+              <ion-item lines="none"><ion-checkbox labelPlacement="end">História</ion-checkbox></ion-item>
+              <ion-item lines="none"><ion-checkbox labelPlacement="end">Arte</ion-checkbox></ion-item>
+              <ion-item lines="none"><ion-checkbox labelPlacement="end">Outros</ion-checkbox></ion-item>
+            </div>
+          </ion-content>
+
+          <ion-footer class="ion-padding bg-white border-top">
+            <ion-button expand="block" color="primary" class="btn-apply-filters" (click)="applyFilters()">
+              Ver resultados
+            </ion-button>
+          </ion-footer>
+        </ng-template>
+      </ion-modal>
+
+      <input type="text" [(ngModel)]="searchTerm" placeholder="Buscar por tema, disciplina ou código BNCC..."
+        class="search-input text-main" />
+      <button class="search-btn bg-primary text-white" type="button">Buscar</button>
+    </div>
+  </header>
+
+  <div class="feed-section">
+    <div class="results-bar">
+      <ion-badge class="results-count text-main">
+        <b>{{ lessonPlans.length }}</b> planos encontrados
+      </ion-badge>
+
+      <ion-select interface="popover" [interfaceOptions]="customPopoverOptions"
+        class="sort-select bg-white border-card text-main" placeholder="Ordenar por">
+        <ion-select-option value="relevantes">Mais relevantes</ion-select-option>
+        <ion-select-option value="recentes">Mais recentes</ion-select-option>
+        <ion-select-option value="favoritos">Mais favoritos</ion-select-option>
+        <ion-select-option value="adaptados">Mais adaptados</ion-select-option>
+      </ion-select>
+    </div>
+
+    <div class="card-list">
+
+      <ion-card *ngFor="let plan of lessonPlans" class="lesson-card bg-white border-card">
+
+        <div class="card-image-box">
+          <img [src]="plan.imagemCapa" [alt]="plan.titulo" class="card-image" />
+          <ion-badge class="badge-stage bg-white text-main">{{ plan.etapaEnsino }}</ion-badge>
+        </div>
+
+        <ion-card-content class="card-body">
+          <div class="card-tags">
+            <ion-badge class="tag-principal">{{ plan.tipoAtividade }}</ion-badge>
+            <ion-badge class="tag-destaque">{{ plan.eixoBNCC }}</ion-badge>
+            <ion-badge *ngIf="plan.adaptadoPorIA" class="tag-ia">Gerado por IA</ion-badge>
+          </div>
+
+          <ion-card-title class="card-title text-main">{{ plan.titulo }}</ion-card-title>
+          <p class="card-description text-muted">
+            {{ plan.resumo }}
+          </p>
+
+          <div class="author-info">
+            <ion-avatar class="author-avatar bg-primary text-white">
+              <ion-badge class="author-initials">
+                {{ lessonPlanService.getAuthorInitials(plan.autor.nome) }}
+              </ion-badge>
+            </ion-avatar>
+            <span class="author-name">{{ plan.autor.nome }}</span>
+          </div>
+
+          <footer class="card-footer">
+            <div class="card-metrics">
+              <ion-badge class="metric-item" title="Favoritos">
+                <ion-icon name="heart-outline"></ion-icon> {{ plan.quantidadeFavoritos }}
+              </ion-badge>
+              <ion-badge class="metric-item" title="Adaptações / Derivações">
+                <ion-icon name="git-branch-outline"></ion-icon> {{ plan.quantidadeAdaptacoes }}
+              </ion-badge>
+            </div>
+
+            <ion-button fill="clear" color="primary" class="card-btn" [routerLink]="['/plano', plan.id]">
+              Ver plano
+              <ion-icon name="arrow-forward-outline" slot="end"></ion-icon>
+            </ion-button>
+          </footer>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+</ion-content>
