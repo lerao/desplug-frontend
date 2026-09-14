@@ -7,19 +7,31 @@ const routes: Routes = [
     redirectTo: 'visitante',
     pathMatch: 'full'
   },
+
   {
     path: 'visitante',
-    loadChildren: () => import('./visitante/visitante.module').then(m => m.VisitantePageModule)
+    loadChildren: () =>
+      import('./visitante/visitante.module').then(m => m.VisitantePageModule)
   },
+
   {
     path: 'tabs',
-    loadChildren: () => import('./tabs/tabs.module').then(m => m.TabsPageModule)
+    loadChildren: () =>
+      import('./tabs/tabs.module').then(m => m.TabsPageModule)
+  },
+
+  {
+    path: 'login',
+    loadChildren: () =>
+      import('./login/login.module').then(m => m.LoginPageModule)
   }
 ];
 
 @NgModule({
   imports: [
-    RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules })
+    RouterModule.forRoot(routes, {
+      preloadingStrategy: PreloadAllModules
+    })
   ],
   exports: [RouterModule]
 })
