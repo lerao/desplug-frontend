@@ -1,0 +1,181 @@
+<ion-content [fullscreen]="true">
+
+  <div class="login-container">
+
+    <!-- LOGO -->
+    <div class="logo-area">
+
+      <img
+        src="assets/logo.png"
+        alt="Logo desplugAI"
+        class="logo"
+      >
+
+      <p class="descricao">
+        O futuro da educação ao alcance das mãos da sua turma
+      </p>
+
+    </div>
+
+
+    <!-- CARD -->
+    <div class="login-card">
+
+      <!-- TIPO DE USUÁRIO -->
+      <div class="tipo-usuario">
+
+        <button
+          type="button"
+          class="tipo"
+          [class.ativo]="selectedRole === 'professor'"
+          (click)="selecionarProfessor()"
+        >
+          <span class="icone">♙</span>
+          Professor
+        </button>
+
+        <button
+          type="button"
+          class="tipo"
+          [class.ativo]="selectedRole === 'admin'"
+          (click)="selecionarAdmin()"
+        >
+          <span class="icone">⚙</span>
+          Administrador
+        </button>
+
+      </div>
+
+
+      <!-- TÍTULO -->
+      <h2>Entrar na sua conta</h2>
+
+
+      <!-- E-MAIL -->
+      <div class="campo">
+
+        <span class="campo-icone">✉</span>
+
+        <ion-input
+          type="email"
+          placeholder="E-mail institucional"
+          [(ngModel)]="email"
+        ></ion-input>
+
+      </div>
+
+
+      <!-- SENHA -->
+      <div class="campo">
+
+        <span class="campo-icone">♙</span>
+
+        <ion-input
+          [type]="showPassword ? 'text' : 'password'"
+          placeholder="Senha"
+          [(ngModel)]="password"
+        ></ion-input>
+
+        <button
+          type="button"
+          class="mostrar-senha"
+          (click)="togglePassword()"
+        >
+          {{ showPassword ? 'Ocultar' : '◉' }}
+        </button>
+
+      </div>
+
+
+      <!-- ESQUECI SENHA -->
+      <div class="senha">
+
+        <button
+          type="button"
+          (click)="esqueciSenha()"
+        >
+          Esqueci minha senha
+        </button>
+
+      </div>
+
+
+      <!-- ENTRAR -->
+      <ion-button
+        expand="block"
+        class="botao-entrar"
+        (click)="fazerLogin()"
+      >
+        Entrar
+      </ion-button>
+
+
+      <!-- DIVISOR -->
+      <div class="divisor">
+
+        <span></span>
+
+        <p>ou continue com</p>
+
+        <span></span>
+
+      </div>
+
+
+      <!-- BOTÕES SOCIAIS -->
+      <div class="botoes-social">
+
+        <!-- GOOGLE -->
+        <ion-button
+          fill="outline"
+          class="botao-google"
+          (click)="loginGoogle()"
+        >
+
+          <img
+            src="assets/google.png"
+            alt="Google"
+          >
+
+          <span>Google</span>
+
+        </ion-button>
+
+
+        <!-- FACEBOOK -->
+        <ion-button
+          class="botao-facebook"
+          (click)="loginFacebook()"
+        >
+
+          <img
+            src="assets/icon/facebook.png"
+            alt="Facebook"
+          >
+
+          <span>Facebook</span>
+
+        </ion-button>
+
+      </div>
+
+    </div>
+
+
+    <!-- CADASTRO -->
+    <div class="cadastro">
+
+      <span>Não possui uma conta?</span>
+
+      <button
+        type="button"
+        (click)="cadastrar()"
+      >
+        cadastre-se
+      </button>
+
+    </div>
+
+  </div>
+
+</ion-content>
