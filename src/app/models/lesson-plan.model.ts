@@ -12,6 +12,11 @@ export interface BNCC {
   eixoComputacao: string; 
 }
 
+export interface PlanoOrigem {
+  id: number;
+  titulo: string;
+}
+
 export interface LessonPlan {
   id: number;
   titulo: string;
@@ -31,4 +36,10 @@ export interface LessonPlan {
   quantidadeAdaptacoes: number;
   adaptadoPorIA: boolean;
   dataCriacao?: string;
+
+  habilidadesBncc?: BNCC[];
+  passos?: string[];
+  comoRealizar?: string;
+  materiais?: string[];
+  planoOrigem?: PlanoOrigem;
 }

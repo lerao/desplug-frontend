@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { VisitantePage } from './visitante.page';
+import { DetalhesPlanoPage } from './detalhes-plano.page';
 
 import { RouterModule } from '@angular/router';
 
-describe('VisitantePage', () => {
-  let component: VisitantePage;
-  let fixture: ComponentFixture<VisitantePage>;
+describe('DetalhesPlanoPage', () => {
+  let component: DetalhesPlanoPage;
+  let fixture: ComponentFixture<DetalhesPlanoPage>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [RouterModule.forRoot([])]
     });
-    fixture = TestBed.createComponent(VisitantePage);
+    fixture = TestBed.createComponent(DetalhesPlanoPage);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

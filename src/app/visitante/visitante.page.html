@@ -46,7 +46,7 @@
             <div class="filter-group">
               <h4>Eixos BNCC Computação</h4>
               <ion-item lines="none"><ion-checkbox labelPlacement="end">Pensamento
-                  Computacional</ion-checkbox></ion-item>
+              Computacional</ion-checkbox></ion-item>
               <ion-item lines="none"><ion-checkbox labelPlacement="end">Mundo Digital</ion-checkbox></ion-item>
               <ion-item lines="none"><ion-checkbox labelPlacement="end">Cultura Digital</ion-checkbox></ion-item>
             </div>
@@ -82,72 +82,70 @@
 
       <input type="text" [(ngModel)]="searchTerm" placeholder="Buscar por tema, disciplina ou código BNCC..."
         class="search-input text-main" />
-      <button class="search-btn bg-primary text-white" type="button">Buscar</button>
-    </div>
-  </header>
+        <button class="search-btn bg-primary text-white" type="button">Buscar</button>
+      </div>
+    </header>
 
-  <div class="feed-section">
-    <div class="results-bar">
-      <ion-badge class="results-count text-main">
-        <b>{{ lessonPlans.length }}</b> planos encontrados
-      </ion-badge>
+    <div class="feed-section">
+      <div class="results-bar">
+        <ion-badge class="results-count text-main">
+          <b>{{ lessonPlans.length }}</b> planos encontrados
+        </ion-badge>
 
-      <ion-select interface="popover" [interfaceOptions]="customPopoverOptions"
-        class="sort-select bg-white border-card text-main" placeholder="Ordenar por">
-        <ion-select-option value="relevantes">Mais relevantes</ion-select-option>
-        <ion-select-option value="recentes">Mais recentes</ion-select-option>
-        <ion-select-option value="favoritos">Mais favoritos</ion-select-option>
-        <ion-select-option value="adaptados">Mais adaptados</ion-select-option>
-      </ion-select>
-    </div>
+        <ion-select interface="popover" [interfaceOptions]="customPopoverOptions"
+          class="sort-select bg-white border-card text-main" placeholder="Ordenar por">
+          <ion-select-option value="relevantes">Mais relevantes</ion-select-option>
+          <ion-select-option value="recentes">Mais recentes</ion-select-option>
+          <ion-select-option value="favoritos">Mais favoritos</ion-select-option>
+          <ion-select-option value="adaptados">Mais adaptados</ion-select-option>
+        </ion-select>
+      </div>
 
-    <div class="card-list">
+      <div class="card-list">
 
-      <ion-card *ngFor="let plan of lessonPlans" class="lesson-card bg-white border-card">
-
-        <div class="card-image-box">
-          <img [src]="plan.imagemCapa" [alt]="plan.titulo" class="card-image" />
-          <ion-badge class="badge-stage bg-white text-main">{{ plan.etapaEnsino }}</ion-badge>
-        </div>
-
-        <ion-card-content class="card-body">
-          <div class="card-tags">
-            <ion-badge class="tag-principal">{{ plan.tipoAtividade }}</ion-badge>
-            <ion-badge class="tag-destaque">{{ plan.eixoBNCC }}</ion-badge>
-            <ion-badge *ngIf="plan.adaptadoPorIA" class="tag-ia">Gerado por IA</ion-badge>
-          </div>
-
-          <ion-card-title class="card-title text-main">{{ plan.titulo }}</ion-card-title>
-          <p class="card-description text-muted">
-            {{ plan.resumo }}
-          </p>
-
-          <div class="author-info">
-            <ion-avatar class="author-avatar bg-primary text-white">
-              <ion-badge class="author-initials">
-                {{ lessonPlanService.getAuthorInitials(plan.autor.nome) }}
-              </ion-badge>
-            </ion-avatar>
-            <span class="author-name">{{ plan.autor.nome }}</span>
-          </div>
-
-          <footer class="card-footer">
-            <div class="card-metrics">
-              <ion-badge class="metric-item" title="Favoritos">
-                <ion-icon name="heart-outline"></ion-icon> {{ plan.quantidadeFavoritos }}
-              </ion-badge>
-              <ion-badge class="metric-item" title="Adaptações / Derivações">
-                <ion-icon name="git-branch-outline"></ion-icon> {{ plan.quantidadeAdaptacoes }}
-              </ion-badge>
+        @for (plan of lessonPlans; track plan) {
+          <ion-card class="lesson-card bg-white border-card">
+            <div class="card-image-box">
+              <img [src]="plan.imagemCapa" [alt]="plan.titulo" class="card-image" />
+              <ion-badge class="badge-stage bg-white text-main">{{ plan.etapaEnsino }}</ion-badge>
             </div>
-
-            <ion-button fill="clear" color="primary" class="card-btn" [routerLink]="['/plano', plan.id]">
-              Ver plano
-              <ion-icon name="arrow-forward-outline" slot="end"></ion-icon>
-            </ion-button>
-          </footer>
-        </ion-card-content>
-      </ion-card>
+            <ion-card-content class="card-body">
+              <div class="card-tags">
+                <ion-badge class="tag-principal">{{ plan.tipoAtividade }}</ion-badge>
+                <ion-badge class="tag-destaque">{{ plan.eixoBNCC }}</ion-badge>
+                @if (plan.adaptadoPorIA) {
+                  <ion-badge class="tag-ia">Gerado por IA</ion-badge>
+                }
+              </div>
+              <ion-card-title class="card-title text-main">{{ plan.titulo }}</ion-card-title>
+              <p class="card-description text-muted">
+                {{ plan.resumo }}
+              </p>
+              <div class="author-info">
+                <ion-avatar class="author-avatar bg-primary text-white">
+                  <ion-badge class="author-initials">
+                    {{ lessonPlanService.getAuthorInitials(plan.autor.nome) }}
+                  </ion-badge>
+                </ion-avatar>
+                <span class="author-name">{{ plan.autor.nome }}</span>
+              </div>
+              <footer class="card-footer">
+                <div class="card-metrics">
+                  <ion-badge class="metric-item" title="Favoritos">
+                    <ion-icon name="heart-outline"></ion-icon> {{ plan.quantidadeFavoritos }}
+                  </ion-badge>
+                  <ion-badge class="metric-item" title="Adaptações / Derivações">
+                    <ion-icon name="git-branch-outline"></ion-icon> {{ plan.quantidadeAdaptacoes }}
+                  </ion-badge>
+                </div>
+                <ion-button fill="clear" color="primary" class="card-btn" [routerLink]="['/detalhes-plano', plan.id]">
+                  Ver plano
+                  <ion-icon name="arrow-forward-outline" slot="end"></ion-icon>
+                </ion-button>
+              </footer>
+            </ion-card-content>
+          </ion-card>
+        }
+      </div>
     </div>
-  </div>
-</ion-content>
+  </ion-content>

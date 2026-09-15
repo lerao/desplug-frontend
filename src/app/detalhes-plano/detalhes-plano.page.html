@@ -1,0 +1,183 @@
+<ion-header>
+  <ion-toolbar class="plan-title-toolbar" color="light">
+    <ion-buttons slot="start" class="back-buttons">
+      <ion-button fill="clear" color="primary" routerLink="/visitante" aria-label="Abrir página visitante">
+        <ion-icon slot="start" name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="plan-header-title" [attr.title]="lessonPlan?.titulo || 'Visão geral da atividade'">
+      {{ lessonPlan?.titulo || 'Visão geral da atividade' }}
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="plan-detail-content">
+  <div *ngIf="isLoading" class="feedback-state" role="status" aria-live="polite">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Carregando os detalhes do plano...</p>
+  </div>
+
+  <ng-container *ngIf="lessonPlan as plan">
+
+  <section class="hero-cover">
+    <img [src]="plan.imagemCapa" [alt]="plan.titulo" title="Imagem de capa do plano" class="cover-img" />
+    <div class="cover-overlay"></div>
+    <div class="cover-info">
+      <div class="badge-row">
+        <ion-badge *ngIf="isLoggedInTeacher" class="tag-principal">
+          {{ plan.status === 'Publicado' ? 'Disponível' : plan.status }}
+        </ion-badge>
+        <ion-badge *ngIf="plan.adaptadoPorIA" class="tag-ia">Adaptado com IA</ion-badge>
+        <ion-badge class="tag-principal">{{ plan.tipoAtividade }}</ion-badge>
+        <ion-badge class="tag-destaque">{{ plan.etapaEnsino }}</ion-badge>
+      </div>
+    </div>
+  </section>
+
+  <ion-card class="section-card title-card">
+    <ion-card-content>
+      <h1 id="plan-title" class="plan-name">{{ plan.titulo }}</h1>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card class="section-card meta-card" aria-labelledby="summary-title">
+    <ion-card-content>
+      <h2 id="summary-title" class="visually-hidden">Resumo do plano</h2>
+      <div class="meta-grid">
+        <div class="meta-item">
+          <span class="meta-label">Autor</span>
+          <span class="meta-value">{{ plan.autor.nome }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Etapa de ensino</span>
+          <span class="meta-value">{{ plan.etapaEnsino }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Tipo de atividade</span>
+          <span class="meta-value">{{ plan.tipoAtividade }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Favoritos</span>
+          <span class="meta-value"><ion-icon name="heart-outline"></ion-icon> {{ plan.quantidadeFavoritos }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Adaptações</span>
+          <span class="meta-value"><ion-icon name="git-branch-outline"></ion-icon> {{ plan.quantidadeAdaptacoes }}</span>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card class="section-card about-card">
+    <ion-card-content>
+      <h2 class="section-title"><ion-icon name="information-circle-outline" aria-hidden="true"></ion-icon> Sobre a atividade</h2>
+      <p class="body-text">{{ plan.resumo }}</p>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card class="section-card learning-card" aria-labelledby="learning-area-title">
+    <ion-card-content>
+      <h2 id="learning-area-title" class="section-title"><ion-icon name="school-outline" aria-hidden="true"></ion-icon> O que esta atividade desenvolve</h2>
+      <div class="bncc-list">
+        <div *ngFor="let habilidade of (plan.habilidadesBncc || [])" class="bncc-item">
+          <div class="bncc-badges">
+            <ion-badge class="tag-principal">{{ habilidade.codigo }}</ion-badge>
+            <ion-badge class="tag-destaque">{{ habilidade.eixoComputacao }}</ion-badge>
+          </div>
+          <p class="bncc-desc">{{ habilidade.descricao }}</p>
+        </div>
+        <p *ngIf="!plan.habilidadesBncc?.length" class="empty-section">As habilidades BNCC ainda não foram cadastradas.</p>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card class="section-card details-card">
+    <ion-card-content>
+      <h2 class="section-title"><ion-icon name="document-text-outline" aria-hidden="true"></ion-icon> Detalhes da atividade</h2>
+      <p class="body-text">{{ plan.descricaoCompleta || 'Este plano ainda não possui detalhes cadastrados.' }}</p>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card class="section-card steps-card">
+    <ion-card-content>
+      <h2 class="section-title"><ion-icon name="list-outline" aria-hidden="true"></ion-icon> Como realizar</h2>
+      <div *ngIf="plan.passos?.length; else noPassos" class="step-list" role="list">
+        <div *ngFor="let passo of plan.passos" role="listitem">{{ passo }}</div>
+      </div>
+      <ng-template #noPassos>
+        <p class="body-text">{{ plan.comoRealizar || 'As instruções para realizar esta atividade ainda não foram cadastradas.' }}</p>
+      </ng-template>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card class="section-card materials-card">
+    <ion-card-content>
+      <h2 class="section-title"><ion-icon name="briefcase-outline" aria-hidden="true"></ion-icon> Materiais</h2>
+      <div *ngIf="plan.materiais?.length; else noMateriais" class="resource-list" role="list">
+        <div *ngFor="let material of plan.materiais" class="resource-item" role="listitem"><span class="bullet" aria-hidden="true"></span>{{ material }}</div>
+      </div>
+      <ng-template #noMateriais>
+        <p class="empty-section">Os materiais ainda não foram cadastrados.</p>
+      </ng-template>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="plan.planoOrigem" class="section-card derivation-card" aria-labelledby="derivation-title">
+    <ion-card-content>
+      <h2 id="derivation-title" class="section-title"><ion-icon name="git-branch-outline" aria-hidden="true"></ion-icon> Origem e derivação</h2>
+      <div class="derivation-tree">
+        <div class="derivation-node derivation-origin">
+          <span class="derivation-label">Plano original</span>
+          <strong>{{ plan.planoOrigem.titulo }}</strong>
+        </div>
+        <div class="derivation-line" aria-hidden="true"></div>
+        <div class="derivation-node derivation-current">
+          <span class="derivation-label">Este plano</span>
+          <strong>{{ plan.titulo }}</strong>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card class="section-card cta-card" aria-labelledby="next-step-title">
+    <div class="cta-ai">
+      <div>
+        <div class="cta-ai-header">
+          <ion-icon name="sparkles-outline" aria-hidden="true"></ion-icon>
+          <strong id="next-step-title" class="cta-ai-title">Adaptar este plano</strong>
+        </div>
+        <p class="cta-ai-desc">Para adaptar este plano à sua turma, crie uma conta e aguarde a aprovação do seu perfil de professor.</p>
+      </div>
+      <ion-button expand="block" fill="solid" class="cta-action btn-orange" aria-label="Criar uma conta para adaptar este plano" (click)="showAccountNotice()">
+        <ion-icon name="sparkles-outline" slot="start"></ion-icon>
+        Criar conta para adaptar
+      </ion-button>
+    </div>
+
+    <div class="cta-divider"></div>
+
+    <div class="cta-save">
+      <p class="cta-save-text">
+        Gostou desta atividade? <strong>Crie uma conta para salvar</strong> esta atividade na sua biblioteca pessoal.
+      </p>
+      <div class="cta-save-actions">
+        <ion-button expand="block" fill="solid" color="secondary" class="cta-action btn-orange" aria-label="Criar uma conta para favoritar este plano" (click)="showAccountNotice()">
+          <ion-icon name="heart-outline" slot="start"></ion-icon>
+          Criar conta para favoritar
+        </ion-button>
+      </div>
+      <p *ngIf="accountNoticeVisible" class="account-notice" role="status" aria-live="polite">
+        Crie sua conta de professor para salvar planos e usar a adaptação com IA.
+      </p>
+    </div>
+  </ion-card>
+
+  </ng-container>
+
+  <div *ngIf="!isLoading && !lessonPlan" class="feedback-state" role="alert">
+    <ion-icon name="document-text-outline" aria-hidden="true"></ion-icon>
+    <h1>Plano não encontrado</h1>
+    <p>Não foi possível encontrar este plano no repositório.</p>
+    <ion-button fill="solid" color="primary" routerLink="/visitante">Ir para a página visitante</ion-button>
+  </div>
+</ion-content>

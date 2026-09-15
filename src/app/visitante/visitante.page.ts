@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { LessonPlanService } from '../services/lesson-plan';
 import { LessonPlan } from '../models/lesson-plan.model';
 
@@ -9,6 +9,8 @@ import { LessonPlan } from '../models/lesson-plan.model';
   standalone: false, 
 })
 export class VisitantePage implements OnInit {
+  lessonPlanService = inject(LessonPlanService);
+
   lessonPlans: LessonPlan[] = [];
   searchTerm: string = '';
 
@@ -17,8 +19,6 @@ export class VisitantePage implements OnInit {
   alignment: 'center',
   cssClass: 'custom-sort-popover'
 };
-
-  constructor(public lessonPlanService: LessonPlanService) {}
 
   ngOnInit() {
     this.fetchPublishedPlans();

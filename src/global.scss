@@ -76,8 +76,8 @@
 }
 
 .tag-destaque {
-  background-color: rgba(76, 194, 255, 0.15);
-  color: #0284C7;
+  background-color: rgba(var(--color-highlight-rgb), 0.15);
+  color: var(--color-tag-destaque);
   padding: 0.25rem 0.6rem;
   border-radius: 12px;
   font-size: 0.7rem;

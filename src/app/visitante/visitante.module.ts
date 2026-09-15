@@ -6,13 +6,16 @@ import { VisitantePage } from './visitante.page';
 import { ExploreContainerComponentModule } from '../explore-container/explore-container.module';
 import { VisitantePageRoutingModule } from './visitante-routing.module';
 
+import { RouterModule } from '@angular/router';
+
 @NgModule({
   imports: [
     IonicModule,
     CommonModule,
     FormsModule,
     ExploreContainerComponentModule,
-    VisitantePageRoutingModule
+    VisitantePageRoutingModule,
+    RouterModule
   ],
   declarations: [VisitantePage]
 })
