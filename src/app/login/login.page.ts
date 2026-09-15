@@ -25,6 +25,10 @@ export class LoginPage {
     this.showPassword = !this.showPassword;
   }
 
+  getPasswordIcon():string {
+    return this.showPassword ? 'eye-off-outline' : 'eye-outline';
+  }
+
   fazerLogin() {
     this.loading = true;
     setTimeout(() => {
