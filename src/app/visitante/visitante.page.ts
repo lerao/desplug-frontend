@@ -46,7 +46,6 @@ export class VisitantePage implements OnInit {
   }
 
   applyFilters() {
-    // Lógica de aplicação dos filtros combinados
     this.isFilterOpen = false;
   }
 }
