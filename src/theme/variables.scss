@@ -3,10 +3,10 @@
 
 
 :root {
-  --color-primary: #0F5D63; /*cor primária*/
-  --color-primary-rgb: 15, 93, 99;
-  --color-primary-shade: #0B474C;
-  --color-primary-tint: #147178;
+  --color-primary: #3f92cd; /*cor primária*/
+  --color-primary-rgb: 63, 146, 205;
+  --color-primary-shade: #3a87bd;
+  --color-primary-tint: #5aa5d9;
 
   --color-secondary: #FF8A00; /*cor secundária*/
   --color-secondary-rgb: 255, 138, 0;
@@ -26,8 +26,6 @@
   /* --- CORES AUXILIARES --- */
   --color-white: #FFFFFF;
   --color-card-border: #D0E4F7;
-  --color-status-published: #00A86B;
-  --color-tag-destaque: #0284C7;
 
   /* --- MAPEAMENTO PARA COMPONENTES DO IONIC --- */
   --ion-color-primary: var(--color-primary);
