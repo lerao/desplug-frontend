@@ -7,6 +7,16 @@ ion-content {
   );
 }
 
+.botao-voltar {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 10;
+}
+
+.botao-voltar ion-back-button {
+  --color: #3f92cd;
+}
 
 .login-container {
   min-height: 100%;
@@ -100,7 +110,7 @@ ion-content {
 
   box-sizing: border-box;
 
-  background: #e0f0f1;
+  background: #c1ddf1a7;
 
   border-radius: 50px;
 
@@ -142,12 +152,12 @@ ion-content {
 
 
 .tipo.ativo {
-  background: #0f5d63;
+  background: #3f92cd;
 
   color: #ffffff;
 
   box-shadow:
-    0 2px 8px rgba(26, 95, 94, 0.25);
+    0 2px 8px rgba(37, 101, 144, 0.25);
 }
 
 

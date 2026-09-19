@@ -1,4 +1,13 @@
+```html
 <ion-content [fullscreen]="true">
+
+  <!-- BOTÃO VOLTAR -->
+  <ion-buttons class="botao-voltar">
+    <ion-back-button
+      defaultHref="/visitante"
+      text="Voltar">
+    </ion-back-button>
+  </ion-buttons>
 
   <div class="login-container">
 
@@ -10,10 +19,6 @@
         alt="Logo desplugAI"
         class="logo"
       >
-
-      <p class="descricao">
-        O futuro da educação ao alcance das mãos da sua turma
-      </p>
 
     </div>
 
@@ -59,8 +64,8 @@
         <ion-input
           type="email"
           placeholder="E-mail institucional"
-          [(ngModel)]="email"
-        ></ion-input>
+          [(ngModel)]="email">
+        </ion-input>
 
       </div>
 
@@ -73,8 +78,8 @@
         <ion-input
           [type]="showPassword ? 'text' : 'password'"
           placeholder="Senha"
-          [(ngModel)]="password"
-        ></ion-input>
+          [(ngModel)]="password">
+        </ion-input>
 
         <button
           type="button"
@@ -140,22 +145,6 @@
 
         </ion-button>
 
-
-        <!-- FACEBOOK -->
-        <ion-button
-          class="botao-facebook"
-          (click)="loginFacebook()"
-        >
-
-          <img
-            src="assets/icon/facebook.png"
-            alt="Facebook"
-          >
-
-          <span>Facebook</span>
-
-        </ion-button>
-
       </div>
 
     </div>
@@ -170,7 +159,7 @@
         type="button"
         (click)="cadastrar()"
       >
-        cadastre-se
+        Cadastre-se
       </button>
 
     </div>
@@ -178,3 +167,4 @@
   </div>
 
 </ion-content>
+

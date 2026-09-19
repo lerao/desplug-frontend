@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { AlertController } from '@ionic/angular';
 
 @Component({
   selector: 'app-login',
@@ -7,11 +8,17 @@ import { Component } from '@angular/core';
   standalone: false,
 })
 export class LoginPage {
+
   email: string = '';
   password: string = '';
   showPassword: boolean = false;
   loading: boolean = false;
+
   selectedRole: 'professor' | 'admin' = 'professor';
+
+  constructor(
+    private alertController: AlertController
+  ) {}
 
   selecionarProfessor() {
     this.selectedRole = 'professor';
@@ -31,14 +38,52 @@ export class LoginPage {
 
   fazerLogin() {
     this.loading = true;
+
     setTimeout(() => {
       this.loading = false;
-      console.log('Login executado:', { email: this.email, role: this.selectedRole });
+
+      console.log('Login executado:', {
+        email: this.email,
+        role: this.selectedRole
+      });
     }, 1400);
   }
 
-  esqueciSenha() {
-    console.log('Recuperação de senha solicitada:', this.email);
+  async esqueciSenha() {
+
+    const alert = await this.alertController.create({
+      header: 'Redefinir senha',
+
+      message: 'Digite seu e-mail para recuperar sua senha.',
+
+      inputs: [
+        {
+          name: 'email',
+          type: 'email',
+          placeholder: 'Digite seu e-mail',
+          value: this.email
+        }
+      ],
+
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        },
+        {
+          text: 'Enviar',
+
+          handler: (dados) => {
+            console.log(
+              'E-mail para recuperação:',
+              dados.email
+            );
+          }
+        }
+      ]
+    });
+
+    await alert.present();
   }
 
   loginGoogle() {
@@ -52,4 +97,6 @@ export class LoginPage {
   cadastrar() {
     console.log('Cadastro solicitado');
   }
+
 }
+
