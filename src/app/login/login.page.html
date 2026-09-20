@@ -1,4 +1,3 @@
-```html
 <ion-content [fullscreen]="true">
 
   <!-- BOTÃO VOLTAR -->
@@ -35,7 +34,7 @@
           [class.ativo]="selectedRole === 'professor'"
           (click)="selecionarProfessor()"
         >
-          <span class="icone">♙</span>
+          <span class="icone"><ion-icon name="person-outline"></ion-icon></span>
           Professor
         </button>
 
@@ -45,21 +44,21 @@
           [class.ativo]="selectedRole === 'admin'"
           (click)="selecionarAdmin()"
         >
-          <span class="icone">⚙</span>
+          <span class="icone"><ion-icon name="settings-outline"></ion-icon></span>
           Administrador
         </button>
 
       </div>
 
 
-      <!-- TÍTULO -->
-      <h2>Entrar na sua conta</h2>
+    <!-- TÍTULO -->
+    <h2>Entrar na sua conta</h2>
 
 
       <!-- E-MAIL -->
       <div class="campo">
 
-        <span class="campo-icone">✉</span>
+        <span class="campo-icone"><ion-icon name="mail-outline"></ion-icon></span>
 
         <ion-input
           type="email"
@@ -73,7 +72,7 @@
       <!-- SENHA -->
       <div class="campo">
 
-        <span class="campo-icone">♙</span>
+        <span class="campo-icone"><ion-icon name="lock-closed-outline"></ion-icon></span>
 
         <ion-input
           [type]="showPassword ? 'text' : 'password'"
@@ -85,8 +84,7 @@
           type="button"
           class="mostrar-senha"
           (click)="togglePassword()"
-        >
-          {{ showPassword ? 'Ocultar' : '◉' }}
+        ><ion-icon [name]="getPasswordIcon()"></ion-icon>
         </button>
 
       </div>
@@ -158,7 +156,7 @@
 
       <button
         type="button"
-        (click)="cadastrar()"
+        routerLink="/cadastro"
       >
         Cadastre-se
       </button>

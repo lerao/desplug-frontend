@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { AlertController } from '@ionic/angular';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -8,6 +9,8 @@ import { AlertController } from '@ionic/angular';
   standalone: false,
 })
 export class LoginPage {
+  private alertController = inject(AlertController);
+  private router = inject(Router);
 
   email: string = '';
   password: string = '';
@@ -16,9 +19,7 @@ export class LoginPage {
 
   selectedRole: 'professor' | 'admin' = 'professor';
 
-  constructor(
-    private alertController: AlertController
-  ) {}
+  constructor() {}
 
   selecionarProfessor() {
     this.selectedRole = 'professor';
@@ -32,6 +33,10 @@ export class LoginPage {
     this.showPassword = !this.showPassword;
   }
 
+  getPasswordIcon(): string {
+    return this.showPassword ? 'eye-off-outline' : 'eye-outline';
+  }
+
   fazerLogin() {
     this.loading = true;
 
@@ -40,43 +45,35 @@ export class LoginPage {
 
       console.log('Login executado:', {
         email: this.email,
-        role: this.selectedRole
+        role: this.selectedRole,
       });
     }, 1400);
   }
 
   async esqueciSenha() {
-
     const alert = await this.alertController.create({
       header: 'Redefinir senha',
-
       message: 'Digite seu e-mail para recuperar sua senha.',
-
       inputs: [
         {
           name: 'email',
           type: 'email',
           placeholder: 'Digite seu e-mail',
-          value: this.email
-        }
+          value: this.email,
+        },
       ],
-
       buttons: [
         {
           text: 'Cancelar',
-          role: 'cancel'
+          role: 'cancel',
         },
         {
           text: 'Enviar',
-
           handler: (dados) => {
-            console.log(
-              'E-mail para recuperação:',
-              dados.email
-            );
-          }
-        }
-      ]
+            console.log('E-mail para recuperação:', dados.email);
+          },
+        },
+      ],
     });
 
     await alert.present();
@@ -91,8 +88,6 @@ export class LoginPage {
   }
 
   cadastrar() {
-    console.log('Cadastro solicitado');
+    this.router.navigate(['/cadastro']);
   }
-
 }
-
