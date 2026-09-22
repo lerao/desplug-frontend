@@ -1,0 +1,197 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar class="custom-toolbar">
+    <ion-buttons slot="start" class="ion-margin-start">
+      <ion-back-button defaultHref="/" icon="chevron-back" text=""></ion-back-button>
+    </ion-buttons>
+  </ion-toolbar>
+  <div class="header-title-block">
+    <div class="header-logo-container">
+      <img src="/assets/image/logo.png" alt="DesplugAI Logo" class="header-logo" />
+    </div>
+    <h1>Criar conta</h1>
+  </div>
+</ion-header>
+
+<ion-content class="custom-content">
+  <div class="form-container">
+    <form #cadastroForm="ngForm" (ngSubmit)="submeterCadastro(cadastroForm)" class="cadastro-form" novalidate>
+
+      <!-- CAMPO: Nome Completo -->
+      <div class="input-group">
+        <label class="custom-label">NOME COMPLETO *</label>
+        <div class="custom-input-box" [class.input-error]="nome.invalid && nome.touched">
+          <ion-icon name="person-outline" class="input-icon-start"></ion-icon>
+          <ion-input 
+            type="text" 
+            name="nome"
+            placeholder="Seu nome completo"
+            [(ngModel)]="usuario.nome"
+            #nome="ngModel"
+            class="custom-input"
+            required>
+          </ion-input>
+        </div>
+        <span class="error-message" *ngIf="nome.invalid && nome.touched">O nome completo é obrigatório.</span>
+      </div>
+
+      <!-- CAMPO: E-mail Comum -->
+      <div class="input-group">
+        <label class="custom-label">E-MAIL *</label>
+        <div class="custom-input-box" [class.input-error]="email.invalid && email.touched">
+          <ion-icon name="mail-outline" class="input-icon-start"></ion-icon>
+          <ion-input 
+            type="email" 
+            name="email"
+            placeholder="seu-email@exemplo.com"
+            [(ngModel)]="usuario.email"
+            #email="ngModel"
+            class="custom-input"
+            required
+            email>
+          </ion-input>
+        </div>
+        <span class="error-message" *ngIf="email.touched && email.errors?.['required']">O e-mail é obrigatório.</span>
+        <span class="error-message" *ngIf="email.touched && email.errors?.['email'] && !email.errors?.['required']">Insira um e-mail com formato válido.</span>
+      </div>
+
+      <!-- CAMPO: Senha -->
+      <div class="input-group">
+        <label class="custom-label">SENHA *</label>
+        <div class="custom-input-box" [class.input-error]="senha.invalid && senha.touched">
+          <ion-icon name="lock-closed-outline" class="input-icon-start"></ion-icon>
+          <ion-input 
+            [type]="exibirSenha1 ? 'text' : 'password'" 
+            name="senha"
+            placeholder="Mínimo 8 caracteres"
+            [(ngModel)]="usuario.senha"
+            #senha="ngModel"
+            class="custom-input"
+            required
+            minlength="8">
+          </ion-input>
+          <ion-icon 
+            [name]="exibirSenha1 ? 'eye-off-outline' : 'eye-outline'" 
+            class="toggle-password input-icon-end"
+            (click)="exibirSenha1 = !exibirSenha1">
+          </ion-icon>
+        </div>
+        <span class="helper-text" *ngIf="!senha.touched || senha.valid">Mínimo de 8 caracteres, com letra e número.</span>
+        <span class="error-message" *ngIf="senha.touched && senha.errors?.['required']">A senha é obrigatória.</span>
+        <span class="error-message" *ngIf="senha.touched && senha.errors?.['minlength'] && !senha.errors?.['required']">
+          A senha deve conter no mínimo 8 caracteres, incluindo letras e números.
+        </span>
+      </div>
+
+      <!-- CAMPO: Confirmar Senha -->
+      <div class="input-group">
+        <label class="custom-label">CONFIRMAR SENHA *</label>
+        <div class="custom-input-box" [class.input-error]="!senhasConferem() && confSenha.touched">
+          <ion-icon name="lock-closed-outline" class="input-icon-start"></ion-icon>
+          <ion-input 
+            [type]="exibirSenha2 ? 'text' : 'password'" 
+            name="confirmarSenha"
+            placeholder="Repita a senha"
+            [(ngModel)]="usuario.confirmarSenha"
+            #confSenha="ngModel"
+            class="custom-input"
+            required>
+          </ion-input>
+          <ion-icon 
+            [name]="exibirSenha2 ? 'eye-off-outline' : 'eye-outline'" 
+            class="toggle-password input-icon-end"
+            (click)="exibirSenha2 = !exibirSenha2">
+          </ion-icon>
+        </div>
+        <span class="error-message" *ngIf="confSenha.touched && !senhasConferem()">As senhas informadas não coincidem.</span>
+      </div>
+
+      <!-- CAMPO: Secretaria de Educação -->
+      <div class="input-group">
+        <label class="custom-label">SECRETARIA DE EDUCAÇÃO *</label>
+        <div class="custom-input-box" [class.input-error]="secretaria.invalid && secretaria.touched">
+          <ion-icon name="business-outline" class="input-icon-start"></ion-icon>
+          <ion-select 
+            name="secretaria"
+            placeholder="Selecione sua secretaria"
+            [(ngModel)]="usuario.secretaria"
+            #secretaria="ngModel"
+            class="custom-input"
+            okText="Selecionar"
+            cancelText="Cancelar"
+            required>
+            <ion-select-option value="estadual">Secretaria Estadual de Educação</ion-select-option>
+            <ion-select-option value="municipal">Secretaria Municipal de Educação</ion-select-option>
+          </ion-select>
+        </div>
+        <span class="error-message" *ngIf="secretaria.invalid && secretaria.touched">A seleção da secretaria é obrigatória.</span>
+      </div>
+
+      <!-- CAMPO: ESTADO / UF (Apenas PE e PB) -->
+      <div class="input-group">
+        <label class="custom-label">ESTADO (UF) *</label>
+        <div class="custom-input-box" [class.input-error]="uf.invalid && uf.touched">
+          <ion-icon name="map-outline" class="input-icon-start"></ion-icon>
+          <ion-select 
+            name="uf"
+            placeholder="Selecione o estado"
+            [(ngModel)]="usuario.uf"
+            #uf="ngModel"
+            (ionChange)="buscarMunicipiosPorUf()"
+            class="custom-input"
+            okText="Selecionar"
+            cancelText="Cancelar"
+            required>
+            <ion-select-option *ngFor="let estado of listaEstados" [value]="estado.sigla">
+              {{ estado.nome }} ({{ estado.sigla }})
+            </ion-select-option>
+          </ion-select>
+        </div>
+        <span class="error-message" *ngIf="uf.invalid && uf.touched">A seleção do estado é obrigatória.</span>
+      </div>
+
+      <!-- CAMPO: MUNICÍPIO (Filtrado estritamente pelas opções PE/PB) -->
+      <div class="input-group">
+        <label class="custom-label">MUNICÍPIO *</label>
+        <div class="custom-input-box" [class.input-error]="municipio.invalid && municipio.touched">
+          <ion-icon name="location-outline" class="input-icon-start"></ion-icon>
+          <ion-select 
+            name="municipio"
+            placeholder="Selecione a cidade"
+            [(ngModel)]="usuario.municipio"
+            #municipio="ngModel"
+            [disabled]="!usuario.uf"
+            class="custom-input"
+            okText="Selecionar"
+            cancelText="Cancelar"
+            required>
+            <ion-select-option *ngFor="let cidade of listaMunicipios" [value]="cidade">
+              {{ cidade }}
+            </ion-select-option>
+          </ion-select>
+        </div>
+        <span class="error-message" *ngIf="municipio.invalid && municipio.touched">A seleção da cidade é obrigatória.</span>
+      </div>
+
+      <!-- Alerta Informativo -->
+      <div class="info-alert-card">
+        <ion-icon name="warning-outline"></ion-icon>
+        <p>
+          Depois de criar sua conta, um administrador vai confirmar seu acesso. Isso pode levar alguns dias.
+        </p>
+      </div>
+
+      <!-- Botão Submeter -->
+      <ion-button 
+        type="submit" 
+        expand="block" 
+        class="btn-orange">
+        Criar minha conta
+      </ion-button>
+      
+      <div class="login-footer">
+        Já tem uma conta? <a href="/login">Fazer login</a>
+      </div>
+
+    </form>
+  </div>
+</ion-content>

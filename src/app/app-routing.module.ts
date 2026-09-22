@@ -32,13 +32,12 @@ const routes: Routes = [
     redirectTo: 'login',
     pathMatch: 'full'
   }
+
 ];
 
 @NgModule({
   imports: [
-    RouterModule.forRoot(routes, {
-      preloadingStrategy: PreloadAllModules
-    })
+    RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules })
   ],
   exports: [RouterModule]
 })
