@@ -1,0 +1,197 @@
+<ion-header class="ion-no-border">
+  <app-header backButtonText="Cancelar" routerLink="/"></app-header>
+
+  <div class="plano-header">
+    <h1 class="header-title">Novo Plano de Aula</h1>
+    <p class="header-subtitle">Etapa {{ etapaAtual }} de {{ totalEtapas }} — {{ etapasTitulos[etapaAtual] }}</p>
+    <div class="etapas">
+      <div class="etapas-progresso">
+        <div class="progress-etapas" [style.width]="(etapaAtual / totalEtapas) * 100 + '%'"></div>
+      </div>
+      <div class="etapas-indicadores">
+        <div class="etapa" *ngFor="let etapa of [1, 2, 3, 4]" [class.active]="etapa === etapaAtual"
+          [class.completed]="etapa < etapaAtual">
+          <ion-icon *ngIf="etapa < etapaAtual" name="checkmark"></ion-icon>
+          <span *ngIf="etapa >= etapaAtual">{{ etapa }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</ion-header>
+
+<ion-content class="plano-content">
+  <div [ngSwitch]="etapaAtual">
+    <div *ngSwitchCase="1">
+      <div class="form-card">
+        <h2 class="form-secao-titulo">IDENTIFICAÇÃO DO PLANO</h2>
+
+        <div class="input-grupo">
+          <ion-label>Título <span class="required">*</span></ion-label>
+          <ion-input [(ngModel)]="plano.titulo" fill="outline" placeholder="Ex.: Algoritmos com Sucata" class="custom-input"></ion-input>
+          <span class="char-counter">0/120</span>
+        </div>
+
+        <div class="input-grupo">
+          <ion-label>Resumo <span class="required">*</span></ion-label>
+          <ion-textarea [(ngModel)]="plano.resumo" fill="outline" rows="4"
+            placeholder="Descreva brevemente os objetivos e a proposta da atividade..."
+            class="custom-input"></ion-textarea>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <h2 class="form-secao-titulo">IMAGEM DE CAPA</h2>
+        <ion-label class="d-block mb-2">Imagem de capa</ion-label>
+        <div class="upload-area">
+          <ion-icon name="push-outline"></ion-icon>
+          <p>Clique para enviar uma imagem</p>
+          <span>JPG, PNG ou WebP</span>
+        </div>
+      </div>
+    </div>
+
+    <div *ngSwitchCase="2">
+      <div class="form-card">
+        <h2 class="form-secao-titulo">TIPO E NÍVEL</h2>
+
+        <div class="input-grupo">
+          <ion-label>Tipo de Atividade <span class="required">*</span></ion-label>
+          <ion-select [(ngModel)]="plano.tipoAtividade" fill="outline" placeholder="Selecionar tipo"
+            class="custom-input">
+            <ion-select-option value="plano_aula">Plano de Aula</ion-select-option>
+            <ion-select-option value="desplugada">Desplugada</ion-select-option>
+            <ion-select-option value="maker">Maker</ion-select-option>
+            <ion-select-option value="digital">Digital</ion-select-option>
+          </ion-select>
+        </div>
+
+        <div class="input-grupo">
+          <ion-label>Etapa de Ensino <span class="required">*</span></ion-label>
+          <ion-select [(ngModel)]="plano.etapaEnsino" fill="outline" placeholder="Selecionar etapa..."
+            class="custom-input">
+            <ion-select-option value="infantil">Ed. Infantil</ion-select-option>
+            <ion-select-option value="fundamental1">Ensino Fundamental I (Anos Iniciais)</ion-select-option>
+            <ion-select-option value="fundamental2">Ensino Fundamental II (Anos Finais)</ion-select-option>
+            <ion-select-option value="medio">Ensino Médio</ion-select-option>
+          </ion-select>
+        </div>
+
+        <div class="input-grupo">
+          <ion-label>Anos Indicados</ion-label>
+          <ion-input [(ngModel)]="plano.anosIndicados" fill="outline" placeholder="Ex.: 4º e 5º Ano, 6º Ano, 1º EM"
+            class="custom-input"></ion-input>
+        </div>
+
+        <div class="input-grupo">
+          <ion-label>Duração Estimada</ion-label>
+          <ion-input [(ngModel)]="plano.duracao" fill="outline" placeholder="Ex.: 2 aulas de 50 min"
+            class="custom-input"></ion-input>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <h2 class="form-secao-titulo">COMPONENTES CURRICULARES</h2>
+        <p class="secao-desc">Selecione as disciplinas envolvidas na atividade</p>
+        <div class="checkbox-grid">
+          <div class="pill-checkbox">
+            <ion-checkbox></ion-checkbox>
+            <ion-label>Português</ion-label>
+          </div>
+          <div class="pill-checkbox">
+            <ion-checkbox></ion-checkbox>
+            <ion-label>Matemática</ion-label>
+          </div>
+          <div class="pill-checkbox">
+            <ion-checkbox></ion-checkbox>
+            <ion-label>História</ion-label>
+          </div>
+          <div class="pill-checkbox">
+            <ion-checkbox></ion-checkbox>
+            <ion-label>Ciências</ion-label>
+          </div>
+          <div class="pill-checkbox">
+            <ion-checkbox></ion-checkbox>
+            <ion-label>Educação Física</ion-label>
+          </div>
+          <div class="pill-checkbox">
+            <ion-checkbox></ion-checkbox>
+            <ion-label>Geografia</ion-label>
+          </div>
+          <div class="pill-checkbox">
+            <ion-checkbox></ion-checkbox>
+            <ion-label>Inglês</ion-label>
+          </div>
+          <div class="pill-checkbox">
+            <ion-checkbox></ion-checkbox>
+            <ion-label>Computação</ion-label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngSwitchCase="3">
+      <div class="form-card">
+        <h2 class="form-secao-titulo">MATERIAIS E EXECUÇÃO</h2>
+
+        <div class="input-grupo">
+          <ion-label>Materiais Necessários <span class="required">*</span></ion-label>
+          <ion-textarea [(ngModel)]="plano.materiais" fill="outline" rows="4"
+            placeholder="Papelão&#10;Tampinhas de garrafa&#10;Folhas de papel sulfite&#10;Canetas coloridas"
+            class="custom-input"></ion-textarea>
+          <ion-badge color="none" class="field-hint">Liste um item por linha</ion-badge>
+        </div>
+
+        <div class="input-grupo">
+          <ion-label>Metodologia / Passo a Passo <span class="required">*</span></ion-label>
+          <ion-textarea [(ngModel)]="plano.metodologia" fill="outline" rows="6"
+            placeholder="Introdução (10 min)&#10;Apresente o tema aos alunos...&#10;&#10;Desenvolvimento (30 min)&#10;1. Divida a turma em grupos..."
+            class="custom-input"></ion-textarea>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <div class="input-grupo mb-0">
+          <ion-label>Critérios de Avaliação <span class="required">*</span></ion-label>
+          <ion-textarea [(ngModel)]="plano.criterios" fill="outline" rows="4"
+            placeholder="Descreva como avaliar se os alunos atingiram os objetivos..."
+            class="custom-input"></ion-textarea>
+        </div>
+      </div>
+    </div>
+
+    <div *ngSwitchCase="4">
+      <div class="bncc-container">
+        <p class="secao-desc mb-3">Selecione as habilidades relacionadas a este plano (tabela LessonPlanSkill)</p>
+
+        <div class="bncc-card" *ngFor="let hab of bnccHab">
+          <ion-checkbox labelPlacement="end" alignment="start">
+            <div class="bncc-content">
+              <div class="bncc-header">
+                <span class="bncc-code">{{ hab.code }}</span>
+                <span class="bncc-tag"> {{ hab.tag }}</span>
+              </div>
+              <p class="bncc-desc">{{ hab.desc }}</p>
+            </div>
+          </ion-checkbox>
+        </div>
+      </div>
+
+      <div class="info-alert">
+        <strong>Seu plano será publicado no repositório.</strong>
+        <p>Após publicar, você poderá usar o Assistente de IA para refiná-lo a qualquer momento.</p>
+      </div>
+    </div>
+
+  </div>
+</ion-content>
+
+<ion-footer class="ion-no-border plano-footer">
+  <div class="footer-acoes" [class.single-btn]="etapaAtual === 1">
+    <ion-button *ngIf="etapaAtual > 1" (click)="prevEtapa()" fill="outline" class="btn-back">
+      <ion-icon name="arrow-back-outline"></ion-icon> Voltar
+    </ion-button>
+    <ion-button (click)="proxEtapa()" class="btn-next" [expand]="etapaAtual === 1 ? 'block' : ''">
+      {{ etapaAtual === 4 ? 'Publicar Plano' : 'Próximo' }} <ion-icon name="arrow-forward-outline"></ion-icon>
+    </ion-button>
+  </div>
+</ion-footer>

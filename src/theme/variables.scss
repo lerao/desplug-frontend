@@ -40,4 +40,25 @@
 
   --ion-background-color: var(--color-bg);
   --ion-text-color: var(--color-text);
+
+  /* TOAST DE AVISO */
+  --ion-color-custom-toast: #fffbeb;
+  --ion-color-custom-toast-rgb: 255, 251, 235;
+  --ion-color-custom-toast-contrast: #92400e;
+  --ion-color-custom-toast-contrast-rgb: 146, 64, 14;
+  --ion-color-custom-toast-shade: #e0ddcf;
+  --ion-color-custom-toast-tint: #fffcf0;
+
+  .ion-color-custom-toast {
+    --ion-color-base: var(--ion-color-custom-toast);
+    --ion-color-base-rgb: var(--ion-color-custom-toast-rgb);
+    --ion-color-contrast: var(--ion-color-custom-toast-contrast);
+    --ion-color-contrast-rgb: var(--ion-color-custom-toast-contrast-rgb);
+    --ion-color-shade: var(--ion-color-custom-toast-shade);
+    --ion-color-tint: var(--ion-color-custom-toast-tint);
+  }
+
+  ion-toast.ion-color-custom-toast {
+    --border-radius: 12px;
+  }
 }

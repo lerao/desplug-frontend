@@ -50,8 +50,8 @@
             email>
           </ion-input>
         </div>
-        <span class="error-message" *ngIf="email.touched && email.errors?.['required']">O e-mail é obrigatório.</span>
-        <span class="error-message" *ngIf="email.touched && email.errors?.['email'] && !email.errors?.['required']">Insira um e-mail com formato válido.</span>
+        <span class="error-message" *ngIf="email.touched && email.hasError('required')">O e-mail é obrigatório.</span>
+        <span class="error-message" *ngIf="email.touched && email.hasError('email') && !email.hasError('required')">Insira um e-mail com formato válido.</span>
       </div>
 
       <!-- CAMPO: Senha -->
@@ -76,8 +76,8 @@
           </ion-icon>
         </div>
         <span class="helper-text" *ngIf="!senha.touched || senha.valid">Mínimo de 8 caracteres, com letra e número.</span>
-        <span class="error-message" *ngIf="senha.touched && senha.errors?.['required']">A senha é obrigatória.</span>
-        <span class="error-message" *ngIf="senha.touched && senha.errors?.['minlength'] && !senha.errors?.['required']">
+        <span class="error-message" *ngIf="senha.touched && senha.hasError('required')">A senha é obrigatória.</span>
+        <span class="error-message" *ngIf="senha.touched && senha.hasError('minlength') && !senha.hasError('required')">
           A senha deve conter no mínimo 8 caracteres, incluindo letras e números.
         </span>
       </div>

@@ -13,11 +13,6 @@ const routes: Routes = [
       import('./visitante/visitante.module').then(m => m.VisitantePageModule)
   },
   {
-    path: 'tabs',
-    loadChildren: () =>
-      import('./tabs/tabs.module').then(m => m.TabsPageModule)
-  },
-  {
     path: 'detalhes-plano/:id',
     loadChildren: () =>
       import('./detalhes-plano/detalhes-plano.module').then(m => m.DetalhesPlanoPageModule)
@@ -35,6 +30,20 @@ const routes: Routes = [
   {
     path: 'cadastro',
     loadChildren: () => import('./cadastro/cadastro.module').then( m => m.CadastroPageModule)
+  },
+  {
+    path: 'cadastro',
+    redirectTo: 'cadastro',
+    pathMatch: 'full'
+  },
+  {
+    path: 'plano-aula',
+    loadChildren: () => import('./plano-aula/plano-aula.module').then( m => m.PlanoAulaPageModule)
+  },
+  {
+    path: 'plano-aula',
+    redirectTo: 'plano-aula',
+    pathMatch: 'full'
   },
 ];
 

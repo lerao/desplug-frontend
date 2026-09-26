@@ -1,30 +1,23 @@
-// ==========================================
-// VARIÁVEIS DE COR (Idênticas à Imagem 1)
-
-$verde-topo: #0a4d4a; 
-$azul-fundo: #eef5f8; 
-$laranja-botao: #f47c00;
 $cinza-label: #2c3e50;
-$amarelo-alerta: #fff3cd;
-$texto-alerta: #856404;
 
 .custom-content {
-  --background: #{$azul-fundo};
+  --background: var(--color-bg);
 }
 
 .custom-toolbar {
-  --background: #{$verde-topo};
-  --color: #ffffff;
+  --background: var(--color-primary);
+  --border-color: var(--color-primary);
+  --color: var(--color-white);
   
   ion-back-button {
-    --color: #ffffff;
+    --color: var(--color-white);
   }
 }
 
 .header-title-block {
-  background-color: $verde-topo;
+  background-color: var(--color-primary);
   padding: 4px 24px 28px 24px;
-  color: #ffffff;
+  color: var(--color-white);
 
   .header-logo-container {
     display: flex;
@@ -32,7 +25,7 @@ $texto-alerta: #856404;
     margin-bottom: 16px; 
     
     .header-logo {
-      height: 55px; 
+      height: 75px; 
       width: auto;
       object-fit: contain;
     }
@@ -78,7 +71,7 @@ $texto-alerta: #856404;
   }
 
   .custom-input-box {
-    background: #ffffff;
+    background: var(--color-white);
     border-radius: 14px; 
     display: flex;
     align-items: center;
@@ -147,7 +140,7 @@ $texto-alerta: #856404;
 }
 
 .info-alert-card {
-  background-color: $amarelo-alerta;
+  background-color: #fff3cd;
   border-radius: 12px;
   padding: 12px 16px;
   margin-top: 8px;
@@ -156,7 +149,7 @@ $texto-alerta: #856404;
   gap: 10px;
 
   ion-icon {
-    color: $texto-alerta;
+    color: #856404;
     font-size: 1.2rem;
     flex-shrink: 0;
     margin-top: 1px;
@@ -165,15 +158,15 @@ $texto-alerta: #856404;
   p {
     margin: 0;
     font-size: 0.78rem;
-    color: $texto-alerta;
+    color: #856404;
     line-height: 1.45;
   }
 }
 
 .btn-orange {
   margin-top: 14px;
-  --background: #{$laranja-botao};
-  --background-activated: #d66a00;
+  --background: var(--color-secondary-shade);
+  --background-activated: var(--color-secondary);
   --border-radius: 14px; 
   --box-shadow: none;
   font-weight: 700;
@@ -190,7 +183,7 @@ $texto-alerta: #856404;
   margin-bottom: 12px;
 
   a {
-    color: $laranja-botao;
+    color: var(--color-secondary-shade);
     text-decoration: none;
     font-weight: 700;
     padding-left: 4px;
