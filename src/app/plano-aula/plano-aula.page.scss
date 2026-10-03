@@ -119,7 +119,7 @@ ion-toolbar {
     --padding-start: 16px;
     --placeholder-font-size: 11px;
     --placeholder-color: var(--color-text-muted);
-    
+
   }
 
   .char-counter {
@@ -352,4 +352,18 @@ ion-toolbar {
       font-weight: 600;
     }
   }
+}
+
+.input-error {
+  --border-color: var(--ion-color-danger, #eb445a) !important;
+  --highlight-color-invalid: var(--ion-color-danger, #eb445a) !important;
+  border-color: var(--ion-color-danger, #eb445a) !important;
+}
+
+.error-msg {
+  color: var(--ion-color-danger, #eb445a) !important;
+  font-size: 12px;
+  display: block;
+  margin-top: 4px;
+  margin-bottom: 8px;
 }

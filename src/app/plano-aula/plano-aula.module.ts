@@ -5,6 +5,7 @@ import { IonicModule } from '@ionic/angular/lazy';
 import { PlanoAulaPageRoutingModule } from './plano-aula-routing.module';
 import { PlanoAulaPage } from './plano-aula.page';
 import { ComponentsModule } from '../components/components.module'; 
+import { ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   imports: [
@@ -12,7 +13,8 @@ import { ComponentsModule } from '../components/components.module';
     FormsModule,
     IonicModule,
     PlanoAulaPageRoutingModule,
-    ComponentsModule
+    ComponentsModule,
+    ReactiveFormsModule
   ],
   declarations: [PlanoAulaPage]
 })
