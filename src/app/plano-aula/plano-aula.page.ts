@@ -34,13 +34,15 @@ export class PlanoAulaPage implements OnInit {
     this.planoForm = this.fb.group({
       titulo: ['', Validators.required],
       resumo: ['', Validators.required],
-      tipoAtividade: ['', Validators.required],
-      etapaEnsino: ['', Validators.required],
-      anosIndicados: ['', Validators.required],
-      duracao: ['', Validators.required],
+      imagem_capa: [''],
+      tipo_atividade: ['', Validators.required],
+      etapa_ensino: ['', Validators.required],
+      anos_indicados: ['', Validators.required],
+      duracao_estimada: ['', Validators.required],
+      componentes_curriculares: [''],
       metodologia: ['', Validators.required],
-      materiais: ['', Validators.required],
-      criterios: ['', Validators.required]
+      materiais_necessarios: ['', Validators.required],
+      criterios_avaliacao: ['', Validators.required]
     });
   }
 
@@ -81,10 +83,10 @@ export class PlanoAulaPage implements OnInit {
         camposValidacao = ['titulo', 'resumo'];
         break;
       case 2:
-        camposValidacao = ['tipoAtividade', 'etapaEnsino', 'anosIndicados', 'duracao'];
+        camposValidacao = ['tipo_atividade', 'etapa_ensino', 'anos_indicados', 'duracao_estimada'];
         break;
       case 3:
-        camposValidacao = ['metodologia', 'materiais', 'criterios'];
+        camposValidacao = ['metodologia', 'materiais_necessarios', 'criterios_avaliacao'];
         break;
       case 4:
         return true;
@@ -117,6 +119,7 @@ export class PlanoAulaPage implements OnInit {
           directory: Directory.Data
         });
 
+        this.planoForm.patchValue({ imagem_capa: resultado.uri });
         console.log('Ficheiro guardado com sucesso no caminho:', resultado.uri);
         alert('Imagem guardada localmente com sucesso!');
 
