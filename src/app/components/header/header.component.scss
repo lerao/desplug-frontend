@@ -1,0 +1,25 @@
+ion-header {
+  &.ion-no-border {
+    --border-width: 0 !important;
+  }
+}
+
+ion-toolbar {
+  --background: var(--color-white);
+  background: var(--color-white);
+
+  ion-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  ion-button {
+    font-weight: 500;
+    text-transform: none;
+  }
+
+  .button-back {
+    color: var(--color-primary);
+  }
+}

@@ -13,11 +13,6 @@ const routes: Routes = [
       import('./visitante/visitante.module').then(m => m.VisitantePageModule)
   },
   {
-    path: 'tabs',
-    loadChildren: () =>
-      import('./tabs/tabs.module').then(m => m.TabsPageModule)
-  },
-  {
     path: 'detalhes-plano/:id',
     loadChildren: () =>
       import('./detalhes-plano/detalhes-plano.module').then(m => m.DetalhesPlanoPageModule)
@@ -34,11 +29,11 @@ const routes: Routes = [
   },
   {
     path: 'cadastro',
-    loadChildren: () => import('./cadastro/cadastro.module').then( m => m.CadastroPageModule)
+    loadChildren: () => import('./cadastro/cadastro.module').then(m => m.CadastroPageModule)
   },
   {
     path: 'chat-ia',
-    loadChildren: () => import('./chat-ia/chat-ia.module').then( m => m.ChatIaPageModule)
+    loadChildren: () => import('./chat-ia/chat-ia.module').then(m => m.ChatIaPageModule)
   },
   {
     path: 'plano-ia',
@@ -48,8 +43,10 @@ const routes: Routes = [
     path: 'plano-final-ia',
     loadChildren: () => import('./plano-final-ia/plano-final-ia.module').then(m => m.PlanoFinalIaPageModule)
   },
-
-
+  {
+    path: 'plano-aula',
+    loadChildren: () => import('./plano-aula/plano-aula.module').then(m => m.PlanoAulaPageModule)
+  }
 ];
 
 @NgModule({
