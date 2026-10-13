@@ -1,0 +1,153 @@
+<ion-header class="final-header ion-no-border">
+  <ion-toolbar>
+    <div class="header-content">
+      <button
+        type="button"
+        class="back-button"
+        aria-label="Voltar ao Studio"
+        (click)="backToStudio()"
+      >
+        <ion-icon name="arrow-back-outline"></ion-icon>
+        <span>Voltar ao Studio</span>
+      </button>
+
+      <div class="wordmark-small">
+        <span>desplug</span><b>AI</b>
+      </div>
+
+      <div class="header-title">
+        <div>
+          <h1>Plano de aula final</h1>
+          <span class="saved-badge">
+            <ion-icon name="checkmark-outline"></ion-icon>
+            {{ statusLabel }}
+          </span>
+        </div>
+        <p>Documento organizado conforme os dados do plano de aula</p>
+      </div>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="false" class="document-content">
+  <div class="document-area">
+    <article class="abnt-page">
+      <header class="document-header">
+        <div class="wordmark">
+          <span>desplug</span><b>AI</b>
+        </div>
+        <h1>Plano de aula adaptado</h1>
+      </header>
+
+      <div class="metadata">
+        <p><strong>Título:</strong> {{ plan.title }}</p>
+        <p><strong>Etapa de ensino:</strong> {{ plan.teachingStage }}</p>
+        <p><strong>Anos indicados:</strong> {{ plan.grade }}</p>
+        <p><strong>Duração estimada:</strong> {{ plan.duration }}</p>
+        <p>
+          <strong>Tipo de atividade:</strong>
+          {{ plan.activityType }}
+        </p>
+        <p>
+          <strong>Componentes curriculares:</strong>
+          {{ plan.curricularComponents.join(", ") }}
+        </p>
+      </div>
+
+      <section>
+        <h2>1 Apresentação</h2>
+        <p>{{ plan.summary }}</p>
+      </section>
+
+      <section>
+        <h2>2 Habilidades BNCC</h2>
+        @for (skill of selectedSkills; track skill.code) {
+        <p>
+          <strong>
+            {{ skill.code }} — {{ skill.title }}.
+          </strong>
+          {{ skill.description }}
+        </p>
+        }
+      </section>
+
+      <section>
+        <h2>3 Justificativa</h2>
+        <p>{{ plan.reason }}</p>
+      </section>
+
+      <section>
+        <h2>4 Objetivo de aprendizagem</h2>
+        <p>{{ plan.objective }}</p>
+      </section>
+
+      <section>
+        <h2>5 Materiais necessários</h2>
+        <ul>
+          @for (material of plan.materials; track material) {
+          <li>{{ material }}</li>
+          }
+        </ul>
+      </section>
+
+      <section>
+        <h2>6 Metodologia e passo a passo</h2>
+        @for (step of plan.steps; track $index; let index = $index) {
+        <div class="step">
+          <p>
+            <strong>
+              {{ index + 1 }}. {{ step.title }} ({{ step.time }})
+            </strong>
+          </p>
+          <p>{{ step.text }}</p>
+        </div>
+        }
+      </section>
+
+      <section>
+        <h2>7 Critérios de avaliação</h2>
+        <p>{{ plan.assessment }}</p>
+      </section>
+
+      <section>
+        <h2>8 Linhagem do plano</h2>
+        <p>
+          Adaptado com DesplugAI a partir do plano
+          <strong>{{ plan.origin.title }}</strong>, de {{ plan.origin.author }}.
+          O plano original permanece preservado.
+        </p>
+      </section>
+    </article>
+  </div>
+</ion-content>
+
+<ion-footer class="final-footer ion-no-border">
+  <ion-toolbar>
+    <div class="footer-content">
+      <div class="format-info">
+        <span>
+          <ion-icon name="document-text-outline"></ion-icon>
+        </span>
+        <div>
+          <strong>Formatação acadêmica ABNT</strong>
+          <p>Página A4, margens normatizadas, Arial 12 e espaçamento 1,5</p>
+        </div>
+      </div>
+
+      <div class="footer-actions">
+        <ion-button fill="outline" (click)="printPlan()">
+          <ion-icon slot="start" name="print-outline"></ion-icon>
+          Imprimir / PDF
+        </ion-button>
+
+        <ion-button class="download-button" (click)="downloadPlan()">
+          <ion-icon
+            slot="start"
+            [name]="downloaded ? 'checkmark-outline' : 'download-outline'"
+          ></ion-icon>
+          {{ downloaded ? "Plano baixado" : "Baixar plano" }}
+        </ion-button>
+      </div>
+    </div>
+  </ion-toolbar>
+</ion-footer>

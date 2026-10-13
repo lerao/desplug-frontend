@@ -36,6 +36,20 @@ const routes: Routes = [
     path: 'cadastro',
     loadChildren: () => import('./cadastro/cadastro.module').then( m => m.CadastroPageModule)
   },
+  {
+    path: 'chat-ia',
+    loadChildren: () => import('./chat-ia/chat-ia.module').then( m => m.ChatIaPageModule)
+  },
+  {
+    path: 'plano-ia',
+    loadChildren: () => import('./plano-ia/plano-ia.module').then(m => m.PlanoIaPageModule)
+  },
+  {
+    path: 'plano-final-ia',
+    loadChildren: () => import('./plano-final-ia/plano-final-ia.module').then(m => m.PlanoFinalIaPageModule)
+  },
+
+
 ];
 
 @NgModule({

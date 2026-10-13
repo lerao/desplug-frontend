@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { AlertController } from '@ionic/angular';
+import { AppDialogService } from '../shared/app-dialog/app-dialog.service';
 
 @Component({
   selector: 'app-cadastro',
@@ -30,7 +30,7 @@ export class CadastroPage implements OnInit {
   exibirSenha1: boolean = false;
   exibirSenha2: boolean = false;
 
-  constructor(private alertController: AlertController) { }
+  constructor(private dialog: AppDialogService) { }
 
   ngOnInit() { }
 
@@ -61,12 +61,11 @@ export class CadastroPage implements OnInit {
   }
 
   async exibirErroValidacao(mensagem: string) {
-    const alert = await this.alertController.create({
-      header: 'Atenção',
+    await this.dialog.show({
+      title: 'Atenção',
       message: mensagem,
-      buttons: ['Entendido']
+      buttons: [{ text: 'Entendido', role: 'confirm' }]
     });
-    await alert.present();
   }
 
   submeterCadastro(form: any) {
@@ -104,30 +103,23 @@ export class CadastroPage implements OnInit {
   }
 
   async exibirSucesso() {
-    const alert = await this.alertController.create({
-      header: 'Cadastro Realizado!',
-      subHeader: 'Seja bem-vindo(a)',
+    const result = await this.dialog.show({
+      title: 'Cadastro Realizado!',
       message: 'Seu perfil foi criado com sucesso e passará por homologação pela Secretaria de Educação.',
-      buttons: [
-        {
-          text: 'Ok',
-          handler: () => {
-            this.usuario = {
-              nome: '',
-              email: '',
-              senha: '',
-              confirmarSenha: '',
-              secretaria: '',
-              uf: '',
-              municipio: ''
-            };
-            this.listaMunicipios = [];
-          }
-        }
-      ],
-      backdropDismiss: false
+      buttons: [{ text: 'Ok', role: 'confirm' }]
     });
 
-    await alert.present();
+    if (result.role === 'confirm') {
+      this.usuario = {
+        nome: '',
+        email: '',
+        senha: '',
+        confirmarSenha: '',
+        secretaria: '',
+        uf: '',
+        municipio: ''
+      };
+      this.listaMunicipios = [];
+    }
   }
 }

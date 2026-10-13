@@ -3,6 +3,7 @@ import { RouterModule } from '@angular/router';
 
 import { LoginPageModule } from './login.module';
 import { LoginPage } from './login.page';
+import { AppDialogService } from '../shared/app-dialog/app-dialog.service';
 
 describe('LoginPage', () => {
   let component: LoginPage;
@@ -10,7 +11,10 @@ describe('LoginPage', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [LoginPageModule, RouterModule.forRoot([])]
+      imports: [LoginPageModule, RouterModule.forRoot([])],
+      providers: [
+        { provide: AppDialogService, useValue: { show: async () => ({}) } }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(LoginPage);

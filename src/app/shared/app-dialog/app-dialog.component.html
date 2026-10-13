@@ -1,0 +1,27 @@
+<section class="dialog-card" role="dialog" aria-modal="true" [attr.aria-label]="title">
+  <h2>{{ title }}</h2>
+  <p>{{ message }}</p>
+
+  @if (input; as field) {
+    <input
+      class="dialog-input"
+      [(ngModel)]="inputValue"
+      [type]="field.type"
+      [name]="field.name"
+      [placeholder]="field.placeholder"
+      [attr.aria-label]="field.placeholder"
+      autocomplete="email">
+  }
+
+  <div class="dialog-actions">
+    @for (button of buttons; track button.role) {
+      <button
+        type="button"
+        [class.primary]="button.role !== 'cancel'"
+        [class.secondary]="button.role === 'cancel'"
+        (click)="close(button.role)">
+        {{ button.text }}
+      </button>
+    }
+  </div>
+</section>

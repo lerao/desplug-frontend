@@ -1,0 +1,390 @@
+<ion-header class="studio-header ion-no-border">
+  <ion-toolbar class="studio-toolbar">
+    <div class="brand">
+      <ion-button
+        class="brand__back"
+        fill="outline"
+        aria-label="Voltar"
+        (click)="backToChat()">
+        <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+      </ion-button>
+      <span class="brand__divider"></span>
+      <img class="brand__logo" src="assets/image/logo.png" alt="DesplugAI" />
+      <div class="brand__details">
+        <div class="brand__title">
+          <strong>DesplugAI Studio</strong>
+          <span class="ai-badge">✦ &nbsp;Adaptar com IA</span>
+        </div>
+        <p>
+          Adaptando:
+          <b>Introdução ao Pensamento Computacional</b>
+          — Prof. Carlos Henrique
+        </p>
+      </div>
+    </div>
+  </ion-toolbar>
+
+  <ion-toolbar class="context-toolbar">
+    <button type="button" class="back-button" (click)="backToChat()">
+      <ion-icon name="chevron-back-outline"></ion-icon>
+      Voltar ao chat
+    </button>
+
+    <span class="generated-badge">
+      <i></i>
+      Plano gerado com IA
+    </span>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="false" class="plan-content">
+  <div class="plan-screen">
+    <article class="plan-hero">
+      <div class="plan-hero__copy">
+        <small>Plano de aula adaptado</small>
+        <ion-textarea
+          class="title-input"
+          aria-label="Título do plano"
+          rows="1"
+          autoGrow="true"
+          [(ngModel)]="plan.title"
+          (ionChange)="persistPlan()">
+        </ion-textarea>
+        <ion-textarea
+          class="hero-summary"
+          aria-label="Resumo do plano"
+          rows="1"
+          autoGrow="true"
+          [(ngModel)]="plan.summary"
+          (ionChange)="persistPlan()">
+        </ion-textarea>
+      </div>
+
+      <button
+        type="button"
+        (click)="editWithAi('Título e apresentação', plan.title + ' — ' + plan.summary)">
+        <ion-icon name="create-outline"></ion-icon>
+        Editar com IA
+      </button>
+    </article>
+
+    <article class="plan-card">
+      <div class="plan-card__header">
+        <h2>Informações gerais</h2>
+        <button
+          type="button"
+          (click)="
+            editWithAi(
+              'Informações gerais',
+              plan.grade + ' · ' + plan.duration + ' · ' + plan.activityType +
+                ' · ' + plan.teachingStage + ' · ' + curricularComponentsText
+            )
+          ">
+          <ion-icon name="create-outline"></ion-icon>
+          Editar com IA
+        </button>
+      </div>
+
+      <div class="field-grid">
+        <div class="field-box">
+          <ion-select
+            label="Série"
+            labelPlacement="stacked"
+            [(ngModel)]="plan.grade"
+            (ionChange)="updateTeachingStage()">
+            @for (grade of grades; track grade) {
+              <ion-select-option [value]="grade">{{ grade }}</ion-select-option>
+            }
+          </ion-select>
+        </div>
+
+        <div class="field-box">
+          <ion-select
+            label="Duração"
+            labelPlacement="stacked"
+            [(ngModel)]="plan.duration"
+            (ionChange)="persistPlan()">
+            @for (duration of durations; track duration) {
+              <ion-select-option [value]="duration">{{ duration }}</ion-select-option>
+            }
+          </ion-select>
+        </div>
+
+        <div class="field-box">
+          <ion-select
+            label="Tipo de atividade"
+            labelPlacement="stacked"
+            [(ngModel)]="plan.activityType"
+            (ionChange)="persistPlan()">
+            @for (type of activityTypes; track type) {
+              <ion-select-option [value]="type">{{ type }}</ion-select-option>
+            }
+          </ion-select>
+        </div>
+      </div>
+
+      <div class="plan-meta">
+        <div>
+          <span>Etapa de ensino</span>
+          <strong>{{ plan.teachingStage }}</strong>
+        </div>
+        <div>
+          <ion-input
+            label="Componentes curriculares"
+            labelPlacement="stacked"
+            [(ngModel)]="curricularComponentsText"
+            (ionChange)="persistPlan()">
+          </ion-input>
+        </div>
+      </div>
+    </article>
+
+    <article class="plan-card">
+      <div class="plan-card__header">
+        <div>
+          <h2>Contexto da adaptação</h2>
+          <p>Informe a realidade da turma para orientar a adaptação pedagógica.</p>
+        </div>
+        <button
+          type="button"
+          (click)="
+            editWithAi(
+              'Contexto da turma',
+              'Materiais: ' + availableMaterialsText +
+                ' · Perfil da turma: ' + plan.classProfile +
+                ' · Orientações: ' + plan.teacherInstructions
+            )
+          ">
+          <ion-icon name="create-outline"></ion-icon>
+          Editar com IA
+        </button>
+      </div>
+
+      <div class="editable-field">
+        <ion-textarea
+          label="Materiais concretos disponíveis"
+          labelPlacement="stacked"
+          helperText="Informe os materiais disponíveis, um por linha."
+          autoGrow="true"
+          [(ngModel)]="availableMaterialsText"
+          (ionChange)="persistPlan()">
+        </ion-textarea>
+      </div>
+
+      <div class="editable-field">
+        <ion-textarea
+          label="Perfil e maturidade da turma"
+          labelPlacement="stacked"
+          autoGrow="true"
+          [(ngModel)]="plan.classProfile"
+          (ionChange)="persistPlan()">
+        </ion-textarea>
+      </div>
+
+      <div class="editable-field">
+        <ion-textarea
+          label="Instruções adicionais do professor"
+          labelPlacement="stacked"
+          autoGrow="true"
+          [(ngModel)]="plan.teacherInstructions"
+          (ionChange)="persistPlan()">
+        </ion-textarea>
+      </div>
+
+      <p class="privacy-notice">
+        Não insira nomes de alunos ou dados pessoais identificáveis no campo de
+        contexto de turma. Descreva apenas características coletivas da turma e
+        necessidades pedagógicas gerais.
+      </p>
+    </article>
+
+    <article class="plan-card">
+      <div class="plan-card__header">
+        <h2>Habilidade BNCC</h2>
+        <button
+          type="button"
+          (click)="editWithAi('Habilidade BNCC', selectedSkill.code + ' — ' + selectedSkill.title)">
+          <ion-icon name="create-outline"></ion-icon>
+          Editar com IA
+        </button>
+      </div>
+
+      <div class="skill-panel">
+        <ion-select
+          label="Selecione uma habilidade"
+          labelPlacement="stacked"
+          [(ngModel)]="selectedSkillCode"
+          (ionChange)="persistPlan()">
+          @for (skill of skills; track skill.code) {
+            <ion-select-option [value]="skill.code">
+              {{ skill.code }} — {{ skill.title }}
+            </ion-select-option>
+          }
+        </ion-select>
+
+        <div class="skill-detail">
+          <small>{{ selectedSkill.code }}</small>
+          <strong>{{ selectedSkill.title }}</strong>
+          <p>{{ selectedSkill.description }}</p>
+        </div>
+      </div>
+    </article>
+
+    <article class="plan-card">
+      <div class="plan-card__header">
+        <h2>Justificativa da adaptação</h2>
+        <button
+          type="button"
+          (click)="editWithAi('Justificativa da adaptação', plan.reason)">
+          <ion-icon name="create-outline"></ion-icon>
+          Editar com IA
+        </button>
+      </div>
+
+      <ion-textarea
+        class="plain-editor"
+        aria-label="Justificativa da adaptação"
+        rows="1"
+        autoGrow="true"
+        [(ngModel)]="plan.reason"
+        (ionChange)="persistPlan()">
+      </ion-textarea>
+    </article>
+
+    <article class="plan-card">
+      <div class="plan-card__header">
+        <div>
+          <h2>Objetivo de aprendizagem</h2>
+          <p>Resultado esperado para os estudantes ao final da atividade.</p>
+        </div>
+        <button
+          type="button"
+          (click)="editWithAi('Objetivo de aprendizagem', plan.objective)">
+          <ion-icon name="create-outline"></ion-icon>
+          Editar com IA
+        </button>
+      </div>
+      <ion-textarea
+        class="plan-editor"
+        aria-label="Objetivo de aprendizagem"
+        rows="1"
+        autoGrow="true"
+        [(ngModel)]="plan.objective"
+        (ionChange)="persistPlan()">
+      </ion-textarea>
+    </article>
+
+    <article class="plan-card">
+      <div class="plan-card__header">
+        <div>
+          <h2>Materiais necessários</h2>
+          <p>Recursos utilizados durante a execução da atividade.</p>
+        </div>
+        <button
+          type="button"
+          (click)="editWithAi('Materiais necessários', materialsText)">
+          <ion-icon name="create-outline"></ion-icon>
+          Editar com IA
+        </button>
+      </div>
+      <ion-textarea
+        class="plan-editor"
+        aria-label="Materiais necessários"
+        helperText="Informe um material por linha."
+        rows="1"
+        autoGrow="true"
+        [(ngModel)]="materialsText"
+        (ionChange)="persistPlan()">
+      </ion-textarea>
+    </article>
+
+    <article class="plan-card steps-card">
+      <div class="plan-card__header">
+        <div>
+          <h2>Passo a passo detalhado</h2>
+          <p>Edite uma etapa individualmente pelo chat com a IA.</p>
+        </div>
+      </div>
+
+      <ol class="steps">
+        @for (step of plan.steps; track $index; let index = $index) {
+          <li>
+            <span class="step-number">{{ index + 1 }}</span>
+
+            <div class="step-content">
+              <div class="step-title">
+                <div>
+                  <strong>
+                    <ion-input
+                      class="step-title-input"
+                      aria-label="Título da etapa"
+                      [(ngModel)]="step.title"
+                      (ionChange)="persistPlan()">
+                    </ion-input>
+                  </strong>
+                  <small>
+                    <ion-input
+                      class="step-time-input"
+                      aria-label="Duração da etapa"
+                      [(ngModel)]="step.time"
+                      (ionChange)="persistPlan()">
+                    </ion-input>
+                  </small>
+                </div>
+
+                <button
+                  type="button"
+                  (click)="editWithAi('Etapa ' + (index + 1) + ': ' + step.title, step.text)">
+                  <ion-icon name="create-outline"></ion-icon>
+                  Editar com IA
+                </button>
+              </div>
+
+              <ion-textarea
+                class="plain-editor step-description"
+                aria-label="Descrição da etapa"
+                rows="1"
+                autoGrow="true"
+                [(ngModel)]="step.text"
+                (ionChange)="persistPlan()">
+              </ion-textarea>
+            </div>
+          </li>
+        }
+      </ol>
+    </article>
+
+    <article class="plan-card">
+      <div class="plan-card__header">
+        <div>
+          <h2>Critérios de avaliação</h2>
+          <p>Rubrica formativa alinhada às habilidades trabalhadas.</p>
+        </div>
+        <button
+          type="button"
+          (click)="editWithAi('Critérios de avaliação', plan.assessment)">
+          <ion-icon name="create-outline"></ion-icon>
+          Editar com IA
+        </button>
+      </div>
+      <ion-textarea
+        class="plan-editor"
+        aria-label="Critérios de avaliação"
+        rows="1"
+        autoGrow="true"
+        [(ngModel)]="plan.assessment"
+        (ionChange)="persistPlan()">
+      </ion-textarea>
+    </article>
+
+  </div>
+</ion-content>
+
+<ion-footer class="action-footer ion-no-border">
+  <ion-toolbar>
+    <ion-button expand="block" (click)="savePlan()">
+      <ion-icon slot="start" name="save-outline"></ion-icon>
+      Salvar plano de aula
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>

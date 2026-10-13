@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
-import { AlertController } from '@ionic/angular';
 import { Router } from '@angular/router';
+import { AppDialogService } from '../shared/app-dialog/app-dialog.service';
 
 @Component({
   selector: 'app-login',
@@ -9,7 +9,7 @@ import { Router } from '@angular/router';
   standalone: false,
 })
 export class LoginPage {
-  private alertController = inject(AlertController);
+  private dialog = inject(AppDialogService);
   private router = inject(Router);
 
   email: string = '';
@@ -51,32 +51,24 @@ export class LoginPage {
   }
 
   async esqueciSenha() {
-    const alert = await this.alertController.create({
-      header: 'Redefinir senha',
+    const result = await this.dialog.show({
+      title: 'Redefinir senha',
       message: 'Digite seu e-mail para recuperar sua senha.',
-      inputs: [
-        {
-          name: 'email',
-          type: 'email',
-          placeholder: 'Digite seu e-mail',
-          value: this.email,
-        },
-      ],
+      input: {
+        name: 'email',
+        type: 'email',
+        placeholder: 'Digite seu e-mail',
+        value: this.email
+      },
       buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel',
-        },
-        {
-          text: 'Enviar',
-          handler: (dados) => {
-            console.log('E-mail para recuperação:', dados.email);
-          },
-        },
-      ],
+        { text: 'Cancelar', role: 'cancel' },
+        { text: 'Enviar', role: 'confirm' }
+      ]
     });
 
-    await alert.present();
+    if (result.role === 'confirm') {
+      console.log('E-mail para recuperação:', result.data?.['email']);
+    }
   }
 
   loginGoogle() {
