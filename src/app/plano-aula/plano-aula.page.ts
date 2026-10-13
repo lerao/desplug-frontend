@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 
@@ -9,6 +9,8 @@ import { Filesystem, Directory } from '@capacitor/filesystem';
   standalone: false,
 })
 export class PlanoAulaPage implements OnInit {
+
+  private readonly fb = inject(FormBuilder);
 
   planoForm!: FormGroup;
   etapaAtual: number = 1;
@@ -27,8 +29,6 @@ export class PlanoAulaPage implements OnInit {
     { code: 'EF06CO03', tag: 'Pensamento Computacional', desc: 'Desenvolver e aplicar conceitos de lógica para resolução de problemas.' },
     { code: 'EF09CO01', tag: 'Cultura Digital', desc: 'Analisar criticamente o impacto das tecnologias digitais na sociedade.' }
   ];
-
-  constructor(private fb: FormBuilder) { }
 
   ngOnInit() {
     this.planoForm = this.fb.group({

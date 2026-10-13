@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { AppDialogService } from '../shared/app-dialog/app-dialog.service';
 
 @Component({
@@ -7,7 +7,9 @@ import { AppDialogService } from '../shared/app-dialog/app-dialog.service';
   styleUrls: ['./cadastro.page.scss'],
   standalone: false,
 })
-export class CadastroPage implements OnInit {
+export class CadastroPage {
+
+  private readonly dialog = inject(AppDialogService);
 
   usuario = {
     nome: '',
@@ -29,10 +31,6 @@ export class CadastroPage implements OnInit {
 
   exibirSenha1: boolean = false;
   exibirSenha2: boolean = false;
-
-  constructor(private dialog: AppDialogService) { }
-
-  ngOnInit() { }
 
   // Filtra as cidades de forma estrita dependendo da UF selecionada
   buscarMunicipiosPorUf() {
