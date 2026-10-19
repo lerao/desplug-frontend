@@ -1,0 +1,515 @@
+@if (filtersOpen) {
+  <div class="filter-overlay" (click)="closeFilters()">
+    <section
+      class="filter-drawer"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="filter-title"
+      (click)="$event.stopPropagation()"
+    >
+      <header class="filter-header">
+        <span class="filter-icon">
+          <ion-icon name="filter-outline"></ion-icon>
+        </span>
+        <div>
+          <strong id="filter-title">
+            {{ filterPanelMode === "published"
+              ? "Filtrar planos publicados"
+              : filterPanelMode === "favorites"
+                ? "Filtrar planos favoritos"
+                : "Filtrar planos" }}
+          </strong>
+          <p>
+            {{ filterPanelMode === "published"
+              ? "Refine os planos já publicados."
+              : filterPanelMode === "favorites"
+                ? "Refine apenas os planos que você favoritou."
+                : "Escolha o tipo de conteúdo que deseja visualizar." }}
+          </p>
+        </div>
+        <ion-button
+          fill="clear"
+          aria-label="Fechar filtros"
+          (click)="closeFilters()"
+        >
+          <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+        </ion-button>
+      </header>
+
+      <div class="filter-scroll">
+        <ion-list lines="none" class="filter-list">
+        @if (filterPanelMode === "general") {
+          <ion-item>
+        <ion-select
+          label="Tipo de plano"
+          labelPlacement="stacked"
+          [(ngModel)]="repositoryView"
+        >
+          @for (option of repositoryOptions; track option.value) {
+            <ion-select-option [value]="option.value">
+              {{ option.label }} ({{ countByView(option.value) }})
+            </ion-select-option>
+          }
+        </ion-select>
+      </ion-item>
+
+      <ion-item>
+        <ion-select
+          label="Área"
+          labelPlacement="stacked"
+          placeholder="Todas as áreas"
+          [(ngModel)]="filters.area"
+        >
+          <ion-select-option value="">Todas as áreas</ion-select-option>
+          @for (area of areas; track area) {
+            <ion-select-option [value]="area">{{ area }}</ion-select-option>
+          }
+        </ion-select>
+      </ion-item>
+
+      <ion-item>
+        <ion-select
+          label="Etapa de ensino"
+          labelPlacement="stacked"
+          placeholder="Todas as etapas"
+          [(ngModel)]="filters.stage"
+        >
+          <ion-select-option value="">Todas as etapas</ion-select-option>
+          @for (stage of stages; track stage) {
+            <ion-select-option [value]="stage">{{ stage }}</ion-select-option>
+          }
+        </ion-select>
+      </ion-item>
+
+      <ion-item>
+        <ion-select
+          label="Eixo"
+          labelPlacement="stacked"
+          placeholder="Todos os eixos"
+          [(ngModel)]="filters.axis"
+        >
+          <ion-select-option value="">Todos os eixos</ion-select-option>
+          @for (axis of axes; track axis) {
+            <ion-select-option [value]="axis">{{ axis }}</ion-select-option>
+          }
+        </ion-select>
+      </ion-item>
+
+      <ion-item>
+        <ion-select
+          label="Disciplina"
+          labelPlacement="stacked"
+          placeholder="Todas as disciplinas"
+          [(ngModel)]="filters.subject"
+        >
+          <ion-select-option value="">Todas as disciplinas</ion-select-option>
+          @for (subject of subjects; track subject) {
+            <ion-select-option [value]="subject">
+              {{ subject }}
+            </ion-select-option>
+          }
+        </ion-select>
+      </ion-item>
+        } @else {
+          <ion-item>
+            <ion-select
+              label="Etapa de ensino"
+              labelPlacement="stacked"
+              placeholder="Todas as etapas"
+              [(ngModel)]="contextFilters.stage"
+            >
+              <ion-select-option value="">Todas as etapas</ion-select-option>
+              @for (stage of publishedStages; track stage) {
+                <ion-select-option [value]="stage">{{ stage }}</ion-select-option>
+              }
+            </ion-select>
+          </ion-item>
+
+          <ion-item>
+            <ion-select
+              label="Eixo da BNCC"
+              labelPlacement="stacked"
+              placeholder="Todos os eixos"
+              [(ngModel)]="contextFilters.axis"
+            >
+              <ion-select-option value="">Todos os eixos</ion-select-option>
+              @for (axis of publishedAxes; track axis) {
+                <ion-select-option [value]="axis">{{ axis }}</ion-select-option>
+              }
+            </ion-select>
+          </ion-item>
+
+          <ion-item>
+            <ion-select
+              label="Tipo de atividade"
+              labelPlacement="stacked"
+              placeholder="Todos os tipos"
+              [(ngModel)]="contextFilters.activityType"
+            >
+              <ion-select-option value="">Todos os tipos</ion-select-option>
+              @for (type of publishedActivityTypes; track type) {
+                <ion-select-option [value]="type">{{ type }}</ion-select-option>
+              }
+            </ion-select>
+          </ion-item>
+
+          <ion-item>
+            <ion-select
+              label="Componente curricular"
+              labelPlacement="stacked"
+              placeholder="Todas as disciplinas"
+              [(ngModel)]="contextFilters.subject"
+            >
+              <ion-select-option value="">Todas as disciplinas</ion-select-option>
+              @for (subject of publishedSubjects; track subject) {
+                <ion-select-option [value]="subject">{{ subject }}</ion-select-option>
+              }
+            </ion-select>
+          </ion-item>
+
+          <ion-item>
+            <ion-select
+              label="Ano/Série"
+              labelPlacement="stacked"
+              placeholder="Todos os anos"
+              [(ngModel)]="contextFilters.grade"
+            >
+              <ion-select-option value="">Todos os anos</ion-select-option>
+              @for (grade of publishedGrades; track grade) {
+                <ion-select-option [value]="grade">{{ grade }}</ion-select-option>
+              }
+            </ion-select>
+          </ion-item>
+
+          <ion-item>
+            <ion-select
+              label="Duração estimada"
+              labelPlacement="stacked"
+              placeholder="Qualquer duração"
+              [(ngModel)]="contextFilters.duration"
+            >
+              <ion-select-option value="">Qualquer duração</ion-select-option>
+              @for (duration of publishedDurations; track duration) {
+                <ion-select-option [value]="duration">{{ duration }}</ion-select-option>
+              }
+            </ion-select>
+          </ion-item>
+
+          <ion-item>
+            <ion-select
+              label="Origem do plano"
+              labelPlacement="stacked"
+              placeholder="Todos os planos"
+              [(ngModel)]="contextFilters.origin"
+            >
+              <ion-select-option value="">Todos os planos</ion-select-option>
+              @for (origin of publishedOrigins; track origin.value) {
+                <ion-select-option [value]="origin.value">
+                  {{ origin.label }}
+                </ion-select-option>
+              }
+            </ion-select>
+          </ion-item>
+        }
+        </ion-list>
+      </div>
+
+      <footer class="filter-footer">
+      <div class="filter-actions">
+        @if (filterPanelMode !== "general"
+          ? contextFilterCount
+          : activeFilterCount) {
+          <ion-button fill="outline" (click)="clearFilters()">
+            Limpar
+          </ion-button>
+        }
+        <ion-button (click)="applyFilters()">
+          Ver {{ filteredPlans.length }}
+          {{ filteredPlans.length === 1 ? "plano" : "planos" }}
+        </ion-button>
+      </div>
+      </footer>
+    </section>
+  </div>
+}
+
+<div id="profile-content" class="ion-page">
+  <ion-header class="profile-header ion-no-border">
+    <ion-toolbar>
+      <div class="topbar">
+        <div class="wordmark" aria-label="DesplugAI">
+          <span>Desplug</span><b>AI</b>
+        </div>
+
+        <div class="topbar-actions">
+          <ion-button
+            class="logout"
+            fill="clear"
+            shape="round"
+            aria-label="Sair da conta"
+            (click)="logout()"
+          >
+            <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-content [fullscreen]="true">
+    <main class="profile-page">
+      <section class="profile-card">
+        <div class="profile-color">
+          <div class="welcome">
+            <span class="avatar">{{ initials }}</span>
+            <div>
+              <small>Painel do professor</small>
+              <h1>Olá, {{ firstName }}</h1>
+              <p>Organize suas ideias e experiências de sala de aula.</p>
+            </div>
+          </div>
+
+          <span
+            class="approval"
+            [class.pending]="!teacherApproved"
+          >
+            <i></i>
+            {{
+              teacherApproved
+                ? "Professor homologado"
+                : "Aprovação pendente"
+            }}
+          </span>
+        </div>
+
+        <div class="profile-actions">
+          <button
+            type="button"
+            (click)="showRepository('published')"
+          >
+            <span>
+              <strong>{{ publishedCount }}</strong>
+              <small>Publicados</small>
+            </span>
+            <i><ion-icon name="chevron-forward-outline"></ion-icon></i>
+          </button>
+          <button
+            type="button"
+            (click)="showRepository('favorites')"
+          >
+            <span>
+              <strong>{{ favoriteCount }}</strong>
+              <small>Favoritos</small>
+            </span>
+            <i><ion-icon name="chevron-forward-outline"></ion-icon></i>
+          </button>
+        </div>
+      </section>
+
+      <section class="repository-controls" aria-label="Filtros e busca de planos">
+        <div class="library-actions">
+          <ion-button
+            class="filter-button"
+            [class.active]="activeFilterCount > 0"
+            fill="clear"
+            aria-label="Abrir filtros gerais"
+            title="Filtros gerais"
+            (click)="openFilters()"
+          >
+            <ion-icon slot="icon-only" name="filter-outline"></ion-icon>
+            @if (activeFilterCount) {
+              <ion-badge>{{ activeFilterCount }}</ion-badge>
+            }
+          </ion-button>
+
+          <ion-searchbar
+            [(ngModel)]="search"
+            placeholder="Buscar planos"
+            [debounce]="150"
+            showClearButton="focus"
+          ></ion-searchbar>
+        </div>
+      </section>
+
+      <section class="library">
+        <header class="library-header">
+          <div>
+            <button
+              type="button"
+              class="repository-title"
+              (click)="openRepositoryFilters()"
+            >
+              {{ repositoryTitle }}
+              <span>
+                <ion-icon name="chevron-down-outline"></ion-icon>
+              </span>
+            </button>
+            <p>
+              {{ filteredPlans.length }}
+              {{
+                filteredPlans.length === 1
+                  ? "plano encontrado"
+                  : "planos encontrados"
+              }}
+            </p>
+          </div>
+        </header>
+        @if (filteredPlans.length) {
+          <div class="plan-grid">
+            @for (plan of filteredPlans; track plan.id) {
+              <article class="plan-card">
+            <div class="plan-image">
+              <img [src]="plan.image" [alt]="plan.imageAlt" />
+              <span class="status" [attr.data-status]="plan.status">
+                {{ statusLabel(plan) }}
+              </span>
+              <button
+                type="button"
+                class="favorite"
+                [class.active]="plan.favorite"
+                [attr.aria-label]="
+                  plan.favorite
+                    ? 'Remover dos favoritos'
+                    : 'Adicionar aos favoritos'
+                "
+                (click)="toggleFavorite(plan.id)"
+              >
+                <ion-icon
+                  [name]="plan.favorite ? 'bookmark' : 'bookmark-outline'"
+                ></ion-icon>
+              </button>
+            </div>
+
+            <div class="plan-body">
+              <div class="tags">
+                @for (tag of plan.tags | slice: 0 : 2; track tag) {
+                  <span>{{ tag }}</span>
+                }
+              </div>
+              <h3>{{ plan.title }}</h3>
+              <p>{{ plan.description }}</p>
+
+              @if (plan.originalPlan) {
+                <span class="derived">
+                  Adaptado de “{{ plan.originalPlan }}”, por
+                  {{ plan.originalAuthor }}
+                </span>
+              }
+
+              <footer>
+                <button
+                  type="button"
+                  class="metric"
+                  [class.active]="plan.liked"
+                  (click)="toggleLike(plan.id)"
+                >
+                  <ion-icon
+                    [name]="plan.liked ? 'heart' : 'heart-outline'"
+                  ></ion-icon>
+                  {{ plan.likes + (plan.liked ? 1 : 0) }}
+                </button>
+                <small>{{ plan.updatedAt }}</small>
+                <button
+                  type="button"
+                  class="open-plan"
+                  (click)="openPlan(plan)"
+                >
+                  {{ plan.status === "draft" ? "Continuar" : "Ver detalhes" }}
+                  <ion-icon name="chevron-forward-outline"></ion-icon>
+                </button>
+              </footer>
+            </div>
+              </article>
+            }
+          </div>
+        } @else {
+          <div class="empty-state">
+            <span><ion-icon name="search-outline"></ion-icon></span>
+            <h3>Nenhum plano encontrado</h3>
+            <p>Altere a busca ou escolha outros filtros.</p>
+            <ion-button (click)="clearFilters()">Limpar filtros</ion-button>
+          </div>
+        }
+      </section>
+    </main>
+
+    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+      <ion-fab-button aria-label="Criar novo plano" (click)="newPlan()">
+        <ion-icon name="add-outline"></ion-icon>
+      </ion-fab-button>
+    </ion-fab>
+  </ion-content>
+
+  <ion-modal
+    class="plan-details-modal"
+    [isOpen]="selectedPlan !== null"
+    (didDismiss)="closePlanDetails()"
+  >
+    @if (selectedPlan; as plan) {
+      <ion-header class="ion-no-border">
+        <ion-toolbar>
+          <div class="detail-heading">
+            <div>
+              <h2>{{ plan.title }}</h2>
+              <p>{{ plan.grade }} · {{ plan.subject }}</p>
+            </div>
+            <ion-button
+              fill="clear"
+              aria-label="Fechar detalhes do plano"
+              (click)="closePlanDetails()"
+            >
+              <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+            </ion-button>
+          </div>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content>
+        <div class="detail-content">
+          <img [src]="plan.image" [alt]="plan.imageAlt" />
+          <p class="detail-description">{{ plan.description }}</p>
+
+          @if (plan.bnccSkills?.length) {
+            <section class="bncc-skills">
+              <h3>Habilidades BNCC</h3>
+              <div class="tags">
+                @for (skill of plan.bnccSkills; track skill) {
+                  <span>{{ skill }}</span>
+                }
+              </div>
+            </section>
+          }
+        </div>
+      </ion-content>
+
+      <ion-footer class="ion-no-border detail-footer">
+        <ion-toolbar>
+          <div class="detail-actions">
+            <ion-button
+              class="adapt-button"
+              expand="block"
+              (click)="adaptSelectedPlan()"
+            >
+              <ion-icon slot="start" name="sparkles-outline"></ion-icon>
+              Adaptar com IA
+            </ion-button>
+            <ion-button
+              class="report-button"
+              expand="block"
+              fill="outline"
+              (click)="registerApplicationReport()"
+            >
+              <ion-icon slot="start" name="reader-outline"></ion-icon>
+              Registrar relato de aplicação
+            </ion-button>
+            @if (plan.applicationCount) {
+              <p>
+                {{ plan.applicationCount }} professores já aplicaram este plano.
+              </p>
+            }
+          </div>
+        </ion-toolbar>
+      </ion-footer>
+    }
+  </ion-modal>
+</div>

@@ -19,8 +19,7 @@ const routes: Routes = [
   },
   {
     path: 'login',
-    loadChildren: () =>
-      import('./login/login.module').then(m => m.LoginPageModule)
+    loadChildren: () => import('./login/login.module').then(m => m.LoginPageModule)
   },
   {
     path: 'entrar',
@@ -46,7 +45,11 @@ const routes: Routes = [
   {
     path: 'plano-aula',
     loadChildren: () => import('./plano-aula/plano-aula.module').then(m => m.PlanoAulaPageModule)
+  },  {
+    path: 'perfil-professor',
+    loadChildren: () => import('./perfil-professor/perfil-professor.module').then(m => m.PerfilProfessorPageModule)
   }
+
 ];
 
 @NgModule({
