@@ -3,7 +3,6 @@ import { Router } from "@angular/router";
 import { addIcons } from "ionicons";
 import { AppDialogService } from "../shared/app-dialog/app-dialog.service";
 import {
-  addOutline,
   bookmark,
   bookmarkOutline,
   chevronDownOutline,
@@ -12,10 +11,11 @@ import {
   filterOutline,
   heart,
   heartOutline,
-  logOutOutline,
+  menuOutline,
   readerOutline,
   searchOutline,
   sparklesOutline,
+  trashOutline,
 } from "ionicons/icons";
 
 type PlanStatus = "published" | "draft" | "ai";
@@ -246,10 +246,10 @@ export class PerfilProfessorPage {
   selectedPlan: LessonPlan | null = null;
   filtersOpen = false;
   filterPanelMode: FilterPanelMode = "general";
+  headerCompact = false;
 
   constructor() {
     addIcons({
-      addOutline,
       bookmark,
       bookmarkOutline,
       chevronDownOutline,
@@ -258,15 +258,20 @@ export class PerfilProfessorPage {
       filterOutline,
       heart,
       heartOutline,
-      logOutOutline,
+      menuOutline,
       readerOutline,
       searchOutline,
       sparklesOutline,
+      trashOutline,
     });
   }
 
   get firstName(): string {
     return this.userName.split(" ")[0];
+  }
+
+  onContentScroll(event: CustomEvent<{ scrollTop: number }>): void {
+    this.headerCompact = event.detail.scrollTop > 48;
   }
 
   get initials(): string {
@@ -284,6 +289,10 @@ export class PerfilProfessorPage {
 
   get favoriteCount(): number {
     return this.plans.filter((plan) => plan.favorite).length;
+  }
+
+  get canDeletePlans(): boolean {
+    return this.repositoryView !== "favorites" && this.repositoryView !== "liked";
   }
 
   get activeFilterCount(): number {
@@ -473,6 +482,27 @@ export class PerfilProfessorPage {
     );
   }
 
+  async deletePlan(planId: number): Promise<void> {
+    if (!this.canDeletePlans) return;
+
+    const plan = this.plans.find((item) => item.id === planId);
+    if (!plan) return;
+
+    const result = await this.dialog.show({
+      title: "Excluir plano?",
+      message: `“${plan.title}” será removido dos seus planos. Esta ação não pode ser desfeita.`,
+      buttons: [
+        { text: "Cancelar", role: "cancel" },
+        { text: "Excluir", role: "confirm" },
+      ],
+    });
+
+    if (result.role !== "confirm") return;
+
+    this.plans = this.plans.filter((item) => item.id !== planId);
+    if (this.selectedPlan?.id === planId) this.closePlanDetails();
+  }
+
   newPlan(): void {
     void this.router.navigateByUrl("/plano-aula");
   }
@@ -483,7 +513,7 @@ export class PerfilProfessorPage {
       return;
     }
 
-    this.selectedPlan = plan;
+    void this.router.navigateByUrl(`/detalhes-plano/${plan.id}`);
   }
 
   closePlanDetails(): void {
@@ -538,9 +568,7 @@ export class PerfilProfessorPage {
     localStorage.setItem("desplugai-relatos-aplicacao", JSON.stringify(reports));
   }
 
-  logout(): void {
-    void this.router.navigateByUrl("/visitante");
-  }
+
 
   private emptyFilters(): PlanFilters {
     return { area: "", stage: "", axis: "", subject: "" };

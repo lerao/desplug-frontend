@@ -1,7 +1,7 @@
 @if (filtersOpen) {
   <div class="filter-overlay" (click)="closeFilters()">
     <section
-      class="filter-drawer"
+      class="filter-popup"
       role="dialog"
       aria-modal="true"
       aria-labelledby="filter-title"
@@ -41,6 +41,7 @@
         @if (filterPanelMode === "general") {
           <ion-item>
         <ion-select
+          interface="popover"
           label="Tipo de plano"
           labelPlacement="stacked"
           [(ngModel)]="repositoryView"
@@ -55,6 +56,7 @@
 
       <ion-item>
         <ion-select
+          interface="popover"
           label="Área"
           labelPlacement="stacked"
           placeholder="Todas as áreas"
@@ -69,6 +71,7 @@
 
       <ion-item>
         <ion-select
+          interface="popover"
           label="Etapa de ensino"
           labelPlacement="stacked"
           placeholder="Todas as etapas"
@@ -83,6 +86,7 @@
 
       <ion-item>
         <ion-select
+          interface="popover"
           label="Eixo"
           labelPlacement="stacked"
           placeholder="Todos os eixos"
@@ -97,6 +101,7 @@
 
       <ion-item>
         <ion-select
+          interface="popover"
           label="Disciplina"
           labelPlacement="stacked"
           placeholder="Todas as disciplinas"
@@ -113,6 +118,7 @@
         } @else {
           <ion-item>
             <ion-select
+              interface="popover"
               label="Etapa de ensino"
               labelPlacement="stacked"
               placeholder="Todas as etapas"
@@ -127,6 +133,7 @@
 
           <ion-item>
             <ion-select
+              interface="popover"
               label="Eixo da BNCC"
               labelPlacement="stacked"
               placeholder="Todos os eixos"
@@ -141,6 +148,7 @@
 
           <ion-item>
             <ion-select
+              interface="popover"
               label="Tipo de atividade"
               labelPlacement="stacked"
               placeholder="Todos os tipos"
@@ -155,6 +163,7 @@
 
           <ion-item>
             <ion-select
+              interface="popover"
               label="Componente curricular"
               labelPlacement="stacked"
               placeholder="Todas as disciplinas"
@@ -169,6 +178,7 @@
 
           <ion-item>
             <ion-select
+              interface="popover"
               label="Ano/Série"
               labelPlacement="stacked"
               placeholder="Todos os anos"
@@ -183,6 +193,7 @@
 
           <ion-item>
             <ion-select
+              interface="popover"
               label="Duração estimada"
               labelPlacement="stacked"
               placeholder="Qualquer duração"
@@ -197,6 +208,7 @@
 
           <ion-item>
             <ion-select
+              interface="popover"
               label="Origem do plano"
               labelPlacement="stacked"
               placeholder="Todos os planos"
@@ -234,29 +246,38 @@
 }
 
 <div id="profile-content" class="ion-page">
-  <ion-header class="profile-header ion-no-border">
+  <ion-header
+    class="profile-header ion-no-border"
+    [class.compact]="headerCompact"
+  >
     <ion-toolbar>
       <div class="topbar">
-        <div class="wordmark" aria-label="DesplugAI">
-          <span>Desplug</span><b>AI</b>
-        </div>
-
-        <div class="topbar-actions">
+        <ion-menu-toggle>
           <ion-button
-            class="logout"
+            class="menu-toggle"
             fill="clear"
-            shape="round"
-            aria-label="Sair da conta"
-            (click)="logout()"
+            aria-label="Abrir menu"
           >
-            <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+            <ion-icon slot="icon-only" name="menu-outline"></ion-icon>
           </ion-button>
+        </ion-menu-toggle>
+        <img class="wordmark" src="assets/image/logo.png" alt="DesplugAI" />
+      </div>
+      <div class="compact-welcome">
+        <span class="compact-avatar">{{ initials.charAt(0) }}</span>
+        <div>
+          <strong>Olá, <span>{{ userName }}</span></strong>
+          <small>Painel do professor</small>
         </div>
       </div>
     </ion-toolbar>
   </ion-header>
 
-  <ion-content [fullscreen]="true">
+  <ion-content
+    [fullscreen]="true"
+    [scrollEvents]="true"
+    (ionScroll)="onContentScroll($event)"
+  >
     <main class="profile-page">
       <section class="profile-card">
         <div class="profile-color">
@@ -264,45 +285,33 @@
             <span class="avatar">{{ initials }}</span>
             <div>
               <small>Painel do professor</small>
-              <h1>Olá, {{ firstName }}</h1>
+              <h1>Olá, <span>{{ firstName }}</span></h1>
               <p>Organize suas ideias e experiências de sala de aula.</p>
             </div>
           </div>
 
-          <span
-            class="approval"
-            [class.pending]="!teacherApproved"
-          >
-            <i></i>
-            {{
-              teacherApproved
-                ? "Professor homologado"
-                : "Aprovação pendente"
-            }}
-          </span>
-        </div>
-
-        <div class="profile-actions">
-          <button
-            type="button"
-            (click)="showRepository('published')"
-          >
-            <span>
-              <strong>{{ publishedCount }}</strong>
-              <small>Publicados</small>
-            </span>
-            <i><ion-icon name="chevron-forward-outline"></ion-icon></i>
-          </button>
-          <button
-            type="button"
-            (click)="showRepository('favorites')"
-          >
-            <span>
-              <strong>{{ favoriteCount }}</strong>
-              <small>Favoritos</small>
-            </span>
-            <i><ion-icon name="chevron-forward-outline"></ion-icon></i>
-          </button>
+          <div class="profile-actions">
+            <button
+              type="button"
+              (click)="showRepository('published')"
+            >
+              <span>
+                <strong>{{ publishedCount }}</strong>
+                <small>Publicados</small>
+              </span>
+              <i><ion-icon name="chevron-forward-outline"></ion-icon></i>
+            </button>
+            <button
+              type="button"
+              (click)="showRepository('favorites')"
+            >
+              <span>
+                <strong>{{ favoriteCount }}</strong>
+                <small>Favoritos</small>
+              </span>
+              <i><ion-icon name="chevron-forward-outline"></ion-icon></i>
+            </button>
+          </div>
         </div>
       </section>
 
@@ -372,6 +381,11 @@
                     ? 'Remover dos favoritos'
                     : 'Adicionar aos favoritos'
                 "
+                [title]="
+                  plan.favorite
+                    ? 'Remover dos salvos'
+                    : 'Salvar plano'
+                "
                 (click)="toggleFavorite(plan.id)"
               >
                 <ion-icon
@@ -401,6 +415,10 @@
                   type="button"
                   class="metric"
                   [class.active]="plan.liked"
+                  [attr.aria-label]="
+                    plan.liked ? 'Descurtir plano' : 'Curtir plano'
+                  "
+                  [title]="plan.liked ? 'Descurtir plano' : 'Curtir plano'"
                   (click)="toggleLike(plan.id)"
                 >
                   <ion-icon
@@ -408,13 +426,27 @@
                   ></ion-icon>
                   {{ plan.likes + (plan.liked ? 1 : 0) }}
                 </button>
-                <small>{{ plan.updatedAt }}</small>
+                  @if (canDeletePlans) {
+                    <button
+                      type="button"
+                      class="delete-plan"
+                      [attr.aria-label]="'Excluir plano ' + plan.title"
+                      [title]="'Excluir plano ' + plan.title"
+                      (click)="deletePlan(plan.id)"
+                    >
+                      <ion-icon name="trash-outline"></ion-icon>
+                    </button>
+                  }
+                  <span class="updated-pill">
+                    <ion-icon name="time-outline"></ion-icon>
+                    <small>{{ plan.updatedAt }}</small>
+                  </span>
                 <button
                   type="button"
                   class="open-plan"
                   (click)="openPlan(plan)"
                 >
-                  {{ plan.status === "draft" ? "Continuar" : "Ver detalhes" }}
+                  <span>{{ plan.status === "draft" ? "Continuar" : "Ver detalhes" }}</span>
                   <ion-icon name="chevron-forward-outline"></ion-icon>
                 </button>
               </footer>
@@ -433,11 +465,6 @@
       </section>
     </main>
 
-    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button aria-label="Criar novo plano" (click)="newPlan()">
-        <ion-icon name="add-outline"></ion-icon>
-      </ion-fab-button>
-    </ion-fab>
   </ion-content>
 
   <ion-modal

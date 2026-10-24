@@ -4,19 +4,25 @@ import { Router } from "@angular/router";
 import { RouterTestingModule } from "@angular/router/testing";
 import { IonicModule } from "@ionic/angular/lazy";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { AppDialogService } from "../shared/app-dialog/app-dialog.service";
 import { PerfilProfessorPage } from "./perfil-professor.page";
 
 describe("PerfilProfessorPage", () => {
   let component: PerfilProfessorPage;
   let fixture: ComponentFixture<PerfilProfessorPage>;
+  let dialogService: { show: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
+    dialogService = { show: vi.fn().mockResolvedValue({ role: "cancel" }) };
     await TestBed.configureTestingModule({
       declarations: [PerfilProfessorPage],
       imports: [
         FormsModule,
         IonicModule.forRoot(),
         RouterTestingModule,
+      ],
+      providers: [
+        { provide: AppDialogService, useValue: dialogService },
       ],
     }).compileComponents();
 
@@ -32,6 +38,15 @@ describe("PerfilProfessorPage", () => {
   it("should show only favorite plans", () => {
     component.showRepository("favorites");
     expect(component.filteredPlans.length).toBe(2);
+  });
+
+  it("should remove a plan from favorites when unsaved", () => {
+    component.showRepository("favorites");
+
+    component.toggleFavorite(2);
+
+    expect(component.favoriteCount).toBe(1);
+    expect(component.filteredPlans.map((plan) => plan.id)).toEqual([3]);
   });
 
   it("should apply filters only to favorite plans in the favorites view", () => {
@@ -171,14 +186,50 @@ describe("PerfilProfessorPage", () => {
     expect(component.filteredPlans.every((plan) => plan.liked)).toBe(true);
   });
 
-  it("should open and close plan details", () => {
+  it("should remove a plan from liked plans when unliked", () => {
+    component.showRepository("liked");
+
+    component.toggleLike(1);
+
+    expect(component.filteredPlans.map((plan) => plan.id)).toEqual([2]);
+  });
+
+  it("should delete a teacher plan only after confirmation", async () => {
+    dialogService.show.mockResolvedValue({ role: "confirm" });
+    const originalCount = component.plans.length;
+
+    await component.deletePlan(1);
+
+    expect(component.plans).toHaveLength(originalCount - 1);
+    expect(component.plans.some((plan) => plan.id === 1)).toBe(false);
+  });
+
+  it("should keep a teacher plan when deletion is cancelled", async () => {
+    const originalCount = component.plans.length;
+
+    await component.deletePlan(1);
+
+    expect(component.plans).toHaveLength(originalCount);
+    expect(component.plans.some((plan) => plan.id === 1)).toBe(true);
+  });
+
+  it("should not expose or execute plan deletion from favorites and liked lists", async () => {
+    component.showRepository("favorites");
+
+    expect(component.canDeletePlans).toBe(false);
+    await component.deletePlan(2);
+
+    expect(component.plans.some((plan) => plan.id === 2)).toBe(true);
+    expect(dialogService.show).not.toHaveBeenCalled();
+  });
+
+  it("should navigate to detailed plan page for published plans", () => {
+    const router = TestBed.inject(Router);
+    const navigateSpy = vi.spyOn(router, "navigateByUrl");
     const plan = component.plans[0];
 
     component.openPlan(plan);
-    expect(component.selectedPlan).toBe(plan);
-
-    component.closePlanDetails();
-    expect(component.selectedPlan).toBeNull();
+    expect(navigateSpy).toHaveBeenCalledWith(`/detalhes-plano/${plan.id}`);
   });
 
   it("should navigate to the new lesson plan form when the add button is clicked", () => {
