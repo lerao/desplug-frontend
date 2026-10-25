@@ -1,51 +1,48 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { LessonPlanService } from '../services/lesson-plan';
-import { LessonPlan } from '../models/lesson-plan.model';
+
+import { Component, inject } from '@angular/core';
+import { Observable, catchError, of } from 'rxjs';
+import { PlanoAulaService, PlanoAula } from '../services/plano-aula.service';
 
 @Component({
   selector: 'app-visitante',
   templateUrl: './visitante.page.html',
   styleUrls: ['./visitante.page.scss'],
-  standalone: false, 
+  standalone: false,
 })
-export class VisitantePage implements OnInit {
-  lessonPlanService = inject(LessonPlanService);
+export class VisitantePage {
 
-  lessonPlans: LessonPlan[] = [];
+  planoAulaService = inject(PlanoAulaService);
+
+  erroCarregamento: string = '';
+
+  planosAula$: Observable<PlanoAula[]> =
+    this.planoAulaService.getPlanosPublicos().pipe(
+      catchError(err => {
+        console.error('Erro ao buscar planos:', err);
+        this.erroCarregamento = 'Erro ao carregar os planos. Por favor, tente novamente.';
+        return of([]);
+      })
+    );
+
   searchTerm: string = '';
 
   customPopoverOptions = {
-  header: 'Ordenar por',
-  alignment: 'center',
-  cssClass: 'custom-sort-popover'
-};
-
-  ngOnInit() {
-    this.fetchPublishedPlans();
-  }
-
-  fetchPublishedPlans() {
-    this.lessonPlanService.getPublicPlans().subscribe({
-      next: (plans: LessonPlan[]) => {
-        this.lessonPlans = plans;
-      },
-      error: (err: any) => {
-        console.error('Erro ao buscar planos publicados:', err);
-      }
-    });
-  }
+    header: 'Ordenar por',
+    alignment: 'center',
+    cssClass: 'custom-sort-popover'
+  };
 
   isFilterOpen = false;
 
-  openFilters() {
+  abrirFiltros() {
     this.isFilterOpen = true;
   }
 
-  closeFilters() {
+  fecharFiltros() {
     this.isFilterOpen = false;
   }
 
-  applyFilters() {
+  aplicarFiltros() {
     this.isFilterOpen = false;
   }
 }

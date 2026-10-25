@@ -183,9 +183,12 @@
       <!-- Botão Submeter -->
       <ion-button 
         type="submit" 
-        expand="block" 
+        expand="block"
+        [disabled]="cadastrando"
         class="btn-orange">
-        Criar minha conta
+        {{ cadastrando ? 'Cadastrando...' : 'Criar minha conta' }}
+
+        <!-- Criar minha conta -->
       </ion-button>
       
       <div class="login-footer">

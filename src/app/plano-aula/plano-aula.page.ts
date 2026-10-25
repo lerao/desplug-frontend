@@ -1,7 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Filesystem, Directory } from '@capacitor/filesystem';
-
+import { PlanoAulaService, PlanoAulaRequest, HabilidadeBncc, TipoAtividade, EtapaEnsino } from '../services/plano-aula.service';
+import { AlertController } from '@ionic/angular';
+import { HttpErrorResponse } from '@angular/common/http';
+import { finalize } from 'rxjs';
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-plano-aula',
   templateUrl: './plano-aula.page.html',
@@ -14,6 +18,11 @@ export class PlanoAulaPage implements OnInit {
   etapaAtual: number = 1;
   totalEtapas: number = 4;
 
+  salvando: boolean = false;
+  habilidadesSelecionadas: number[] = [];
+
+  autorIdTeste: number | null = 2;
+
   etapasTitulos: Record<number, string> = {
     1: 'Identificação',
     2: 'Classificação',
@@ -21,14 +30,20 @@ export class PlanoAulaPage implements OnInit {
     4: 'BNCC & Publicação'
   };
 
-  bnccHab = [
-    { code: 'EM13CO01', tag: 'Pensamento Computacional', desc: 'Reconhecer e compreender os conceitos de algoritmos e pensamento computacional.' },
-    { code: 'EF05CI02', tag: 'Mundo Digital', desc: 'Identificar os cuidados necessários para a preservação do meio ambiente digital.' },
-    { code: 'EF06CO03', tag: 'Pensamento Computacional', desc: 'Desenvolver e aplicar conceitos de lógica para resolução de problemas.' },
-    { code: 'EF09CO01', tag: 'Cultura Digital', desc: 'Analisar criticamente o impacto das tecnologias digitais na sociedade.' }
-  ];
+  bnccHab: {
+    id: number;
+    code: string;
+    tag: string;
+    desc: string;
+    componenteCurricular: string;
+  }[] = [];
 
-  constructor(private fb: FormBuilder) { }
+  constructor(
+    private fb: FormBuilder,
+    private planoAulaApi: PlanoAulaService,
+    private alertController: AlertController,
+    private router: Router
+  ) { }
 
   ngOnInit() {
     this.planoForm = this.fb.group({
@@ -44,6 +59,40 @@ export class PlanoAulaPage implements OnInit {
       materiais_necessarios: ['', Validators.required],
       criterios_avaliacao: ['', Validators.required]
     });
+
+    this.carregarHabilidades();
+  }
+
+  carregarHabilidades() {
+    this.planoAulaApi.listarHabilidades().subscribe({
+      next: (habilidades: HabilidadeBncc[]) => {
+        console.log('Habilidades BNCC carregadas:', habilidades);
+        this.bnccHab = habilidades.map(hab => ({
+          id: hab.id,
+          code: hab.codigo,
+          tag: hab.eixoComputacao,
+          desc: hab.descricao,
+          componenteCurricular: hab.componenteCurricular
+        }));
+      },
+
+      error: (erro: HttpErrorResponse) => {
+        console.error('Erro ao carregar habilidades BNCC:', erro);
+      }
+    });
+  }
+
+  marcarHabilidade(id: number, selecionada: boolean) {
+    if (selecionada) {
+      if (!this.habilidadesSelecionadas.includes(id)) {
+        this.habilidadesSelecionadas.push(id);
+      }
+    } else {
+      this.habilidadesSelecionadas =
+        this.habilidadesSelecionadas.filter(
+          habilidadeId => habilidadeId !== id
+        );
+    }
   }
 
   camposInvalidos(field: string): boolean {
@@ -69,10 +118,160 @@ export class PlanoAulaPage implements OnInit {
     }
   }
 
-  publicarPlano() {
-    if (this.planoForm.valid) {
-      console.log('Dados do plano prontos para salvar:', this.planoForm.value);
+  async publicarPlano() {
+
+    if (this.planoForm.invalid) {
+      this.planoForm.markAllAsTouched();
+      return;
     }
+
+    if (this.habilidadesSelecionadas.length === 0) {
+      await this.exibirMensagem(
+        'Atenção',
+        'Selecione pelo menos uma habilidade BNCC.'
+      );
+      return;
+    }
+
+    if (this.autorIdTeste === null) {
+      await this.exibirMensagem(
+        'Atenção',
+        'É necessário informar um autor de teste para cadastrar o plano.'
+      );
+      return;
+    }
+
+    if (this.salvando) return;
+
+    const valores = this.planoForm.value;
+
+    const tipos: Record<string, TipoAtividade> = {
+      plano_aula: 'PLANO_AULA',
+      desplugada: 'ATIVIDADE_DESPLUGADA',
+      maker: 'PROJETO_MAKER',
+      digital: 'ATIVIDADE_DIGITAL'
+    };
+
+    const etapas: Record<string, EtapaEnsino> = {
+      infantil: 'EDUCACAO_INFANTIL',
+      fundamental1: 'FUNDAMENTAL_INICIAIS',
+      fundamental2: 'FUNDAMENTAL_FINAIS',
+      medio: 'ENSINO_MEDIO'
+    };
+
+    const componentesCurriculares = [
+      ...new Set(
+        this.bnccHab
+          .filter(hab =>
+            this.habilidadesSelecionadas.includes(hab.id)
+          )
+          .map(hab => hab.componenteCurricular?.trim())
+          .filter((nome): nome is string => !!nome)
+      )
+    ].join(', ');
+
+    if (!componentesCurriculares) {
+      await this.exibirMensagem(
+        'Atenção',
+        'As habilidades selecionadas não possuem componentes curriculares cadastrados.'
+      );
+      return;
+    }
+
+    const dadosPlano: PlanoAulaRequest = {
+      titulo: valores.titulo,
+      resumo: valores.resumo,
+      tipoAtividade: tipos[valores.tipo_atividade],
+      etapaEnsino: etapas[valores.etapa_ensino],
+      anosIndicados: valores.anos_indicados,
+      duracao: valores.duracao_estimada,
+      componentesCurriculares: componentesCurriculares,
+      materiaisNecessarios: valores.materiais_necessarios,
+      metodologia: valores.metodologia,
+      criteriosAvaliacao: valores.criterios_avaliacao,
+
+      // Upload ainda não integrado
+      imagemCapa: '',
+
+      habilidadesPlano: this.habilidadesSelecionadas.map(
+        id => ({
+          habilidade: { id }
+        })
+      ),
+
+      autor: {
+        id: this.autorIdTeste
+      },
+
+      isGeradoIA: false,
+      isDerivado: false
+    };
+
+    this.salvando = true;
+
+    this.planoAulaApi.cadastrar(dadosPlano)
+      .pipe(
+        finalize(() => {
+          this.salvando = false;
+        })
+      )
+      .subscribe({
+
+        next: async (resposta) => {
+          console.log(
+            'Plano de aula cadastrado com sucesso!',
+            resposta
+          );
+
+          const alert = await this.alertController.create({
+            header: 'Plano enviado!',
+            message: 'Seu plano de aula foi cadastrado e enviado para moderação.',
+            buttons: [
+              {
+                text: 'OK',
+                handler: () => {
+                  this.router.navigate(['/visitante']);
+                }
+              }
+            ],
+            backdropDismiss: false
+          });
+          await alert.present();
+        },
+
+        error: async (erro: HttpErrorResponse) => {
+          console.error('Erro ao cadastrar plano:', erro);
+
+          let mensagem = 'Não foi possível cadastrar o plano.';
+
+          if (erro.status === 0) {
+            mensagem = 'Não foi possível conectar ao servidor. Verifique a API ou o CORS.';
+          } else if (erro.status === 400) {
+            mensagem = 'Os dados enviados são inválidos.';
+          } else if (erro.status === 403) {
+            mensagem = 'Você não possui permissão para publicar.';
+          } else if (erro.status === 404) {
+            mensagem = 'A rota ou algum recurso não foi encontrado.';
+          } else if (erro.status === 503) {
+            mensagem = 'O servidor está temporariamente indisponível.';
+          } else if (erro.status >= 500) {
+            mensagem = 'Ocorreu um erro interno no servidor.';
+          }
+
+          await this.exibirMensagem('Erro', mensagem);
+        }
+
+      });
+  }
+
+  async exibirMensagem(titulo: string, mensagem: string) {
+    const alert = await this.alertController.create({
+      header: titulo,
+      message: mensagem,
+      buttons: ['OK']
+    });
+
+    await alert.present();
   }
 
   validarEtapaAtual(): boolean {

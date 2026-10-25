@@ -15,11 +15,11 @@
     </div>
 
     <div class="search-box bg-white">
-      <button class="filter-btn text-primary" type="button" (click)="openFilters()">
+      <button class="filter-btn text-primary" type="button" (click)="abrirFiltros()">
         <ion-icon name="options-outline"></ion-icon>
       </button>
 
-      <ion-modal [isOpen]="isFilterOpen" (didDismiss)="closeFilters()" class="filter-modal">
+      <ion-modal [isOpen]="isFilterOpen" (didDismiss)="fecharFiltros()" class="filter-modal">
         <ng-template>
 
           <!-- Cabeçalho (Header) do Modal -->
@@ -27,7 +27,7 @@
             <ion-toolbar>
               <ion-title class="modal-title">Filtrar planos</ion-title>
               <ion-buttons slot="end">
-                <ion-button class="btn-close-modal" (click)="closeFilters()">
+                <ion-button class="btn-close-modal" (click)="fecharFiltros()">
                   <ion-icon name="close-outline"></ion-icon>
                 </ion-button>
               </ion-buttons>
@@ -103,7 +103,7 @@
             </ion-accordion-group>
 
             <div class="modal-action-box">
-              <ion-button expand="block" color="primary" class="filter-btn-apply" (click)="applyFilters()">
+              <ion-button expand="block" color="primary" class="filter-btn-apply" (click)="aplicarFiltros()">
                 Ver resultados
               </ion-button>
             </div>
@@ -117,10 +117,16 @@
     </div>
   </header>
 
-  <div class="feed-section">
+  <div *ngIf="erroCarregamento" class="ion-padding ion-text-center">
+    <ion-text color="danger">
+      <p>{{ erroCarregamento }}</p>
+    </ion-text>
+  </div>
+
+  <div class="feed-section" *ngIf="planosAula$ | async as planosAula">
     <div class="results-bar">
       <ion-badge class="results-count text-main">
-        <b>{{ lessonPlans.length }}</b> planos encontrados
+        <b>{{ planosAula.length }}</b> planos encontrados
       </ion-badge>
 
       <ion-select interface="popover" [interfaceOptions]="customPopoverOptions"
@@ -133,44 +139,44 @@
     </div>
 
     <div class="card-list">
-      <ion-card *ngFor="let plan of lessonPlans" class="lesson-card bg-white border-card">
+      <ion-card *ngFor="let plano of planosAula" class="lesson-card bg-white border-card">
         <div class="card-image-box">
-          <img [src]="plan.imagemCapa" [alt]="plan.titulo" class="card-image" />
-          <ion-badge class="badge-stage bg-white text-main">{{ plan.etapaEnsino }}</ion-badge>
+          <img [src]="plano.imagemCapa" [alt]="plano.titulo" class="card-image" />
+          <ion-badge class="badge-stage bg-white text-main">{{ plano.etapaEnsino }}</ion-badge>
         </div>
 
         <ion-card-content class="card-body">
           <div class="card-tags">
-            <ion-badge class="tag-principal">{{ plan.tipoAtividade }}</ion-badge>
-            <ion-badge class="tag-destaque">{{ plan.eixoBNCC }}</ion-badge>
-            <ion-badge *ngIf="plan.adaptadoPorIA" class="tag-ia">Gerado por IA</ion-badge>
+            <ion-badge class="tag-principal">{{ plano.tipoAtividade }}</ion-badge>
+            <ion-badge class="tag-destaque">{{ plano.eixoBNCC }}</ion-badge>
+            <ion-badge *ngIf="plano.isGeradoIA" class="tag-ia">Gerado por IA</ion-badge>
           </div>
 
-          <ion-card-title class="card-title text-main">{{ plan.titulo }}</ion-card-title>
+          <ion-card-title class="card-title text-main">{{ plano.titulo }}</ion-card-title>
           <p class="card-description text-muted">
-            {{ plan.resumo }}
+            {{ plano.resumo }}
           </p>
 
           <div class="author-info">
             <ion-avatar class="author-avatar bg-primary text-white">
               <ion-badge class="author-initials">
-                {{ lessonPlanService.getAuthorInitials(plan.autor.nome) }}
+                {{ planoAulaService.getAutorIniciais(plano.autor.nome) }}
               </ion-badge>
             </ion-avatar>
-            <span class="author-name text-main">{{ plan.autor.nome }}</span>
+            <span class="author-name text-main">{{ plano.autor.nome }}</span>
           </div>
 
           <footer class="card-footer">
             <div class="card-metrics">
               <ion-badge class="metric-item" title="Favoritos">
-                <ion-icon name="heart-outline"></ion-icon> {{ plan.quantidadeFavoritos }}
+                <ion-icon name="heart-outline"></ion-icon> {{ plano.quantidadeFavoritos }}
               </ion-badge>
               <ion-badge class="metric-item" title="Adaptações / Derivações">
-                <ion-icon name="git-branch-outline"></ion-icon> {{ plan.quantidadeAdaptacoes }}
+                <ion-icon name="git-branch-outline"></ion-icon> {{ plano.quantidadeAdaptacoes }}
               </ion-badge>
             </div>
 
-            <ion-button fill="clear" class="card-btn" [routerLink]="['/detalhes-plano', plan.id]">
+            <ion-button fill="clear" class="card-btn" [routerLink]="['/detalhes-plano', plano.id]">
               Ver plano
               <ion-icon name="arrow-forward-outline" slot="end"></ion-icon>
             </ion-button>

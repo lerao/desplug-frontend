@@ -1,5 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { AlertController } from '@ionic/angular';
+import { Router } from '@angular/router';
+import { AuthService, CadastroRequest } from '../services/auth.service';
+import { HttpErrorResponse } from '@angular/common/http';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-cadastro',
@@ -19,6 +23,8 @@ export class CadastroPage implements OnInit {
     municipio: ''    // Armazena o nome do município selecionado
   };
 
+  cadastrando: boolean = false;
+
   // Lista fixa contendo estritamente Pernambuco e Paraíba
   listaEstados = [
     { sigla: 'PE', nome: 'Pernambuco' },
@@ -30,19 +36,27 @@ export class CadastroPage implements OnInit {
   exibirSenha1: boolean = false;
   exibirSenha2: boolean = false;
 
-  constructor(private alertController: AlertController) { }
+  constructor(private alertController: AlertController, private authService: AuthService, private router: Router) { }
 
   ngOnInit() { }
 
   // Filtra as cidades de forma estrita dependendo da UF selecionada
   buscarMunicipiosPorUf() {
-    this.usuario.municipio = ''; // Reseta o município anterior ao mudar de estado
+    this.usuario.municipio = '';
     this.listaMunicipios = [];
 
     if (this.usuario.uf === 'PE') {
-      this.listaMunicipios = ['Afogados da Ingazeira', 'Água Branca'];
+      this.listaMunicipios = [
+        'Afogados da Ingazeira',
+        'Recife',
+        'Caruaru'
+      ];
     } else if (this.usuario.uf === 'PB') {
-      this.listaMunicipios = ['Água Branca', 'Afogados da Ingazeira'];
+      this.listaMunicipios = [
+        'Água Branca',
+        'João Pessoa',
+        'Campina Grande'
+      ];
     }
   }
 
@@ -98,9 +112,60 @@ export class CadastroPage implements OnInit {
       this.exibirErroValidacao('Por favor, selecione o seu Município.');
       return;
     }
-    
-    console.log('Dados prontos para envio:', this.usuario);
-    this.exibirSucesso();
+
+
+    if (this.cadastrando) return;
+
+    this.cadastrando = true;
+
+    // Dados que serão enviados ao backend
+    const dadosCadastro : CadastroRequest = {
+      nome: this.usuario.nome.trim(),
+      email: this.usuario.email.trim().toLowerCase(),
+      senha: this.usuario.senha,
+       perfisUsuario: [
+    {
+      perfil: 'ROLE_PROFESSOR_PENDING'
+    }
+  ]
+    };
+
+    // Enviando dados para a API
+    this.authService.cadastrar(dadosCadastro)
+      .pipe(
+        finalize(() => {
+          this.cadastrando = false;
+        })
+      )
+      .subscribe({
+
+        next: (resposta) => {
+          console.log('Cadastro realizado com sucesso!');
+          this.exibirSucesso();
+        },
+
+        error: (erro: HttpErrorResponse) => {
+          console.error('Erro ao cadastrar:', erro);
+
+          let mensagem = 'Não foi possível realizar o cadastro.';
+
+          if (erro.status === 0) {
+            mensagem = 'Não foi possível conectar ao servidor. Verifique a API ou o CORS.';
+          } else if (erro.status === 400) {
+            mensagem = 'Os dados enviados são inválidos.';
+          } else if (erro.status === 409) {
+            mensagem = 'Este e-mail já está cadastrado.';
+          } else if (erro.status === 503) {
+            mensagem = 'O servidor está temporariamente indisponível.';
+          } else if (erro.status >= 500) {
+            mensagem = 'Ocorreu um erro interno no servidor.';
+          }
+
+          this.exibirErroValidacao(mensagem);
+        }
+
+      });
+
   }
 
   async exibirSucesso() {
@@ -108,26 +173,12 @@ export class CadastroPage implements OnInit {
       header: 'Cadastro Realizado!',
       subHeader: 'Seja bem-vindo(a)',
       message: 'Seu perfil foi criado com sucesso e passará por homologação pela Secretaria de Educação.',
-      buttons: [
-        {
-          text: 'Ok',
-          handler: () => {
-            this.usuario = {
-              nome: '',
-              email: '',
-              senha: '',
-              confirmarSenha: '',
-              secretaria: '',
-              uf: '',
-              municipio: ''
-            };
-            this.listaMunicipios = [];
-          }
-        }
-      ],
+      buttons: ['OK'],
       backdropDismiss: false
     });
 
     await alert.present();
+    await alert.onDidDismiss();
+    await this.router.navigateByUrl('/login', { replaceUrl: true })
   }
 }

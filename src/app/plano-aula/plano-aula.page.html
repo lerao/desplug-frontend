@@ -1,5 +1,5 @@
 <ion-header class="ion-no-border">
-  <app-header backButtonText="Cancelar" routerLink="/"></app-header>
+  <app-header backButtonText="Voltar"></app-header>
 
   <div class="plano-header">
     <h1 class="header-title">Novo Plano de Aula</h1>
@@ -139,7 +139,8 @@
         <p class="secao-desc mb-3">Selecione as habilidades relacionadas a este plano</p>
 
         <div class="bncc-card" *ngFor="let hab of bnccHab">
-          <ion-checkbox labelPlacement="end" alignment="start">
+          <ion-checkbox labelPlacement="end" alignment="start" [checked]="habilidadesSelecionadas.includes(hab.id)"
+          (ionChange)="marcarHabilidade(hab.id, $event.detail.checked)">
             <div class="bncc-content">
               <div class="bncc-header">
                 <span class="bncc-code">{{ hab.code }}</span>
@@ -164,8 +165,9 @@
     <ion-button *ngIf="etapaAtual > 1" (click)="prevEtapa()" fill="outline" class="btn-back">
       <ion-icon name="arrow-back-outline"></ion-icon> Voltar
     </ion-button>
-    <ion-button (click)="proxEtapa()" class="btn-next" [expand]="etapaAtual === 1 ? 'block' : ''">
-      {{ etapaAtual === 4 ? 'Publicar Plano' : 'Próximo' }} <ion-icon name="arrow-forward-outline"></ion-icon>
+    <ion-button (click)="proxEtapa()" class="btn-next" [expand]="etapaAtual === 1 ? 'block' : ''" [disabled]="salvando">
+      {{ salvando ? 'Salvando...' : (etapaAtual === 4 ? 'Publicar Plano' : 'Próximo') }}
+      <ion-icon name="arrow-forward-outline"></ion-icon>
     </ion-button>
   </div>
 </ion-footer>

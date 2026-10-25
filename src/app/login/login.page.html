@@ -2,9 +2,7 @@
 
   <!-- BOTÃO VOLTAR -->
   <ion-buttons class="botao-voltar">
-    <ion-back-button
-      defaultHref="/visitante"
-      text="Voltar">
+    <ion-back-button defaultHref="/visitante" text="Voltar">
     </ion-back-button>
   </ion-buttons>
 
@@ -13,11 +11,7 @@
     <!-- LOGO -->
     <div class="logo-area">
 
-      <img
-        src="assets/logo.png"
-        alt="Logo desplugAI"
-        class="logo"
-      >
+      <img src="assets/logo.png" alt="Logo desplugAI" class="logo">
 
     </div>
 
@@ -28,22 +22,12 @@
       <!-- TIPO DE USUÁRIO -->
       <div class="tipo-usuario">
 
-        <button
-          type="button"
-          class="tipo"
-          [class.ativo]="selectedRole === 'professor'"
-          (click)="selecionarProfessor()"
-        >
+        <button type="button" class="tipo" [class.ativo]="selectedRole === 'professor'" (click)="selecionarProfessor()">
           <span class="icone"><ion-icon name="person-outline"></ion-icon></span>
           Professor
         </button>
 
-        <button
-          type="button"
-          class="tipo"
-          [class.ativo]="selectedRole === 'admin'"
-          (click)="selecionarAdmin()"
-        >
+        <button type="button" class="tipo" [class.ativo]="selectedRole === 'admin'" (click)="selecionarAdmin()">
           <span class="icone"><ion-icon name="settings-outline"></ion-icon></span>
           Administrador
         </button>
@@ -51,8 +35,8 @@
       </div>
 
 
-    <!-- TÍTULO -->
-    <h2>Entrar na sua conta</h2>
+      <!-- TÍTULO -->
+      <h2>Entrar na sua conta</h2>
 
 
       <!-- E-MAIL -->
@@ -60,10 +44,7 @@
 
         <span class="campo-icone"><ion-icon name="mail-outline"></ion-icon></span>
 
-        <ion-input
-          type="email"
-          placeholder="E-mail institucional"
-          [(ngModel)]="email">
+        <ion-input type="email" placeholder="E-mail institucional" [(ngModel)]="email">
         </ion-input>
 
       </div>
@@ -74,17 +55,11 @@
 
         <span class="campo-icone"><ion-icon name="lock-closed-outline"></ion-icon></span>
 
-        <ion-input
-          [type]="showPassword ? 'text' : 'password'"
-          placeholder="Senha"
-          [(ngModel)]="password">
+        <ion-input [type]="showPassword ? 'text' : 'password'" placeholder="Senha" [(ngModel)]="password">
         </ion-input>
 
-        <button
-          type="button"
-          class="mostrar-senha"
-          (click)="togglePassword()"
-        ><ion-icon [name]="getPasswordIcon()"></ion-icon>
+        <button type="button" class="mostrar-senha" (click)="togglePassword()"><ion-icon
+            [name]="getPasswordIcon()"></ion-icon>
         </button>
 
       </div>
@@ -93,10 +68,7 @@
       <!-- ESQUECI SENHA -->
       <div class="senha">
 
-        <button
-          type="button"
-          (click)="esqueciSenha()"
-        >
+        <button type="button" (click)="esqueciSenha()">
           Esqueci minha senha
         </button>
 
@@ -104,12 +76,13 @@
 
 
       <!-- ENTRAR -->
-      <ion-button
-        expand="block"
-        class="botao-entrar"
-        (click)="fazerLogin()"
-      >
-        Entrar
+      <ion-button expand="block" class="botao-entrar" [disabled]="loading()" (click)="fazerLogin()">
+
+        <ion-spinner *ngIf="loading()" name="crescent" slot="start">
+        </ion-spinner>
+
+        {{ loading() ? 'Entrando...' : 'Entrar' }}
+
       </ion-button>
 
 
@@ -129,16 +102,9 @@
       <div class="botoes-social">
 
         <!-- GOOGLE -->
-        <ion-button
-          fill="outline"
-          class="botao-google"
-          (click)="loginGoogle()"
-        >
+        <ion-button fill="outline" class="botao-google" (click)="loginGoogle()">
 
-          <img
-            src="assets/google.png"
-            alt="Google"
-          >
+          <img src="assets/google.png" alt="Google">
 
           <span>Google</span>
 
@@ -154,10 +120,7 @@
 
       <span>Não possui uma conta?</span>
 
-      <button
-        type="button"
-        routerLink="/cadastro"
-      >
+      <button type="button" routerLink="/cadastro">
         Cadastre-se
       </button>
 
@@ -166,4 +129,3 @@
   </div>
 
 </ion-content>
-

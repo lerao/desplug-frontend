@@ -1,6 +1,14 @@
-import { Component, inject } from '@angular/core';
+
+import { Component, inject, signal } from '@angular/core';
 import { AlertController } from '@ionic/angular';
 import { Router } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
+import { finalize } from 'rxjs';
+
+import {
+  AuthService,
+  PerfilLogin
+} from '../services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -9,17 +17,18 @@ import { Router } from '@angular/router';
   standalone: false,
 })
 export class LoginPage {
+
   private alertController = inject(AlertController);
   private router = inject(Router);
+  private authService = inject(AuthService);
 
   email: string = '';
   password: string = '';
   showPassword: boolean = false;
-  loading: boolean = false;
+
+  readonly loading = signal(false);
 
   selectedRole: 'professor' | 'admin' = 'professor';
-
-  constructor() {}
 
   selecionarProfessor() {
     this.selectedRole = 'professor';
@@ -34,20 +43,118 @@ export class LoginPage {
   }
 
   getPasswordIcon(): string {
-    return this.showPassword ? 'eye-off-outline' : 'eye-outline';
+    return this.showPassword
+      ? 'eye-off-outline'
+      : 'eye-outline';
   }
 
-  fazerLogin() {
-    this.loading = true;
+  fazerLogin(): void {
 
-    setTimeout(() => {
-      this.loading = false;
+    if (this.loading()) {
+      return;
+    }
 
-      console.log('Login executado:', {
-        email: this.email,
-        role: this.selectedRole,
+    const email = this.email.trim().toLowerCase();
+
+    if (!email || !this.password) {
+      void this.exibirAlerta(
+        'Campos obrigatórios',
+        'Informe seu e-mail e senha para entrar.'
+      );
+      return;
+    }
+
+    // Converter a seleção visual para o enum da API
+    const perfil: PerfilLogin =
+      this.selectedRole === 'professor'
+        ? 'ROLE_PROFESSOR_PENDING'
+        : 'ROLE_ADMIN';
+
+    const dadosLogin = {
+      email,
+      senha: this.password,
+      perfil
+    };
+
+    this.loading.set(true);
+
+    this.authService.login(dadosLogin)
+      .pipe(
+        finalize(() => {
+          this.loading.set(false);
+        })
+      )
+      .subscribe({
+
+        next: resposta => {
+
+          try {
+            // Guarda a sessão retornada pela API
+            this.authService.salvarSessao(resposta);
+
+            // Redirecionamento temporário
+            void this.router.navigateByUrl('/visitante', {
+              replaceUrl: true
+            });
+
+          } catch (erro) {
+            console.error(
+              'Erro ao processar a sessão:',
+              erro
+            );
+
+            void this.exibirAlerta(
+              'Erro na autenticação',
+              'O servidor retornou uma sessão inválida.'
+            );
+          }
+        },
+
+        error: (erro: HttpErrorResponse) => {
+
+          console.error(
+            'Erro na requisição de login:',
+            erro.status
+          );
+
+          let mensagem =
+            'Não foi possível realizar o login. Verifique suas credenciais e o perfil selecionado.';
+
+          if (erro.status === 0) {
+            mensagem =
+              'Não foi possível conectar ao servidor.';
+          } else if (
+            erro.status === 400 ||
+            erro.status === 401 ||
+            erro.status === 403
+          ) {
+            mensagem =
+              'Não foi possível autenticar. Verifique seu e-mail, senha e perfil de acesso.';
+          } else if (erro.status >= 500) {
+            mensagem =
+              'Não foi possível autenticar agora. Tente novamente ou entre em contato com a equipe responsável.';
+          }
+
+          void this.exibirAlerta(
+            'Não foi possível entrar',
+            mensagem
+          );
+        }
       });
-    }, 1400);
+  }
+
+  private async exibirAlerta(
+    header: string,
+    message: string
+  ): Promise<void> {
+
+    const alerta = await this.alertController.create({
+      header,
+      message,
+      buttons: ['OK']
+    });
+
+    await alerta.present();
   }
 
   async esqueciSenha() {
@@ -70,7 +177,10 @@ export class LoginPage {
         {
           text: 'Enviar',
           handler: (dados) => {
-            console.log('E-mail para recuperação:', dados.email);
+            console.log(
+              'E-mail para recuperação:',
+              dados.email
+            );
           },
         },
       ],
@@ -88,6 +198,6 @@ export class LoginPage {
   }
 
   cadastrar() {
-    this.router.navigate(['/cadastro']);
+    void this.router.navigate(['/cadastro']);
   }
 }

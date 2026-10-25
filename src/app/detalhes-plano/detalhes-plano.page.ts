@@ -1,8 +1,10 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 
-import { LessonPlan } from '../models/lesson-plan.model';
-import { LessonPlanService } from '../services/lesson-plan';
+import { Component, inject } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { catchError, map, of, startWith, switchMap } from 'rxjs';
+import {PlanoAulaService, PlanoAula } from '../services/plano-aula.service';
+
+interface DetalhesPlano { plano: PlanoAula | null; carregando: boolean;}
 
 @Component({
   selector: 'app-detalhes-plano',
@@ -10,77 +12,53 @@ import { LessonPlanService } from '../services/lesson-plan';
   styleUrls: ['./detalhes-plano.page.scss'],
   standalone: false,
 })
-export class DetalhesPlanoPage implements OnInit {
+export class DetalhesPlanoPage {
+
   private readonly route = inject(ActivatedRoute);
-  private readonly lessonPlanService = inject(LessonPlanService);
+  private readonly planoAulaService = inject(PlanoAulaService);
 
-  // Plano que será exibido na página
-  lessonPlan: LessonPlan | undefined;
+  readonly status$ = this.route.paramMap.pipe(
+    switchMap(params => {
 
-  // Controla o estado de carregamento
-  isLoading = true;
+      const id = Number(params.get('id'));
 
-  // Controla a mensagem exibida ao clicar
-  // em "Criar conta para adaptar" ou
-  // "Criar conta para favoritar"
+      if (!Number.isInteger(id) || id <= 0) {
+        return of<DetalhesPlano>({
+          plano: null,
+          carregando: false
+        });
+      }
+
+      return this.planoAulaService.getPlanoPublicoById(id).pipe(
+        map((plano): DetalhesPlano => ({
+          plano,
+          carregando: false
+        })),
+
+        startWith({
+          plano: null,
+          carregando: true
+        } as DetalhesPlano),
+
+        catchError(erro => {
+          console.error(
+            'Erro ao carregar os detalhes do plano:',
+            erro
+          );
+
+          return of<DetalhesPlano>({
+            plano: null,
+            carregando: false
+          });
+        })
+      );
+    })
+  );
+
   accountNoticeVisible = false;
 
-  // Badge "Disponível" só é exibido para professor autenticado.
-  // Ainda não há autenticação nesta tela de visitante.
   isLoggedInTeacher = false;
 
-  ngOnInit(): void {
-    this.carregarPlano();
-  }
-
-  /**
-   * Obtém o ID do plano pela URL e carrega
-   * os dados através do LessonPlanService.
-   *
-   * Exemplo:
-   * /detalhes-plano/1
-   */
-  private carregarPlano(): void {
-    this.isLoading = true;
-
-    const idParam = this.route.snapshot.paramMap.get('id');
-
-    // Se não existir ID na URL
-    if (!idParam) {
-      this.lessonPlan = undefined;
-      this.isLoading = false;
-      return;
-    }
-
-    const id = Number(idParam);
-
-    // Se o ID não for um número válido
-    if (Number.isNaN(id)) {
-      this.lessonPlan = undefined;
-      this.isLoading = false;
-      return;
-    }
-
-    // Busca o plano pelo ID
-    this.lessonPlanService.getPlanById(id).subscribe({
-      next: (plan) => {
-        this.lessonPlan = plan;
-        this.isLoading = false;
-      },
-
-      error: (error) => {
-        console.error('Erro ao carregar os detalhes do plano:', error);
-
-        this.lessonPlan = undefined;
-        this.isLoading = false;
-      }
-    });
-  }
-
-  /**
-   * Exibe o aviso informando que o visitante
-   * precisa criar uma conta.
-   */
   showAccountNotice(): void {
     this.accountNoticeVisible = true;
   }
