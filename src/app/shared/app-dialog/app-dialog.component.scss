@@ -82,7 +82,7 @@ p {
 }
 
 .dialog-actions .primary {
-  background: #0e6267;
+  background: var(--color-primary);
   box-shadow: 0 4px 8px rgb(14 98 103 / 16%);
   color: #fff;
 }

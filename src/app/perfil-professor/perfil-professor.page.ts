@@ -1,24 +1,10 @@
+
 import { Component, inject } from "@angular/core";
 import { Router } from "@angular/router";
-import { addIcons } from "ionicons";
 import { AppDialogService } from "../shared/app-dialog/app-dialog.service";
-import {
-  bookmark,
-  bookmarkOutline,
-  chevronDownOutline,
-  chevronForwardOutline,
-  closeOutline,
-  filterOutline,
-  heart,
-  heartOutline,
-  menuOutline,
-  readerOutline,
-  searchOutline,
-  sparklesOutline,
-  trashOutline,
-} from "ionicons/icons";
 
 type PlanStatus = "published" | "draft" | "ai";
+
 type RepositoryView =
   | "published"
   | "drafts"
@@ -52,26 +38,9 @@ interface LessonPlan {
   status: PlanStatus;
   originalPlan?: string;
   originalAuthor?: string;
+  quantidadeFavoritos?: number;
+  quantidadeAdaptacoes?: number;
 }
-
-interface PlanFilters {
-  area: string;
-  stage: string;
-  axis: string;
-  subject: string;
-}
-
-interface PublishedPlanFilters {
-  stage: string;
-  axis: string;
-  activityType: string;
-  subject: string;
-  duration: string;
-  grade: string;
-  origin: string;
-}
-
-type FilterPanelMode = "general" | "published" | "favorites";
 
 @Component({
   selector: "app-perfil-professor",
@@ -85,53 +54,6 @@ export class PerfilProfessorPage {
 
   readonly userName = "Ana Souza";
   readonly teacherApproved = true;
-  readonly repositoryOptions: Array<{
-    value: RepositoryView;
-    label: string;
-  }> = [
-    { value: "published", label: "Planos publicados" },
-    { value: "drafts", label: "Rascunhos" },
-    { value: "ai", label: "Adaptações com IA" },
-    { value: "favorites", label: "Planos favoritos" },
-    { value: "liked", label: "Planos curtidos" },
-  ];
-  readonly areas = [
-    "Matemática e suas Tecnologias",
-    "Ciências Humanas e Sociais Aplicadas",
-    "Linguagens",
-  ];
-  readonly stages = [
-    "Anos iniciais do Ensino Fundamental",
-    "Anos finais do Ensino Fundamental",
-    "Ensino Médio",
-  ];
-  readonly axes = [
-    "Pensamento computacional",
-    "Mundo digital",
-    "Cultura digital",
-  ];
-  readonly subjects = [
-    "Computação",
-    "Língua Portuguesa",
-    "Arte",
-    "Educação Física",
-    "Língua Inglesa",
-    "Matemática",
-    "Ciências",
-    "Geografia",
-    "História",
-    "Ensino Religioso",
-    "Biologia",
-    "Física",
-    "Química",
-    "Filosofia",
-    "Sociologia",
-  ];
-  readonly publishedActivityTypes = ["Desplugada", "Maker", "Digital"];
-  readonly publishedOrigins = [
-    { value: "manual", label: "Planos manuais" },
-    { value: "ai", label: "Gerados/adaptados por IA" },
-  ];
 
   plans: LessonPlan[] = [
     {
@@ -143,7 +65,7 @@ export class PerfilProfessorPage {
         "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=900&q=85",
       imageAlt: "Professora conduzindo uma atividade em sala de aula",
       area: "Matemática e suas Tecnologias",
-      stage: "Anos finais do Ensino Fundamental",
+      stage: "Anos Finais (Ensino Fundamental)",
       axis: "Pensamento computacional",
       subject: "Matemática",
       grade: "6º ano",
@@ -196,7 +118,7 @@ export class PerfilProfessorPage {
         "https://images.unsplash.com/photo-1786926274316-981cac2a2662?auto=format&fit=crop&w=900&q=85",
       imageAlt: "Crianças desenhando juntas em uma atividade escolar",
       area: "Linguagens",
-      stage: "Anos iniciais do Ensino Fundamental",
+      stage: "Anos Iniciais (Ensino Fundamental)",
       axis: "Pensamento computacional",
       subject: "Arte",
       grade: "Anos iniciais",
@@ -222,7 +144,7 @@ export class PerfilProfessorPage {
         "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=900&q=85",
       imageAlt: "Estudantes em uma sala de aula",
       area: "Matemática e suas Tecnologias",
-      stage: "Anos iniciais do Ensino Fundamental",
+      stage: "Anos Iniciais (Ensino Fundamental)",
       axis: "Pensamento computacional",
       subject: "Matemática",
       grade: "4º ano",
@@ -238,33 +160,11 @@ export class PerfilProfessorPage {
     },
   ];
 
-  filters: PlanFilters = this.emptyFilters();
-  publishedFilters: PublishedPlanFilters = this.emptyPublishedFilters();
-  favoriteFilters: PublishedPlanFilters = this.emptyPublishedFilters();
   repositoryView: RepositoryView = "published";
   search = "";
   selectedPlan: LessonPlan | null = null;
-  filtersOpen = false;
-  filterPanelMode: FilterPanelMode = "general";
+  isFilterOpen = false;
   headerCompact = false;
-
-  constructor() {
-    addIcons({
-      bookmark,
-      bookmarkOutline,
-      chevronDownOutline,
-      chevronForwardOutline,
-      closeOutline,
-      filterOutline,
-      heart,
-      heartOutline,
-      menuOutline,
-      readerOutline,
-      searchOutline,
-      sparklesOutline,
-      trashOutline,
-    });
-  }
 
   get firstName(): string {
     return this.userName.split(" ")[0];
@@ -284,7 +184,9 @@ export class PerfilProfessorPage {
   }
 
   get publishedCount(): number {
-    return this.plans.filter((plan) => plan.status === "published").length;
+    return this.plans.filter(
+      (plan) => plan.status === "published",
+    ).length;
   }
 
   get favoriteCount(): number {
@@ -292,57 +194,10 @@ export class PerfilProfessorPage {
   }
 
   get canDeletePlans(): boolean {
-    return this.repositoryView !== "favorites" && this.repositoryView !== "liked";
-  }
-
-  get activeFilterCount(): number {
-    return [
-      ...Object.values(this.filters),
-      ...Object.values(
-        this.repositoryView === "favorites"
-          ? this.favoriteFilters
-          : this.publishedFilters,
-      ),
-      ...(this.search.trim() ? [this.search] : []),
-    ].filter(Boolean).length;
-  }
-
-  get contextFilterCount(): number {
-    return [
-      ...Object.values(
-        this.filterPanelMode === "favorites"
-          ? this.favoriteFilters
-          : this.publishedFilters,
-      ),
-      ...Object.values(this.filters),
-      ...(this.search.trim() ? [this.search] : []),
-    ].filter(Boolean).length;
-  }
-
-  get contextFilters(): PublishedPlanFilters {
-    return this.filterPanelMode === "favorites"
-      ? this.favoriteFilters
-      : this.publishedFilters;
-  }
-
-  get publishedStages(): string[] {
-    return this.publishedOptions("stage");
-  }
-
-  get publishedAxes(): string[] {
-    return this.axes;
-  }
-
-  get publishedDurations(): string[] {
-    return this.publishedOptions("duration");
-  }
-
-  get publishedGrades(): string[] {
-    return this.publishedOptions("grade");
-  }
-
-  get publishedSubjects(): string[] {
-    return this.subjects;
+    return (
+      this.repositoryView !== "favorites" &&
+      this.repositoryView !== "liked"
+    );
   }
 
   get repositoryTitle(): string {
@@ -353,11 +208,13 @@ export class PerfilProfessorPage {
       favorites: "Meus Planos Favoritos",
       liked: "Meus Planos Curtidos",
     };
+
     return titles[this.repositoryView];
   }
 
   get filteredPlans(): LessonPlan[] {
     const query = this.search.trim().toLocaleLowerCase("pt-BR");
+
     return this.plans.filter((plan) => {
       const belongsToView =
         this.repositoryView === "published"
@@ -370,123 +227,126 @@ export class PerfilProfessorPage {
                 ? plan.favorite
                 : plan.liked;
 
+      const searchableText = [
+        plan.title,
+        plan.description,
+        plan.tags.join(" "),
+        plan.materials?.join(" ") ?? "",
+        plan.bnccSkills?.join(" ") ?? "",
+        plan.curricularComponents.join(" "),
+      ]
+        .join(" ")
+        .toLocaleLowerCase("pt-BR");
+
       return (
         belongsToView &&
-        (!this.filters.area || plan.area === this.filters.area) &&
-        (!this.filters.stage || plan.stage === this.filters.stage) &&
-        (!this.filters.axis || plan.axis === this.filters.axis) &&
-        (!this.filters.subject || plan.subject === this.filters.subject) &&
-        (!(this.repositoryView === "published" ||
-          this.repositoryView === "favorites") ||
-          this.matchesContextFilters(
-            plan,
-            this.repositoryView === "favorites"
-              ? this.favoriteFilters
-              : this.publishedFilters,
-          )) &&
-        (!query ||
-          `${plan.title} ${plan.description} ${plan.tags.join(" ")} ${plan.materials?.join(" ") ?? ""} ${plan.bnccSkills?.join(" ") ?? ""} ${plan.curricularComponents.join(" ")}`
-            .toLocaleLowerCase("pt-BR")
-            .includes(query))
+        (!query || searchableText.includes(query))
       );
     });
   }
 
   countByView(view: RepositoryView): number {
     if (view === "published") {
-      return this.plans.filter((plan) => plan.status === "published").length;
+      return this.plans.filter(
+        (plan) => plan.status === "published",
+      ).length;
     }
+
     if (view === "drafts") {
-      return this.plans.filter((plan) => plan.status === "draft").length;
+      return this.plans.filter(
+        (plan) => plan.status === "draft",
+      ).length;
     }
+
     if (view === "ai") {
-      return this.plans.filter((plan) => plan.status === "ai").length;
+      return this.plans.filter(
+        (plan) => plan.status === "ai",
+      ).length;
     }
+
     if (view === "favorites") {
       return this.favoriteCount;
     }
+
     return this.plans.filter((plan) => plan.liked).length;
   }
 
   statusLabel(plan: LessonPlan): string {
-    if (plan.status === "draft") return "Rascunho";
-    if (plan.status === "ai") return "Adaptado com IA";
+    if (plan.status === "draft") {
+      return "Rascunho";
+    }
+
+    if (plan.status === "ai") {
+      return "Adaptado com IA";
+    }
+
     return "Publicado";
   }
 
   openFilters(): void {
-    this.filterPanelMode = "general";
-    this.filtersOpen = true;
-  }
-
-  openPublishedFilters(): void {
-    this.repositoryView = "published";
-    this.filters = this.emptyFilters();
-    this.filterPanelMode = "published";
-    this.filtersOpen = true;
-  }
-
-  openFavoriteFilters(): void {
-    this.repositoryView = "favorites";
-    this.filters = this.emptyFilters();
-    this.filterPanelMode = "favorites";
-    this.filtersOpen = true;
+    this.isFilterOpen = true;
   }
 
   openRepositoryFilters(): void {
-    if (this.repositoryView === "published") {
-      this.openPublishedFilters();
-    } else if (this.repositoryView === "favorites") {
-      this.openFavoriteFilters();
-    } else {
-      this.openFilters();
-    }
+    this.openFilters();
   }
 
   applyFilters(): void {
-    this.filtersOpen = false;
+    this.isFilterOpen = false;
+
     document
       .querySelector(".library")
-      ?.scrollIntoView?.({ behavior: "smooth", block: "start" });
+      ?.scrollIntoView?.({
+        behavior: "smooth",
+        block: "start",
+      });
   }
 
   closeFilters(): void {
-    this.filtersOpen = false;
+    this.isFilterOpen = false;
   }
 
   clearFilters(): void {
-    this.filters = this.emptyFilters();
-    this.publishedFilters = this.emptyPublishedFilters();
-    this.favoriteFilters = this.emptyPublishedFilters();
     this.search = "";
-    this.repositoryView =
-      this.filterPanelMode === "favorites" ? "favorites" : "published";
   }
 
   showRepository(view: RepositoryView): void {
     this.repositoryView = view;
+
     document
       .querySelector(".library")
-      ?.scrollIntoView?.({ behavior: "smooth", block: "start" });
+      ?.scrollIntoView?.({
+        behavior: "smooth",
+        block: "start",
+      });
   }
 
   toggleLike(planId: number): void {
     this.plans = this.plans.map((plan) =>
-      plan.id === planId ? { ...plan, liked: !plan.liked } : plan,
+      plan.id === planId
+        ? { ...plan, liked: !plan.liked }
+        : plan,
     );
   }
 
   toggleFavorite(planId: number): void {
     this.plans = this.plans.map((plan) =>
-      plan.id === planId ? { ...plan, favorite: !plan.favorite } : plan,
+      plan.id === planId
+        ? { ...plan, favorite: !plan.favorite }
+        : plan,
     );
   }
 
   async deletePlan(planId: number): Promise<void> {
-    if (!this.canDeletePlans) return;
+    if (!this.canDeletePlans) {
+      return;
+    }
 
     const plan = this.plans.find((item) => item.id === planId);
-    if (!plan) return;
+
+    if (!plan) {
+      return;
+    }
 
     const result = await this.dialog.show({
       title: "Excluir plano?",
@@ -497,10 +357,17 @@ export class PerfilProfessorPage {
       ],
     });
 
-    if (result.role !== "confirm") return;
+    if (result.role !== "confirm") {
+      return;
+    }
 
-    this.plans = this.plans.filter((item) => item.id !== planId);
-    if (this.selectedPlan?.id === planId) this.closePlanDetails();
+    this.plans = this.plans.filter(
+      (item) => item.id !== planId,
+    );
+
+    if (this.selectedPlan?.id === planId) {
+      this.closePlanDetails();
+    }
   }
 
   newPlan(): void {
@@ -513,7 +380,9 @@ export class PerfilProfessorPage {
       return;
     }
 
-    void this.router.navigateByUrl(`/detalhes-plano/${plan.id}`);
+    void this.router.navigateByUrl(
+      `/detalhes-plano/${plan.id}`,
+    );
   }
 
   closePlanDetails(): void {
@@ -521,25 +390,36 @@ export class PerfilProfessorPage {
   }
 
   adaptSelectedPlan(): void {
-    if (!this.selectedPlan) return;
+    if (!this.selectedPlan) {
+      return;
+    }
 
     localStorage.setItem(
       "desplugai-selected-plan",
       JSON.stringify(this.selectedPlan),
     );
+
     this.closePlanDetails();
+
     void this.router.navigateByUrl("/plano-ia");
   }
 
   private continuePlan(plan: LessonPlan): void {
-    localStorage.setItem("desplugai-selected-plan", JSON.stringify(plan));
+    localStorage.setItem(
+      "desplugai-selected-plan",
+      JSON.stringify(plan),
+    );
+
     void this.router.navigateByUrl("/plano-ia");
   }
 
   async registerApplicationReport(): Promise<void> {
-    if (!this.selectedPlan) return;
+    if (!this.selectedPlan) {
+      return;
+    }
 
     const plan = this.selectedPlan;
+
     const result = await this.dialog.show({
       title: "Registrar relato de aplicação",
       message: `Conte como foi aplicar “${plan.title}” em sua turma.`,
@@ -555,68 +435,28 @@ export class PerfilProfessorPage {
     });
 
     const relato = result.data?.["relato"]?.trim();
-    if (result.role !== "confirm" || !relato) return;
+
+    if (result.role !== "confirm" || !relato) {
+      return;
+    }
 
     const reports = JSON.parse(
       localStorage.getItem("desplugai-relatos-aplicacao") ?? "[]",
-    ) as Array<{ planId: number; relato: string; createdAt: string }>;
+    ) as Array<{
+      planId: number;
+      relato: string;
+      createdAt: string;
+    }>;
+
     reports.push({
       planId: plan.id,
       relato,
       createdAt: new Date().toISOString(),
     });
-    localStorage.setItem("desplugai-relatos-aplicacao", JSON.stringify(reports));
-  }
 
-
-
-  private emptyFilters(): PlanFilters {
-    return { area: "", stage: "", axis: "", subject: "" };
-  }
-
-  private emptyPublishedFilters(): PublishedPlanFilters {
-    return {
-      stage: "",
-      axis: "",
-      activityType: "",
-      subject: "",
-      duration: "",
-      grade: "",
-      origin: "",
-    };
-  }
-
-  private publishedOptions(
-    field: "stage" | "axis" | "duration" | "grade",
-  ): string[] {
-    return [
-      ...new Set(
-        this.plans
-          .filter((plan) =>
-            this.repositoryView === "favorites"
-              ? plan.favorite
-              : plan.status === "published",
-          )
-          .map((plan) => plan[field])
-          .filter((value): value is string => Boolean(value)),
-      ),
-    ];
-  }
-
-  private matchesContextFilters(
-    plan: LessonPlan,
-    filters: PublishedPlanFilters,
-  ): boolean {
-    return (
-      (!filters.stage || plan.stage === filters.stage) &&
-      (!filters.axis || plan.axis === filters.axis) &&
-      (!filters.activityType || plan.activityType === filters.activityType) &&
-      (!filters.subject ||
-        plan.curricularComponents.includes(filters.subject)) &&
-      (!filters.duration || plan.duration === filters.duration) &&
-      (!filters.grade || plan.grade === filters.grade) &&
-      (!filters.origin ||
-        (filters.origin === "ai" ? plan.generatedByAI : !plan.generatedByAI))
+    localStorage.setItem(
+      "desplugai-relatos-aplicacao",
+      JSON.stringify(reports),
     );
   }
 }
