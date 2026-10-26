@@ -1,0 +1,123 @@
+<ion-header class="chat-header">
+  <div class="session-toolbar">
+    <ion-button
+      class="back-button"
+      fill="outline"
+      routerLink="/tabs"
+      aria-label="Voltar">
+      <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+    </ion-button>
+
+    <span class="brand-divider" aria-hidden="true"></span>
+    <img class="studio-logo" src="assets/image/logo.png" alt="DesplugAI" />
+    <div class="studio-mark" aria-hidden="true">✦</div>
+
+    <div class="session-details">
+      <div class="studio-title">
+        <strong>DesplugAI Studio</strong>
+        <span class="adapt-badge">Adaptar com IA</span>
+      </div>
+      <span>
+        Adaptando: <b>Introdução ao Pensamento Computacional</b> — Prof. Carlos Henrique
+      </span>
+    </div>
+  </div>
+
+  <div class="conversation-toolbar">
+    <div class="conversation-title">
+      <strong>Chat de adaptação</strong>
+      <span>Refine o plano conversando com a IA</span>
+    </div>
+    <div class="online-status" aria-label="Assistente online">
+      <span></span>
+      Online
+    </div>
+  </div>
+</ion-header>
+
+<ion-content #chatContent [fullscreen]="false" class="chat-content">
+  <div class="chat-container">
+    @for (item of mensagens; track $index) {
+      <article
+        class="message-row"
+        [class.user-row]="item.autor === 'usuario'"
+        [class.assistant-row]="item.autor === 'ia'">
+        @if (item.autor === 'ia') {
+          <div class="assistant-avatar" aria-hidden="true">
+            <ion-icon name="sparkles"></ion-icon>
+          </div>
+        }
+
+        <div class="message-column">
+          @if (item.autor === 'ia') {
+            <div class="message-author">
+              <strong>Assistente DesplugAI</strong>
+              @if (item.etiqueta) {
+                <span class="message-tag">{{ item.etiqueta }}</span>
+              }
+            </div>
+          } @else {
+            <strong class="user-label">Você</strong>
+          }
+
+          <div class="message-bubble">
+            <p>{{ item.texto }}</p>
+          </div>
+        </div>
+      </article>
+    }
+
+    @if (carregando) {
+      <article class="message-row assistant-row">
+        <div class="assistant-avatar" aria-hidden="true">
+          <ion-icon name="sparkles"></ion-icon>
+        </div>
+        <div class="message-column">
+          <div class="message-author">
+            <strong>Assistente DesplugAI</strong>
+            <span class="message-tag">digitando</span>
+          </div>
+          <div class="message-bubble typing" aria-label="Assistente digitando">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+      </article>
+    }
+  </div>
+</ion-content>
+
+<ion-footer class="composer-footer">
+  <div class="composer">
+    <div class="input-wrapper">
+      <ion-textarea
+        [(ngModel)]="mensagem"
+        placeholder="Digite uma orientação ou ajuste..."
+        autoGrow="true"
+        rows="1"
+        maxlength="1000"
+        aria-label="Orientação para ajustar o plano"
+        (keydown)="pressionarTecla($event)">
+      </ion-textarea>
+
+      <ion-button
+        class="send-button"
+        fill="clear"
+        aria-label="Enviar orientação"
+        (click)="enviarMensagem()"
+        [disabled]="!mensagem.trim() || carregando">
+        <ion-icon slot="icon-only" name="send-outline"></ion-icon>
+      </ion-button>
+    </div>
+
+    <ion-button
+      class="generate-button"
+      expand="block"
+      [disabled]="carregando"
+      (click)="gerarPlanoAula()">
+      Gerar plano de aula
+      <ion-icon slot="end" name="chevron-forward-outline"></ion-icon>
+    </ion-button>
+  </div>
+</ion-footer>

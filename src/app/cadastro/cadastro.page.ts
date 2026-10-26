@@ -118,7 +118,6 @@ export class CadastroPage implements OnInit {
 
     this.cadastrando = true;
 
-    // Dados que serão enviados ao backend
     const dadosCadastro : CadastroRequest = {
       nome: this.usuario.nome.trim(),
       email: this.usuario.email.trim().toLowerCase(),
@@ -163,9 +162,7 @@ export class CadastroPage implements OnInit {
 
           this.exibirErroValidacao(mensagem);
         }
-
       });
-
   }
 
   async exibirSucesso() {

@@ -10,7 +10,6 @@
       <ion-title class="plan-header-title" [attr.title]="status.plano?.titulo || 'Visão geral da atividade'">
         {{ status.plano?.titulo || 'Visão geral da atividade' }}
       </ion-title>
-
     </ion-toolbar>
   </ion-header>
 
@@ -93,16 +92,14 @@
               </div>
               <p class="bncc-desc">{{ habilidade.descricao }}</p>
             </div>
-            <p *ngIf="!plano.habilidadesBncc?.length" class="empty-section">As habilidades BNCC ainda não foram
-              cadastradas.</p>
+            <p *ngIf="!plano.habilidadesBncc?.length" class="empty-section">As habilidades BNCC ainda não foram cadastradas.</p>
           </div>
         </ion-card-content>
       </ion-card>
 
       <ion-card class="section-card details-card">
         <ion-card-content>
-          <h2 class="section-title"><ion-icon name="document-text-outline" aria-hidden="true"></ion-icon> Detalhes da
-            atividade</h2>
+          <h2 class="section-title"><ion-icon name="document-text-outline" aria-hidden="true"></ion-icon> Detalhes da atividade</h2>
           <p class="body-text">{{ plano.descricaoCompleta || 'Este plano ainda não possui detalhes cadastrados.' }}</p>
         </ion-card-content>
       </ion-card>
@@ -114,8 +111,7 @@
             <div *ngFor="let passo of plano.passos" role="listitem">{{ passo }}</div>
           </div>
           <ng-template #noPassos>
-            <p class="body-text">{{ plano.comoRealizar || 'As instruções para realizar esta atividade ainda não foram
-              cadastradas.' }}</p>
+            <p class="body-text">{{ plano.comoRealizar || 'As instruções para realizar esta atividade ainda não foram cadastradas.' }}</p>
           </ng-template>
         </ion-card-content>
       </ion-card>
@@ -158,9 +154,7 @@
               <ion-icon name="sparkles-outline" aria-hidden="true"></ion-icon>
               <strong id="next-step-title" class="cta-ai-title">Adaptar este plano</strong>
             </div>
-            <p class="cta-ai-desc">Para adaptar este plano à sua turma, crie uma conta e aguarde a aprovação do seu
-              perfil
-              de professor.</p>
+            <p class="cta-ai-desc">Para adaptar este plano à sua turma, crie uma conta e aguarde a aprovação do seu perfil de professor.</p>
           </div>
           <ion-button expand="block" fill="solid" class="cta-action btn-orange"
             aria-label="Criar uma conta para adaptar este plano" (click)="showAccountNotice()" routerLink="/cadastro">
@@ -173,8 +167,7 @@
 
         <div class="cta-save">
           <p class="cta-save-text">
-            Gostou desta atividade? <strong>Crie uma conta para salvar</strong> esta atividade na sua biblioteca
-            pessoal.
+            Gostou desta atividade? <strong>Crie uma conta para salvar</strong> esta atividade na sua biblioteca pessoal.
           </p>
           <div class="cta-save-actions">
             <ion-button expand="block" fill="solid" color="secondary" class="cta-action btn-orange"

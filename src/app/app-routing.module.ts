@@ -19,8 +19,7 @@ const routes: Routes = [
   },
   {
     path: 'login',
-    loadChildren: () =>
-      import('./login/login.module').then(m => m.LoginPageModule)
+    loadChildren: () => import('./login/login.module').then(m => m.LoginPageModule)
   },
   {
     path: 'entrar',
@@ -29,22 +28,28 @@ const routes: Routes = [
   },
   {
     path: 'cadastro',
-    loadChildren: () => import('./cadastro/cadastro.module').then( m => m.CadastroPageModule)
+    loadChildren: () => import('./cadastro/cadastro.module').then(m => m.CadastroPageModule)
   },
   {
-    path: 'cadastro',
-    redirectTo: 'cadastro',
-    pathMatch: 'full'
+    path: 'chat-ia',
+    loadChildren: () => import('./chat-ia/chat-ia.module').then(m => m.ChatIaPageModule)
+  },
+  {
+    path: 'plano-ia',
+    loadChildren: () => import('./plano-ia/plano-ia.module').then(m => m.PlanoIaPageModule)
+  },
+  {
+    path: 'plano-final-ia',
+    loadChildren: () => import('./plano-final-ia/plano-final-ia.module').then(m => m.PlanoFinalIaPageModule)
   },
   {
     path: 'plano-aula',
-    loadChildren: () => import('./plano-aula/plano-aula.module').then( m => m.PlanoAulaPageModule)
-  },
-  {
-    path: 'plano-aula',
-    redirectTo: 'plano-aula',
-    pathMatch: 'full'
-  },
+    loadChildren: () => import('./plano-aula/plano-aula.module').then(m => m.PlanoAulaPageModule)
+  },  {
+    path: 'perfil-professor',
+    loadChildren: () => import('./perfil-professor/perfil-professor.module').then(m => m.PerfilProfessorPageModule)
+  }
+
 ];
 
 @NgModule({

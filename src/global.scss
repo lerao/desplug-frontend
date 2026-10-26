@@ -111,3 +111,25 @@
     color: var(--color-text-muted);
   }
 }
+
+ion-modal.app-dialog-modal {
+  --width: min(315px, calc(100% - 32px));
+  --height: auto;
+  --max-height: calc(100% - 48px);
+  --border-radius: 14px;
+  --background: transparent;
+  --box-shadow: none;
+}
+
+ion-modal.app-dialog-modal::part(content) {
+  overflow: visible;
+  border-radius: 14px;
+  background: transparent;
+  box-shadow: none;
+}
+
+ion-modal.app-dialog-modal::part(backdrop) {
+  background: rgb(0 0 0 / 58%);
+  opacity: 1;
+  backdrop-filter: blur(3px);
+}

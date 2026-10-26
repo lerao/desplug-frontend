@@ -18,7 +18,7 @@ ion-badge {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
     min-height: 48px;
 
     .menu-button {
@@ -35,7 +35,7 @@ ion-badge {
       justify-content: center;
 
       .logo {
-        height: 150px;
+        height: 140px;
         width: auto;
         max-width: 100%;
         object-fit: contain;
@@ -117,7 +117,7 @@ ion-badge {
 
   ion-header {
     ion-toolbar {
-      --background: #E7F3FF !important;
+      --background: var(--color-bg) !important;
       --min-height: 64px;
       --border-width: 0 0 1px 0;
       --border-color: #F1F5F9;
