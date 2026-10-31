@@ -10,60 +10,45 @@
 
     <!-- LOGO -->
     <div class="logo-area">
-
       <img src="assets/logo.png" alt="Logo desplugAI" class="logo">
-
     </div>
-
 
     <!-- CARD -->
     <div class="login-card">
 
-      <!-- TIPO DE USUÁRIO -->
-      <div class="tipo-usuario">
-
-        <button type="button" class="tipo" [class.ativo]="selectedRole === 'professor'" (click)="selecionarProfessor()">
-          <span class="icone"><ion-icon name="person-outline"></ion-icon></span>
-          Professor
-        </button>
-
-        <button type="button" class="tipo" [class.ativo]="selectedRole === 'admin'" (click)="selecionarAdmin()">
-          <span class="icone"><ion-icon name="settings-outline"></ion-icon></span>
-          Administrador
-        </button>
-
-      </div>
-
-
       <!-- TÍTULO -->
       <h2>Entrar na sua conta</h2>
-
 
       <!-- E-MAIL -->
       <div class="campo">
 
-        <span class="campo-icone"><ion-icon name="mail-outline"></ion-icon></span>
+        <span class="campo-icone">
+          <ion-icon name="mail-outline"></ion-icon>
+        </span>
 
         <ion-input type="email" placeholder="E-mail institucional" [(ngModel)]="email">
         </ion-input>
 
       </div>
 
-
       <!-- SENHA -->
       <div class="campo">
 
-        <span class="campo-icone"><ion-icon name="lock-closed-outline"></ion-icon></span>
+        <span class="campo-icone">
+          <ion-icon name="lock-closed-outline"></ion-icon>
+        </span>
 
         <ion-input [type]="showPassword ? 'text' : 'password'" placeholder="Senha" [(ngModel)]="password">
         </ion-input>
 
-        <button type="button" class="mostrar-senha" (click)="togglePassword()"><ion-icon
-            [name]="getPasswordIcon()"></ion-icon>
+        <button type="button" class="mostrar-senha" (click)="togglePassword()">
+
+          <ion-icon [name]="getPasswordIcon()">
+          </ion-icon>
+
         </button>
 
       </div>
-
 
       <!-- ESQUECI SENHA -->
       <div class="senha">
@@ -74,7 +59,6 @@
 
       </div>
 
-
       <!-- ENTRAR -->
       <ion-button expand="block" class="botao-entrar" [disabled]="loading()" (click)="fazerLogin()">
 
@@ -84,7 +68,6 @@
         {{ loading() ? 'Entrando...' : 'Entrar' }}
 
       </ion-button>
-
 
       <!-- DIVISOR -->
       <div class="divisor">
@@ -97,11 +80,8 @@
 
       </div>
 
-
-      <!-- BOTÕES SOCIAIS -->
       <div class="botoes-social">
 
-        <!-- GOOGLE -->
         <ion-button fill="outline" class="botao-google" (click)="loginGoogle()">
 
           <img src="assets/google.png" alt="Google">
@@ -113,7 +93,6 @@
       </div>
 
     </div>
-
 
     <!-- CADASTRO -->
     <div class="cadastro">

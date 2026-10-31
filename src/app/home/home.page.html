@@ -1,0 +1,313 @@
+
+<div id="profile-content" class="ion-page">
+  <ion-header class="profile-header ion-no-border" [class.compact]="headerCompact">
+    <ion-toolbar>
+      <div class="topbar">
+        <ion-menu-toggle>
+          <ion-button class="menu-toggle" fill="clear"  aria-label="Abrir menu" >
+            <ion-icon slot="icon-only" name="menu-outline"></ion-icon>
+          </ion-button>
+        </ion-menu-toggle>
+        <img class="wordmark" src="assets/image/logo.png"  alt="DesplugAI"/>
+      </div>
+
+      <div class="compact-welcome">
+        <span class="compact-avatar">
+          {{ iniciaisNome }}
+        </span>
+
+        <div>
+          <strong>Olá, <span>{{ nomeUsuario }}</span></strong>
+        </div>
+      </div>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-content [fullscreen]="true"  [scrollEvents]="true"  (ionScroll)="onHeaderCompact($event)">
+    <main class="profile-page">
+      <section class="profile-card">
+        <div class="profile-color">
+          <div class="welcome">
+            <span class="avatar">
+              {{ iniciaisNome }}
+            </span>
+
+            <div>
+              <h1> Olá,
+                <span>
+                  {{ primeiroNome }}
+                </span>
+              </h1>
+              <p>
+                Organize suas ideias e experiências de sala de aula.
+              </p>
+            </div>
+          </div>
+
+          <div class="profile-actions">
+            <button type="button"  [class.active]="modoExibicao() === 'meus'"  (click)="mostrarPlanosPorUsuario()">
+              <span>
+                <strong>{{ qtdPlanosPorUsuario() }}</strong>
+                <small>Meus Planos</small>
+              </span>
+            </button>
+
+            <button type="button"  [class.active]="modoExibicao() === 'favoritos'"  (click)="mostrarFavoritos()">
+              <span>
+                <strong>{{ favoritos }}</strong>
+                <small>Favoritos</small>
+              </span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="repository-controls"  aria-label="Filtros e busca de planos">
+        <div class="library-actions search-box bg-white">
+          <button class="filter-btn text-primary"  type="button"  aria-label="Abrir filtros"  (click)="abrirFiltros()">
+            <ion-icon name="options-outline"></ion-icon>
+          </button>
+
+          <ion-searchbar [ngModel]="pesquisa()" (ngModelChange)="pesquisa.set($event)" 
+          placeholder="Buscar planos" [debounce]="150" showClearButton="focus">
+          </ion-searchbar>
+        </div>
+      </section>
+
+      <section class="library">
+        <header class="library-header">
+          <div>
+            <div class="repository-title">
+              <span>
+                {{modoExibicao() === 'meus' ? 'Meus Planos' : modoExibicao() === 'favoritos' ? 'Favoritos' : 'Todos os Planos'}}
+              </span>
+
+              <button type="button" class="title-dropdown" aria-label="Escolher visualização"(click)="mostrarMenuVisualizacao = !mostrarMenuVisualizacao">
+                <ion-icon name="chevron-down-outline"></ion-icon>
+              </button>
+            </div>
+
+            <div  class="view-menu" *ngIf="mostrarMenuVisualizacao">
+              <button type="button" (click)="mostrarTodosPlanos(); mostrarMenuVisualizacao = false">
+                Todos os Planos
+              </button>
+
+              <button type="button" (click)="mostrarPlanosPorUsuario(); mostrarMenuVisualizacao = false">
+                Meus Planos
+              </button>
+
+              <button type="button" (click)="mostrarFavoritos(); mostrarMenuVisualizacao = false">
+                Favoritos
+              </button>
+            </div>
+
+            <p> {{ planosFiltrados().length }}
+              {{planosFiltrados().length === 1  ? 'plano encontrado'  : 'planos encontrados'}}
+            </p>
+          </div>
+        </header>
+
+        <div *ngIf="carregando()" class="ion-padding ion-text-center">
+          <ion-spinner name="crescent" color="primary"></ion-spinner>
+          <p class="ion-margin-top text-muted">
+            Carregando planos...
+          </p>
+        </div>
+
+        <div *ngIf="!carregando() && mensagemErro()" class="ion-padding ion-text-center">
+          <ion-text color="danger">
+            <p>{{ mensagemErro() }}</p>
+          </ion-text>
+        </div>
+
+        <div
+          class="plan-grid" *ngIf=" !carregando() && !mensagemErro() &&  planosFiltrados().length > 0;  else semPlanos  ">
+          <article class="plan-card" *ngFor="let plano of planosFiltrados()">
+            <div class="plan-image">
+              <img [src]="plano.imagemCapa || 'assets/image/logo.png'" [alt]="plano.titulo"/>
+            </div>
+
+            <div class="plan-body">
+              <div class="tags">
+                <span *ngIf="plano.tipoAtividade">
+                  {{ plano.tipoAtividade }}
+                </span>
+
+                <span *ngIf=" plano.eixoBNCC &&  plano.eixoBNCC !== 'Não informado'">
+                  {{ plano.eixoBNCC }}
+                </span>
+              </div>
+
+              <h3>{{ plano.titulo }}</h3>
+              <p>{{ plano.resumo }}</p>
+
+              <footer>
+                <button type="button" class="metric-item metric-favorites" title="Favoritos">
+                  <ion-icon name="heart-outline"></ion-icon>
+                  {{ plano.quantidadeFavoritos ?? 0 }}
+                </button>
+
+                <button type="button" class="metric-item metric-adaptations" title="Adaptações / Derivações" routerLink="/chat-ia">
+                  <ion-icon name="git-branch-outline"></ion-icon>
+                  {{ plano.quantidadeAdaptacoes ?? 0 }}
+                </button>
+
+                <button type="button" class="delete-plan" title="Excluir" *ngIf="isAutor(plano)" (click)="excluirPlano(plano)">
+                  <ion-icon name="trash-outline"></ion-icon>
+                </button>
+
+                <button type="button" class="open-plan" [routerLink]="['/detalhes-plano', plano.id]">
+                  <span>
+                    {{plano.status === 'Rascunho' ? 'Continuar' : 'Ver detalhes'}}
+                  </span>
+
+                  <ion-icon name="chevron-forward-outline"></ion-icon>
+                </button>
+              </footer>
+            </div>
+          </article>
+        </div>
+
+        <ng-template #semPlanos>
+          <div class="empty-state" *ngIf="!carregando() && !mensagemErro()">
+            <span>
+              <ion-icon name="search-outline"></ion-icon>
+            </span>
+
+            <h3>Nenhum plano encontrado</h3>
+
+            <p>Altere a busca ou escolha outros filtros.</p>
+
+            <ion-button (click)="limparFiltros()">
+              Limpar filtros
+            </ion-button>
+          </div>
+        </ng-template>
+      </section>
+    </main>
+  </ion-content>
+
+  <ion-modal [isOpen]="abrirFiltro" (didDismiss)="fecharFiltros()" class="filter-modal">
+    <ng-template>
+      <ion-header class="ion-no-border">
+        <ion-toolbar>
+          <ion-title class="modal-title">
+            Filtrar planos
+          </ion-title>
+
+          <ion-buttons slot="end">
+            <ion-button class="btn-close-modal" aria-label="Fechar filtros" (click)="fecharFiltros()">
+              <ion-icon name="close-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="ion-padding">
+        <h2 class="filtros-subtitle">Filtros</h2>
+
+        <ion-accordion-group [multiple]="true" [value]="['etapa_ensino']">
+          <ion-accordion value="etapa_ensino">
+            <ion-item slot="header">
+              <ion-icon name="school" slot="start" class="accordion-icon icon-purple"></ion-icon>
+
+              <ion-label>Etapa de Ensino</ion-label>
+            </ion-item>
+
+            <div slot="content" class="ion-padding-bottom">
+              <ion-item lines="none">
+                <ion-checkbox labelPlacement="end">
+                  Educação Infantil
+                </ion-checkbox>
+              </ion-item>
+
+              <ion-item lines="none">
+                <ion-checkbox labelPlacement="end">
+                  Anos Iniciais
+                </ion-checkbox>
+              </ion-item>
+
+              <ion-item lines="none">
+                <ion-checkbox labelPlacement="end">
+                  Anos Finais
+                </ion-checkbox>
+              </ion-item>
+
+              <ion-item lines="none">
+                <ion-checkbox labelPlacement="end">
+                  Ensino Médio
+                </ion-checkbox>
+              </ion-item>
+            </div>
+          </ion-accordion>
+
+          <ion-accordion value="eixos_bncc">
+            <ion-item slot="header">
+              <ion-icon name="hardware-chip" slot="start" class="accordion-icon icon-pink"></ion-icon>
+              <ion-label>Eixos BNCC Computação</ion-label>
+            </ion-item>
+
+            <div slot="content" class="ion-padding-bottom">
+              <ion-item lines="none">
+                <ion-checkbox labelPlacement="end">
+                  Pensamento Computacional
+                </ion-checkbox>
+              </ion-item>
+
+              <ion-item lines="none">
+                <ion-checkbox labelPlacement="end">
+                  Mundo Digital
+                </ion-checkbox>
+              </ion-item>
+
+              <ion-item lines="none">
+                <ion-checkbox labelPlacement="end">
+                  Cultura Digital
+                </ion-checkbox>
+              </ion-item>
+            </div>
+          </ion-accordion>
+
+          <ion-accordion value="tipo_atividade">
+            <ion-item slot="header">
+              <ion-icon name="locate" slot="start" class="accordion-icon icon-red"></ion-icon>
+              <ion-label>Tipo de Atividade</ion-label>
+            </ion-item>
+
+            <div slot="content" class="ion-padding-bottom">
+              <ion-item lines="none">
+                <ion-checkbox labelPlacement="end">
+                  Desplugada
+                </ion-checkbox>
+              </ion-item>
+
+              <ion-item lines="none">
+                <ion-checkbox labelPlacement="end">
+                  Maker
+                </ion-checkbox>
+              </ion-item>
+
+              <ion-item lines="none">
+                <ion-checkbox labelPlacement="end">
+                  Digital
+                </ion-checkbox>
+              </ion-item>
+
+              <ion-item lines="none">
+                <ion-checkbox labelPlacement="end">
+                  Plano de Aula
+                </ion-checkbox>
+              </ion-item>
+            </div>
+          </ion-accordion>
+        </ion-accordion-group>
+
+        <div class="modal-action-box">
+          <ion-button expand="block" color="primary" class="filter-btn-apply" (click)="aplicarFiltros()">
+            Ver resultados
+          </ion-button>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+</div>

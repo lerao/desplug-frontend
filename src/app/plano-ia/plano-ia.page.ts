@@ -214,7 +214,7 @@ export class PlanoIaPage implements OnInit {
 
   async savePlan(): Promise<void> {
     if (this.plan.skillCodes.length === 0) {
-      await this.dialog.show({
+      await this.dialog.confirm({
         title: "Habilidade BNCC obrigatória",
         message: "Associe pelo menos uma habilidade ou competência BNCC antes de salvar o plano.",
         buttons: [{ text: "Entendi", role: "confirm" }],
@@ -223,7 +223,7 @@ export class PlanoIaPage implements OnInit {
     }
 
     this.persistPlan();
-    const result = await this.dialog.show({
+    const result = await this.dialog.confirm({
       title: "Salvar e publicar",
       message: "Deseja salvar e publicar o plano de aula no app?",
       buttons: [

@@ -91,6 +91,20 @@ p {
   background: #0a555b;
 }
 
+button.danger {
+  background-color: var(--ion-color-danger, #ef4444);
+  color: #ffffff;
+  border: 1px solid var(--ion-color-danger, #ef4444);
+
+  &:hover {
+    background-color: var(--ion-color-danger-shade, #dc2626);
+  }
+
+  &:active {
+    background-color: var(--ion-color-danger-tint, #f87171);
+  }
+}
+
 @media (max-width: 360px) {
   .dialog-card {
     padding: 19px 16px 16px;

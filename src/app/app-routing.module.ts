@@ -45,9 +45,14 @@ const routes: Routes = [
   {
     path: 'plano-aula',
     loadChildren: () => import('./plano-aula/plano-aula.module').then(m => m.PlanoAulaPageModule)
-  },  {
+  },
+  {
     path: 'perfil-professor',
     loadChildren: () => import('./perfil-professor/perfil-professor.module').then(m => m.PerfilProfessorPageModule)
+  },
+  {
+    path: 'home',
+    loadChildren: () => import('./home/home.module').then( m => m.HomePageModule)
   }
 
 ];

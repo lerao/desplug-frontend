@@ -7,13 +7,15 @@ import { IonicModule } from '@ionic/angular/lazy';
 import { DetalhesPlanoPageRoutingModule } from './detalhes-plano-routing.module';
 
 import { DetalhesPlanoPage } from './detalhes-plano.page';
+import { ComponentsModule } from '../components/components.module'; 
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
     IonicModule,
-    DetalhesPlanoPageRoutingModule
+    DetalhesPlanoPageRoutingModule,
+    ComponentsModule
   ],
   declarations: [DetalhesPlanoPage]
 })

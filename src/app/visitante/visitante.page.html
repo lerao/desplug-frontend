@@ -131,7 +131,7 @@
     </ion-text>
   </div>
 
-  <div class="feed-section" *ngIf="planosAula$ | async as planosAula">
+  <div class="feed-section" *ngIf="planosAula$ | async as planosAula; else carregando">
     <div class="results-bar">
       <ion-badge class="results-count text-main">
         <b>{{ planosAula.length }}</b> planos encontrados
@@ -173,12 +173,14 @@
           </div>
           <footer class="card-footer">
             <div class="card-metrics">
-              <ion-badge class="metric-item" title="Favoritos">
-                <ion-icon name="heart-outline"></ion-icon> {{ plano.quantidadeFavoritos }}
-              </ion-badge>
-              <ion-badge class="metric-item" title="Adaptações / Derivações">
-                <ion-icon name="git-branch-outline"></ion-icon> {{ plano.quantidadeAdaptacoes }}
-              </ion-badge>
+              <ion-button class="metric-item" title="Favoritos" mode="md" routerLink="/login">
+                <ion-icon name="heart-outline"></ion-icon>
+                {{ plano.quantidadeFavoritos }}
+              </ion-button>
+              <ion-button class="metric-item" title="Adaptações / Derivações" mode="md" routerLink="/login">
+                <ion-icon name="git-branch-outline"></ion-icon>
+                {{ plano.quantidadeAdaptacoes }}
+              </ion-button>
             </div>
 
             <ion-button fill="clear" class="card-btn" [routerLink]="['/detalhes-plano', plano.id]">
@@ -190,4 +192,12 @@
       </ion-card>
     </div>
   </div>
+  <ng-template #carregando>
+    <div class="ion-padding ion-text-center" *ngIf="!erroCarregamento">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+      <ion-text color="medium">
+        <p>Carregando planos de aula. Aguarde...</p>
+      </ion-text>
+    </div>
+  </ng-template>
 </ion-content>

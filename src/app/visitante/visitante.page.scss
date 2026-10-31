@@ -151,8 +151,6 @@ ion-badge {
   ion-content {
     --padding-top: 0.5rem;
     --padding-bottom: 0;
-    
-
 
     .filtros-subtitle {
       font-size: 1.1rem;
@@ -176,11 +174,25 @@ ion-badge {
             margin-right: 0.85rem;
             opacity: 0.85;
 
-            &.icon-purple { color: #6366F1; }
-            &.icon-pink { color: #EC4899; }
-            &.icon-red { color: #EF4444; }
-            &.icon-green { color: #10B981; }
-            &.icon-orange { color: #F59E0B; }
+            &.icon-purple {
+              color: #6366F1;
+            }
+
+            &.icon-pink {
+              color: #EC4899;
+            }
+
+            &.icon-red {
+              color: #EF4444;
+            }
+
+            &.icon-green {
+              color: #10B981;
+            }
+
+            &.icon-orange {
+              color: #F59E0B;
+            }
           }
 
           ion-label {
@@ -196,7 +208,7 @@ ion-badge {
 
           ion-item {
             --background: transparent;
-            --padding-start: 2.75rem; 
+            --padding-start: 2.75rem;
             --inner-padding-end: 0.5rem;
             --min-height: 38px;
 
@@ -352,21 +364,29 @@ ion-card.lesson-card {
         align-items: center;
         gap: 0.65rem;
 
-        ion-badge.metric-item {
+        ion-button.metric-item {
           --background: #F1F5F9;
+          --background-hover: #e2e8f0;
           --color: var(--color-text-muted);
-          
-          display: flex;
-          align-items: center;
-          gap: 0.3rem;
+          --border-radius: 8px;
+          --padding-start: 0.65rem;
+          --padding-end: 0.65rem;
+          --box-shadow: none;
+
+          margin: 0;
+          height: 28px;
           font-size: 0.75rem;
           font-weight: 600;
-          padding: 0.35rem 0.65rem;
-          border-radius: 8px;
+          text-transform: none;
+          letter-spacing: normal;
+          &::part(native) {
+            gap: 0.3rem;
+          }
 
           ion-icon {
             font-size: 0.95rem;
             color: var(--color-text-muted);
+            margin-right: 0.1rem;
           }
         }
       }

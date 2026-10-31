@@ -64,7 +64,7 @@ export class AuthService {
   constructor(private http: HttpClient) { }
 
   // CADASTRO
-  cadastrar(dados: CadastroRequest): Observable<any> {
+  cadastrarUsuario(dados: CadastroRequest): Observable<any> {
     return this.http.post(
       `${this.apiUrl}/usuario`,
       dados
@@ -105,7 +105,7 @@ export class AuthService {
     this.statusSessao.set(sessao);
   }
 
-  // RECUPERAR SESSÃO AO RECARREGAR
+  // recuperaSessao ao recarregar página
   private recuperarSessao(): SessaoSalva | null {
     const dados = sessionStorage.getItem(this.chaveSessao);
 
@@ -156,7 +156,7 @@ export class AuthService {
     }
   }
 
-  // RECUPERAR TOKEN NÃO EXPIRADO
+  // pega token que não está expirado
   obterTokenValido(): string | null {
 
     const sessao = this.statusSessao();
@@ -173,7 +173,7 @@ export class AuthService {
     return sessao.token;
   }
 
-  // ENCERRAR SESSÃO
+  // encerra sessão
   sair(): void {
     sessionStorage.removeItem(this.chaveSessao);
     this.statusSessao.set(null);

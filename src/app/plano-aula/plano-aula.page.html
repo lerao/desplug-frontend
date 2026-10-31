@@ -163,11 +163,11 @@
 <ion-footer class="ion-no-border plano-footer">
   <div class="footer-acoes" [class.single-btn]="etapaAtual === 1">
     <ion-button *ngIf="etapaAtual > 1" (click)="prevEtapa()" fill="outline" class="btn-back">
-      <ion-icon name="arrow-back-outline"></ion-icon> Voltar
+      <ion-icon name="chevron-back-outline" slot="start"></ion-icon> Voltar
     </ion-button>
     <ion-button (click)="proxEtapa()" class="btn-next" [expand]="etapaAtual === 1 ? 'block' : ''" [disabled]="salvando">
       {{ salvando ? 'Salvando...' : (etapaAtual === 4 ? 'Publicar Plano' : 'Próximo') }}
-      <ion-icon name="arrow-forward-outline"></ion-icon>
+      <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
     </ion-button>
   </div>
 </ion-footer>

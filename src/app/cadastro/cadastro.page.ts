@@ -130,7 +130,7 @@ export class CadastroPage implements OnInit {
     };
 
     // Enviando dados para a API
-    this.authService.cadastrar(dadosCadastro)
+    this.authService.cadastrarUsuario(dadosCadastro)
       .pipe(
         finalize(() => {
           this.cadastrando = false;
@@ -144,7 +144,7 @@ export class CadastroPage implements OnInit {
         },
 
         error: (erro: HttpErrorResponse) => {
-          console.error('Erro ao cadastrar:', erro);
+          console.error('Erro ao cadastrar usuário:', erro);
 
           let mensagem = 'Não foi possível realizar o cadastro.';
 

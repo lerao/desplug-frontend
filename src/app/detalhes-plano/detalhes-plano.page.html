@@ -1,16 +1,6 @@
 <ng-container *ngIf="status$ | async as status">
   <ion-header>
-    <ion-toolbar class="plan-title-toolbar" color="light">
-      <ion-buttons slot="start" class="back-buttons">
-        <ion-button fill="clear" color="primary" routerLink="/visitante" aria-label="Abrir página visitante">
-          <ion-icon slot="start" name="arrow-back-outline"></ion-icon>
-        </ion-button>
-      </ion-buttons>
-
-      <ion-title class="plan-header-title" [attr.title]="status.plano?.titulo || 'Visão geral da atividade'">
-        {{ status.plano?.titulo || 'Visão geral da atividade' }}
-      </ion-title>
-    </ion-toolbar>
+    <app-header backButtonText="Voltar"></app-header>
   </ion-header>
 
   <ion-content class="plan-detail-content">
@@ -22,12 +12,11 @@
     <ng-container *ngIf="status.plano as plano">
 
       <section class="hero-cover">
-        <img [src]="plano.imagemCapa" [alt]="plano.titulo" title="Imagem de capa do plano"
-          class="cover-img" />
+        <img [src]="plano.imagemCapa" [alt]="plano.titulo" title="Imagem de capa do plano" class="cover-img" />
         <div class="cover-overlay"></div>
         <div class="cover-info">
           <div class="badge-row">
-            <ion-badge *ngIf="isLoggedInTeacher" class="tag-principal">
+            <ion-badge *ngIf="usuarioLogado" class="tag-principal">
               {{ plano.status === 'Publicado' ? 'Disponível' : plano.status }}
             </ion-badge>
             <ion-badge *ngIf="plano.isGeradoIA" class="tag-ia">Adaptado com IA</ion-badge>
@@ -65,8 +54,8 @@
             </div>
             <div class="meta-item">
               <span class="meta-label">Adaptações</span>
-              <span class="meta-value"><ion-icon name="git-branch-outline"></ion-icon> {{ plano.quantidadeAdaptacoes
-                }}</span>
+              <span class="meta-value"><ion-icon name="git-branch-outline"></ion-icon>
+                {{ plano.quantidadeAdaptacoes }}</span>
             </div>
           </div>
         </ion-card-content>
@@ -74,8 +63,8 @@
 
       <ion-card class="section-card about-card">
         <ion-card-content>
-          <h2 class="section-title"><ion-icon name="information-circle-outline" aria-hidden="true"></ion-icon> Sobre a
-            atividade</h2>
+          <h2 class="section-title"><ion-icon name="information-circle-outline" aria-hidden="true"></ion-icon>
+            Sobre a atividade</h2>
           <p class="body-text">{{ plano.resumo }}</p>
         </ion-card-content>
       </ion-card>
@@ -92,14 +81,16 @@
               </div>
               <p class="bncc-desc">{{ habilidade.descricao }}</p>
             </div>
-            <p *ngIf="!plano.habilidadesBncc?.length" class="empty-section">As habilidades BNCC ainda não foram cadastradas.</p>
+            <p *ngIf="!plano.habilidadesBncc?.length" class="empty-section">As habilidades BNCC ainda não foram
+              cadastradas.</p>
           </div>
         </ion-card-content>
       </ion-card>
 
       <ion-card class="section-card details-card">
         <ion-card-content>
-          <h2 class="section-title"><ion-icon name="document-text-outline" aria-hidden="true"></ion-icon> Detalhes da atividade</h2>
+          <h2 class="section-title"><ion-icon name="document-text-outline" aria-hidden="true"></ion-icon> Detalhes da
+            atividade</h2>
           <p class="body-text">{{ plano.descricaoCompleta || 'Este plano ainda não possui detalhes cadastrados.' }}</p>
         </ion-card-content>
       </ion-card>
@@ -111,7 +102,8 @@
             <div *ngFor="let passo of plano.passos" role="listitem">{{ passo }}</div>
           </div>
           <ng-template #noPassos>
-            <p class="body-text">{{ plano.comoRealizar || 'As instruções para realizar esta atividade ainda não foram cadastradas.' }}</p>
+            <p class="body-text">{{ plano.comoRealizar || 'As instruções para realizar esta atividade ainda não foram
+              cadastradas.' }}</p>
           </ng-template>
         </ion-card-content>
       </ion-card>
@@ -126,6 +118,106 @@
           <ng-template #noMateriais>
             <p class="empty-section">Os materiais ainda não foram cadastrados.</p>
           </ng-template>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- COMENTÁRIOS / FEEDBACKS -->
+      <ion-card class="section-card feedbacks-card" aria-labelledby="feedbacks-title">
+        <ion-card-content>
+
+          <div class="feedbacks-header">
+            <h2 id="feedbacks-title" class="section-title">
+              <ion-icon name="chatbubbles-outline" aria-hidden="true"></ion-icon>
+              Comentários ({{ status.feedbacks.length }})
+            </h2>
+
+            <ion-button *ngIf="usuarioLogado && !exibirFormFeedback" fill="clear" class="btn-comentar"
+              (click)="alternarFormFeedback()">
+              <ion-icon name="add-outline"></ion-icon>
+              Comentar
+            </ion-button>
+          </div>
+
+          <p *ngIf="status.feedbacks.length === 0 && !exibirFormFeedback" class="empty-section text-center">
+            Nenhum comentário encontrado.
+          </p>
+
+          <div *ngIf="usuarioLogado && exibirFormFeedback" class="feedback-form-container">
+
+            <h3 class="feedback-form-title">
+              {{ idComentario !== null ? 'Editar comentário' : 'Novo comentário' }}
+            </h3>
+
+            <div class="rating-row">
+              <span class="rating-label">Avaliação:</span>
+
+              <div class="stars-container">
+                <ion-icon *ngFor="let star of [1,2,3,4,5]"
+                  [name]="salvarFeedback.avaliacaoGeral >= star ? 'star' : 'star-outline'" class="star-icon"
+                  (click)="setAvaliacao(star)">
+                </ion-icon>
+              </div>
+            </div>
+
+            <ion-textarea class="feedback-textarea" [(ngModel)]="salvarFeedback.relatoExperiencia"
+              placeholder="Descreva como foi a recepção dos estudantes, dificuldades e pontos fortes..." rows="4">
+            </ion-textarea>
+
+            <div class="form-actions">
+              <ion-button expand="block" fill="solid" class="btn-publicar" (click)="salvarComentario(plano.id)"
+                [disabled]="!salvarFeedback.relatoExperiencia.trim() || salvarFeedback.avaliacaoGeral === 0 || isSubmetendoFeedback">
+                {{ isSubmetendoFeedback ? 'Salvando...' : idComentario !== null ? 'Salvar alterações' : 'Comentar' }}
+              </ion-button>
+
+              <ion-button class="btn-cancelar" expand="block" fill="outline" color="medium" (click)="cancelarFormulario()" [disabled]="isSubmetendoFeedback">
+                Cancelar
+              </ion-button>
+
+            </div>
+          </div>
+          <div *ngIf="status.feedbacks.length > 0" class="feedback-list">
+            <div *ngFor="let feedback of status.feedbacks" class="feedback-item">
+              <div class="feedback-item-header">
+                <div class="feedback-author-info">
+                  <div class="author-avatar">
+                    {{ getIniciaisNome(feedback.usuario?.nome || 'Usuário') }}
+                  </div>
+
+                  <div class="author-meta">
+                    <span class="author-name">
+                      {{ feedback.usuario?.nome || 'Usuário' }}
+                    </span>
+
+                    <span class="feedback-date">
+                      {{ feedback.dataRegistro | date:'dd \'de\' MMM. \'de\' yyyy' }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="feedback-header-actions">
+                  <div class="feedback-stars">
+                    <ion-icon *ngFor="let star of [1,2,3,4,5]"
+                      [name]="feedback.avaliacaoGeral >= star ? 'star' : 'star-outline'" class="star-icon-static">
+                    </ion-icon>
+                  </div>
+
+                  <div *ngIf="isFeedbackUsuario(feedback)" class="feedback-actions">
+
+                    <ion-button fill="clear" size="small" class="btn-editar-feedback" aria-label="Editar comentário"
+                      (click)="editarFeedback(feedback)">
+                      <ion-icon name="create-outline" slot="icon-only"></ion-icon>
+                    </ion-button>
+
+                    <ion-button fill="clear" size="small" class="btn-excluir-feedback" aria-label="Excluir comentário"
+                      (click)="excluirFeedback(feedback)">
+                      <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+                    </ion-button>
+                  </div>
+                </div>
+              </div>
+              <p class="feedback-text"> {{ feedback.relatoExperiencia }} </p>
+            </div>
+          </div>
         </ion-card-content>
       </ion-card>
 
@@ -147,7 +239,7 @@
         </ion-card-content>
       </ion-card>
 
-      <ion-card class="section-card cta-card" aria-labelledby="next-step-title">
+      <ion-card *ngIf="!usuarioLogado" class="section-card cta-card" aria-labelledby="next-step-title">
         <div class="cta-ai">
           <div>
             <div class="cta-ai-header">
@@ -167,11 +259,12 @@
 
         <div class="cta-save">
           <p class="cta-save-text">
-            Gostou desta atividade? <strong>Crie uma conta para salvar</strong> esta atividade na sua biblioteca pessoal.
+            Gostou desta atividade? <strong>Crie uma conta para ter acesso a mais atividades.</strong>
           </p>
           <div class="cta-save-actions">
             <ion-button expand="block" fill="solid" color="secondary" class="cta-action btn-orange"
-              aria-label="Criar uma conta para favoritar este plano" (click)="showAccountNotice()" routerLink="/cadastro">
+              aria-label="Criar uma conta para favoritar este plano" (click)="showAccountNotice()"
+              routerLink="/cadastro">
               <ion-icon name="heart-outline" slot="start"></ion-icon>
               Criar conta para favoritar
             </ion-button>
@@ -181,7 +274,6 @@
           </p>
         </div>
       </ion-card>
-
     </ng-container>
 
     <div *ngIf="!status.carregando && !status.plano" class="feedback-state" role="alert">

@@ -128,6 +128,25 @@ export interface PlanoAula {
   planoOrigem?: PlanoOrigem;
 }
 
+//FEEDBACKS PRÁTICOS - COMENTÁRIOS 
+export interface FeedbackPratico {
+  id: number;
+  relatoExperiencia: string;
+  avaliacaoGeral: number;
+  dataRegistro: string;
+  dataAplicacao?: string;
+  usuario?: User;
+  plano: { id: number };
+}
+
+export interface FeedbackPraticoRequest {
+  relatoExperiencia: string;
+  avaliacaoGeral: number;
+  dataAplicacao: string;
+  plano: { id: number };
+  usuario?: { id: number };
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -137,23 +156,27 @@ export class PlanoAulaService {
 
   constructor(private http: HttpClient, private authService: AuthService) { }
 
-  // Cadastrar plano de aula
-
-  // Cadastrar plano de aula
-  cadastrar(dados: PlanoAulaRequest):
-    Observable<PlanoAulaResponse> {
+  cadastrarPlano(dados: PlanoAulaRequest): Observable<PlanoAulaResponse> {
 
     const token = this.authService.obterTokenValido();
+    const sessao = this.authService.sessaoAtual();
 
-    if (!token) {
+    if (!token || !sessao) {
       return throwError(() =>
         new Error('É necessário fazer login para cadastrar um plano.')
       );
     }
 
+    const dadosUsuario: PlanoAulaRequest = {
+      ...dados,
+      autor: {
+        id: sessao.usuarioId
+      }
+    };
+
     return this.http.post<PlanoAulaResponse>(
       `${this.apiUrl}/plano-aula`,
-      dados,
+      dadosUsuario,
       {
         headers: {
           Authorization: `Bearer ${token}`
@@ -162,9 +185,8 @@ export class PlanoAulaService {
     );
   }
 
-
   // Buscar habilidades BNCC
-  listarHabilidades(): Observable<HabilidadeBncc[]> {
+  getHabilidades(): Observable<HabilidadeBncc[]> {
 
     const token = this.authService.obterTokenValido();
 
@@ -185,55 +207,53 @@ export class PlanoAulaService {
   }
 
   // Buscar todos os planos para a tela de visitante (temporário) - alterar para que aceite apenas planos com status "Publicado" 
-
-  // Buscar planos para visitantes sem autenticação
-  getPlanosPublicos(): Observable<PlanoAula[]> {
-
+  getPlanos(): Observable<PlanoAula[]> {
     return this.http.get<PlanoAulaApiResponse[]>(
       `${this.apiUrl}/plano-aula`
     ).pipe(
       map(planos =>
-        planos.map(plano => this.converterPlano(plano))
+        planos.map(plano => this.montarPlano(plano))
       )
     );
   }
 
-
-  // Buscar detalhes de um plano como visitante - detalhes_planos
-  getPlanoPublicoById(id: number): Observable<PlanoAula> {
-
+  // exibe detalhes de um plano (detalhes_planos).
+  getPlanoPorId(id: number): Observable<PlanoAula> {
     return this.http.get<PlanoAulaApiResponse>(
       `${this.apiUrl}/plano-aula/${id}`
     ).pipe(
-      map(plano => this.converterPlano(plano))
+      map(plano => this.montarPlano(plano))
     );
   }
 
-  // Buscar um plano específico pelo ID - detalhes_planos
-  getPlanoById(id: number): Observable<PlanoAula> {
-
+  // exibe os planos de acordo com o usuário (é usado na home, para listar os planos do usuário logado).
+  getPlanosPorAutor(usuarioId: number): Observable<PlanoAula[]> {
     const token = this.authService.obterTokenValido();
 
     if (!token) {
       return throwError(() =>
-        new Error('É necessário fazer login para visualizar o plano.')
+        new Error('É necessário fazer login para consultar seus planos.')
       );
     }
 
-    return this.http.get<PlanoAulaApiResponse>(
-      `${this.apiUrl}/plano-aula/${id}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
+    return this.http
+      .get<PlanoAulaApiResponse[]>(
+        `${this.apiUrl}/plano-aula/usuario/${usuarioId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      }
-    ).pipe(
-      map(plano => this.converterPlano(plano))
-    );
+      )
+      .pipe(
+        map((resposta) =>
+          resposta.map((plano) => this.montarPlano(plano))
+        )
+      );
   }
 
-  // Converter dados da API para o modelo usado nos cards
-  private converterPlano(plano: PlanoAulaApiResponse): PlanoAula {
+  // Converte dados da API para o modelo usado nos cards.
+  private montarPlano(plano: PlanoAulaApiResponse): PlanoAula {
     const etapas: Record<EtapaEnsino, PlanoAula['etapaEnsino']> = {
       EDUCACAO_INFANTIL: 'Educação Infantil',
       FUNDAMENTAL_INICIAIS: 'Anos Iniciais',
@@ -291,7 +311,6 @@ export class PlanoAulaService {
         email: plano.autor?.email ?? ''
       },
 
-      // Ainda não codificados pela API
       quantidadeFavoritos: 0,
       quantidadeAdaptacoes: 0,
 
@@ -326,15 +345,13 @@ export class PlanoAulaService {
     };
   }
 
-  // Gerar as iniciais do autor
-
+  // exibe as iniciais do nome do usuário para montar o avatar.
   getAutorIniciais(nome: string): string {
     if (!nome?.trim()) {
       return 'S/N';
     }
 
     const nomeLimpo = nome.replace(/\bProf(?:ª)?\./gi, '').trim();
-    
     if (!nomeLimpo) {
       return 'S/N';
     }
@@ -349,5 +366,106 @@ export class PlanoAulaService {
     const ultimaInicial = partes[partes.length - 1][0];
 
     return `${primeiraInicial}${ultimaInicial}`.toUpperCase();
+  }
+
+  // exclui o plano, apenas se o usuário for o autor de plano
+  excluirPlano(id: number): Observable<{ status: number, mensagem: string }> {
+    const token = this.authService.obterTokenValido();
+
+    if (!token) {
+      return throwError(() =>
+        new Error('É necessário fazer login para excluir o plano.')
+      );
+    }
+
+    return this.http.delete<{ status: number, mensagem: string }>(
+      `${this.apiUrl}/plano-aula/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+  }
+
+  // exibe os comentário do plano selecionado
+  getFeedbacksPorPlano(planoId: number): Observable<FeedbackPratico[]> {
+    return this.http.get<FeedbackPratico[]>(`${this.apiUrl}/feedback-pratico`)
+    .pipe(
+      map(feedbacks => feedbacks.filter(
+        feedback => feedback.plano?.id === planoId
+      ))
+    );
+  }
+
+  // adiciona um novo comentário
+  criarFeedback(dados: FeedbackPraticoRequest): Observable<FeedbackPratico> {
+    const token = this.authService.obterTokenValido();
+    const sessao = this.authService.sessaoAtual();
+
+    if (!token || !sessao) {
+      return throwError(() => new Error('É necessário fazer login para publicar um comentário.'));
+    }
+
+    const payloadComUsuario = {
+      ...dados,
+      usuario: { id: sessao.usuarioId }
+    };
+
+    return this.http.post<FeedbackPratico>(
+      `${this.apiUrl}/feedback-pratico`, payloadComUsuario,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      }
+    );
+  }
+
+    // atualizar um comentário
+  atualizarFeedback(id: number, dados: FeedbackPraticoRequest): Observable<FeedbackPratico> {
+    const token = this.authService.obterTokenValido();
+    const sessao = this.authService.sessaoAtual();
+
+    if (!token || !sessao) {
+      return throwError(() =>
+        new Error('É necessário fazer login para editar um comentário.')
+      );
+    }
+
+    const payloadComUsuario = {
+      ...dados,
+      usuario: { id: sessao.usuarioId }
+    };
+
+    return this.http.put<FeedbackPratico>(
+      `${this.apiUrl}/feedback-pratico/${id}`,
+      payloadComUsuario,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+  }
+
+  // excluir um comentário
+  excluirFeedback( id: number): Observable<{ status: number; mensagem: string }> {
+    const token = this.authService.obterTokenValido();
+
+    if (!token) {
+      return throwError(() =>
+        new Error('É necessário fazer login para excluir um comentário.')
+      );
+    }
+
+    return this.http.delete<{ status: number; mensagem: string }>(
+      `${this.apiUrl}/feedback-pratico/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
   }
 }

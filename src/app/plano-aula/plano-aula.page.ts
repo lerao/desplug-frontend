@@ -2,10 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { PlanoAulaService, PlanoAulaRequest, HabilidadeBncc, TipoAtividade, EtapaEnsino } from '../services/plano-aula.service';
-import { AlertController } from '@ionic/angular';
+import { AppDialogService } from '../shared/app-dialog/app-dialog.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { finalize } from 'rxjs';
 import { Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 @Component({
   selector: 'app-plano-aula',
   templateUrl: './plano-aula.page.html',
@@ -20,8 +21,6 @@ export class PlanoAulaPage implements OnInit {
 
   salvando: boolean = false;
   habilidadesSelecionadas: number[] = [];
-
-  autorIdTeste: number | null = 2;
 
   etapasTitulos: Record<number, string> = {
     1: 'Identificação',
@@ -41,8 +40,9 @@ export class PlanoAulaPage implements OnInit {
   constructor(
     private fb: FormBuilder,
     private planoAulaApi: PlanoAulaService,
-    private alertController: AlertController,
-    private router: Router
+    private appDialog: AppDialogService,
+    private router: Router,
+    private authService: AuthService
   ) { }
 
   ngOnInit() {
@@ -64,7 +64,7 @@ export class PlanoAulaPage implements OnInit {
   }
 
   carregarHabilidades() {
-    this.planoAulaApi.listarHabilidades().subscribe({
+    this.planoAulaApi.getHabilidades().subscribe({
       next: (habilidades: HabilidadeBncc[]) => {
         console.log('Habilidades BNCC carregadas:', habilidades);
         this.bnccHab = habilidades.map(hab => ({
@@ -119,25 +119,19 @@ export class PlanoAulaPage implements OnInit {
   }
 
   async publicarPlano() {
-
     if (this.planoForm.invalid) {
       this.planoForm.markAllAsTouched();
       return;
     }
 
     if (this.habilidadesSelecionadas.length === 0) {
-      await this.exibirMensagem(
-        'Atenção',
-        'Selecione pelo menos uma habilidade BNCC.'
-      );
-      return;
-    }
-
-    if (this.autorIdTeste === null) {
-      await this.exibirMensagem(
-        'Atenção',
-        'É necessário informar um autor de teste para cadastrar o plano.'
-      );
+      await this.appDialog.confirm({
+        title: 'Atenção',
+        message: 'Selecione pelo menos uma habilidade BNCC.',
+        buttons: [
+          { text: 'Entendi', role: 'confirm' }
+        ]
+      });
       return;
     }
 
@@ -171,10 +165,13 @@ export class PlanoAulaPage implements OnInit {
     ].join(', ');
 
     if (!componentesCurriculares) {
-      await this.exibirMensagem(
-        'Atenção',
-        'As habilidades selecionadas não possuem componentes curriculares cadastrados.'
-      );
+      await this.appDialog.confirm({
+        title: 'Atenção',
+        message: 'As habilidades selecionadas não possuem componentes curriculares cadastrados.',
+        buttons: [
+          { text: 'Entendi', role: 'confirm' }
+        ]
+      });
       return;
     }
 
@@ -190,7 +187,6 @@ export class PlanoAulaPage implements OnInit {
       metodologia: valores.metodologia,
       criteriosAvaliacao: valores.criterios_avaliacao,
 
-      // Upload ainda não integrado
       imagemCapa: '',
 
       habilidadesPlano: this.habilidadesSelecionadas.map(
@@ -200,7 +196,7 @@ export class PlanoAulaPage implements OnInit {
       ),
 
       autor: {
-        id: this.autorIdTeste
+        id: this.authService.sessaoAtual()?.usuarioId ?? 0
       },
 
       isGeradoIA: false,
@@ -209,7 +205,7 @@ export class PlanoAulaPage implements OnInit {
 
     this.salvando = true;
 
-    this.planoAulaApi.cadastrar(dadosPlano)
+    this.planoAulaApi.cadastrarPlano(dadosPlano)
       .pipe(
         finalize(() => {
           this.salvando = false;
@@ -223,20 +219,12 @@ export class PlanoAulaPage implements OnInit {
             resposta
           );
 
-          const alert = await this.alertController.create({
-            header: 'Plano enviado!',
-            message: 'Seu plano de aula foi cadastrado e enviado para moderação.',
-            buttons: [
-              {
-                text: 'OK',
-                handler: () => {
-                  this.router.navigate(['/visitante']);
-                }
-              }
-            ],
-            backdropDismiss: false
-          });
-          await alert.present();
+          await this.appDialog.alert(
+          'Seu plano de aula foi cadastrado e enviado para moderação.',
+          'Plano Enviado!'
+        );
+
+          window.location.href='/home';
         },
 
         error: async (erro: HttpErrorResponse) => {
@@ -258,20 +246,26 @@ export class PlanoAulaPage implements OnInit {
             mensagem = 'Ocorreu um erro interno no servidor.';
           }
 
-          await this.exibirMensagem('Erro', mensagem);
+          await this.appDialog.confirm({
+            title: 'Erro ao publicar',
+            message: mensagem,
+            buttons: [
+              { text: 'Entendi', role: 'confirm' }
+            ]
+          });
         }
 
       });
   }
 
   async exibirMensagem(titulo: string, mensagem: string) {
-    const alert = await this.alertController.create({
-      header: titulo,
+    await this.appDialog.confirm({
+      title: titulo,
       message: mensagem,
-      buttons: ['OK']
+      buttons: [
+        { text: 'Entendi', role: 'confirm' }
+      ]
     });
-
-    await alert.present();
   }
 
   validarEtapaAtual(): boolean {

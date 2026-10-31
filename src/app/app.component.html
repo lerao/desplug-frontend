@@ -15,7 +15,8 @@
         </div>
         <div class="menu-list">
           <ion-menu-toggle auto-hide="false">
-            <div class="menu-card" routerLink="/visitante" routerDirection="root">
+            <div class="menu-card" [routerLink]="usuarioLogado() ? '/home' : '/visitante'"
+              routerDirection="root">
               <div class="card-left">
                 <div class="icon-wrapper">
                   <ion-icon name="home-outline"></ion-icon>
@@ -40,7 +41,7 @@
           <ion-item-divider class="menu-divider">
           </ion-item-divider>
 
-          <!-- MENU PARA VISITANTES -->
+          <!-- menu para visitantes -->
           <ng-container *ngIf="!usuarioLogado()">
             <ion-menu-toggle auto-hide="false">
               <div class="menu-card card-highlight" routerLink="/login" routerDirection="forward">
@@ -68,7 +69,7 @@
 
           </ng-container>
 
-          <!-- MENU PARA USUÁRIOS LOGADOS -->
+          <!-- menu para usuários logados -->
           <ng-container *ngIf="usuarioLogado()">
             <ion-menu-toggle auto-hide="false">
               <div class="menu-card" routerLink="/plano-aula" routerDirection="forward">

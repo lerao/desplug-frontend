@@ -3,11 +3,7 @@ import { AlertController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { finalize } from 'rxjs';
-
-import {
-  AuthService,
-  PerfilLogin
-} from '../services/auth.service';
+import { AuthService, PerfilLogin } from '../services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -27,24 +23,12 @@ export class LoginPage {
 
   readonly loading = signal(false);
 
-  selectedRole: 'professor' | 'admin' = 'professor';
-
-  selecionarProfessor() {
-    this.selectedRole = 'professor';
-  }
-
-  selecionarAdmin() {
-    this.selectedRole = 'admin';
-  }
-
-  togglePassword() {
+  togglePassword(): void {
     this.showPassword = !this.showPassword;
   }
 
   getPasswordIcon(): string {
-    return this.showPassword
-      ? 'eye-off-outline'
-      : 'eye-outline';
+    return this.showPassword ? 'eye-off-outline': 'eye-outline';
   }
 
   fazerLogin(): void {
@@ -63,16 +47,10 @@ export class LoginPage {
       return;
     }
 
-    // Converter a seleção visual para o enum da API
-    const perfil: PerfilLogin =
-      this.selectedRole === 'professor'
-        ? 'ROLE_PROFESSOR_PENDING'
-        : 'ROLE_ADMIN';
-
     const dadosLogin = {
       email,
       senha: this.password,
-      perfil
+      perfil: 'ROLE_PROFESSOR_PENDING' as PerfilLogin
     };
 
     this.loading.set(true);
@@ -86,78 +64,49 @@ export class LoginPage {
       .subscribe({
 
         next: resposta => {
-
           try {
-            // Guarda a sessão retornada pela API
             this.authService.salvarSessao(resposta);
 
-            // Redirecionamento temporário
-            void this.router.navigateByUrl('/visitante', {
-              replaceUrl: true
-            });
+            void this.router.navigateByUrl('/home', { replaceUrl: true });
 
           } catch (erro) {
-            console.error(
-              'Erro ao processar a sessão:',
-              erro
-            );
+            console.error('Erro ao processar a sessão:', erro);
 
             void this.exibirAlerta(
-              'Erro na autenticação',
-              'O servidor retornou uma sessão inválida.'
-            );
+              'Erro na autenticação', 'O servidor retornou uma sessão inválida.');
           }
         },
 
         error: (erro: HttpErrorResponse) => {
 
-          console.error(
-            'Erro na requisição de login:',
-            erro.status
-          );
+          console.error('Erro na requisição de login:', erro.status, erro.error);
 
-          let mensagem =
-            'Não foi possível realizar o login. Verifique suas credenciais e o perfil selecionado.';
+          let mensagem = 'Não foi possível realizar o login. Verifique suas credenciais e o perfil da sua conta.';
 
           if (erro.status === 0) {
-            mensagem =
-              'Não foi possível conectar ao servidor.';
-          } else if (
-            erro.status === 400 ||
-            erro.status === 401 ||
-            erro.status === 403
-          ) {
-            mensagem =
-              'Não foi possível autenticar. Verifique seu e-mail, senha e perfil de acesso.';
+            mensagem = 'Não foi possível conectar ao servidor. Verifique sua conexão.';
+          } else if (erro.status === 400 || erro.status === 401 || erro.status === 403) {
+            mensagem = 'Não foi possível autenticar. Verifique seu e-mail, sua senha e se sua conta possui o perfil de acesso necessário.';
           } else if (erro.status >= 500) {
-            mensagem =
-              'Não foi possível autenticar agora. Tente novamente ou entre em contato com a equipe responsável.';
+            mensagem = 'O servidor apresentou um erro. Tente novamente mais tarde.';
           }
 
-          void this.exibirAlerta(
-            'Não foi possível entrar',
-            mensagem
-          );
+          void this.exibirAlerta('Não foi possível entrar', mensagem);
         }
       });
   }
 
-  private async exibirAlerta(
-    header: string,
-    message: string
-  ): Promise<void> {
-
+  private async exibirAlerta(header: string, message: string): Promise<void> {
     const alerta = await this.alertController.create({
       header,
       message,
       buttons: ['OK']
     });
-
     await alerta.present();
   }
 
-  async esqueciSenha() {
-    const alert = await this.alertController.create({
+  async esqueciSenha(): Promise<void> {
+    const alerta = await this.alertController.create({
       header: 'Redefinir senha',
       message: 'Digite seu e-mail para recuperar sua senha.',
       inputs: [
@@ -185,18 +134,14 @@ export class LoginPage {
       ],
     });
 
-    await alert.present();
+    await alerta.present();
   }
 
-  loginGoogle() {
+  loginGoogle(): void {
     console.log('Login com Google solicitado');
   }
 
-  loginFacebook() {
-    console.log('Login com Facebook solicitado');
-  }
-
-  cadastrar() {
+  cadastrarUsuario(): void {
     void this.router.navigate(['/cadastro']);
   }
 }

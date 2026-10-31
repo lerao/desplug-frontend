@@ -1,10 +1,11 @@
 import { Component, Input, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ModalController } from '@ionic/angular/lazy';
+import { CommonModule } from '@angular/common';
 
 export interface AppDialogButton {
   text: string;
-  role: 'cancel' | 'confirm' | 'publish';
+  role: 'cancel' | 'confirm' | 'publish' | 'destructive';
 }
 
 export interface AppDialogOptions {
@@ -17,12 +18,13 @@ export interface AppDialogOptions {
     value?: string;
   };
   buttons: AppDialogButton[];
+  autoClose?: boolean;
 }
 
 @Component({
   selector: 'app-dialog',
   standalone: true,
-  imports: [FormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './app-dialog.component.html',
   styleUrls: ['./app-dialog.component.scss']
 })
@@ -33,6 +35,7 @@ export class AppDialogComponent implements OnInit {
   @Input() message = '';
   @Input() input?: AppDialogOptions['input'];
   @Input() buttons: AppDialogButton[] = [];
+  @Input() autoClose = false;
 
   inputValue = '';
 

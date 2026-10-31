@@ -16,7 +16,7 @@ export class VisitantePage {
   erroCarregamento: string = '';
 
   planosAula$: Observable<PlanoAula[]> =
-    this.planoAulaService.getPlanosPublicos().pipe(
+    this.planoAulaService.getPlanos().pipe(
       catchError(err => {
         console.error('Erro ao buscar planos:', err);
         this.erroCarregamento = 'Erro ao carregar os planos. Por favor, tente novamente.';
