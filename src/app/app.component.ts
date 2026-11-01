@@ -1,4 +1,5 @@
-import { Component, ViewEncapsulation } from '@angular/core';
+import { Component, ViewEncapsulation, inject } from '@angular/core';
+import { AuthService } from './services/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -8,6 +9,13 @@ import { Component, ViewEncapsulation } from '@angular/core';
   encapsulation: ViewEncapsulation.None,
 })
 export class AppComponent {
+  private authService = inject(AuthService);
+
+  readonly isLoggedIn$ = this.authService.isLoggedIn$;
 
   constructor() {}
+
+  logout(): void {
+    this.authService.logout();
+  }
 }

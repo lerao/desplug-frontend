@@ -41,30 +41,59 @@
 
           <ion-item-divider class="menu-divider"></ion-item-divider>
 
-          <!-- BOTÃO ENTRAR CORRIGIDO COM ROTA /login -->
-          <ion-menu-toggle auto-hide="false">
-            <div class="menu-card card-highlight" routerLink="/login" routerDirection="forward">
-              <div class="card-left">
-                <div class="icon-wrapper">
-                  <ion-icon name="log-in-outline"></ion-icon>
+          <!-- ITENS VISÍVEIS APENAS QUANDO LOGADO -->
+          <ng-container *ngIf="isLoggedIn$ | async">
+            <ion-menu-toggle auto-hide="false">
+              <div class="menu-card" routerLink="/perfil" routerDirection="forward">
+                <div class="card-left">
+                  <div class="icon-wrapper">
+                    <ion-icon name="person-circle-outline"></ion-icon>
+                  </div>
+                  <span>Meu Perfil</span>
                 </div>
-                <span>Entrar</span>
+                <ion-icon name="chevron-forward-outline" class="arrow-icon"></ion-icon>
               </div>
-              <ion-icon name="chevron-forward-outline" class="arrow-icon"></ion-icon>
-            </div>
-          </ion-menu-toggle>
+            </ion-menu-toggle>
 
-          <ion-menu-toggle auto-hide="false">
-            <div class="menu-card card-outline" routerLink="/cadastro" routerDirection="forward">
-              <div class="card-left">
-                <div class="icon-wrapper">
-                  <ion-icon name="person-add-outline"></ion-icon>
+            <ion-menu-toggle auto-hide="false">
+              <div class="menu-card card-outline" (click)="logout()">
+                <div class="card-left">
+                  <div class="icon-wrapper">
+                    <ion-icon name="log-out-outline"></ion-icon>
+                  </div>
+                  <span>Sair</span>
                 </div>
-                <span>Criar Conta</span>
+                <ion-icon name="chevron-forward-outline" class="arrow-icon"></ion-icon>
               </div>
-              <ion-icon name="chevron-forward-outline" class="arrow-icon"></ion-icon>
-            </div>
-          </ion-menu-toggle>
+            </ion-menu-toggle>
+          </ng-container>
+
+          <!-- ITENS VISÍVEIS APENAS QUANDO NÃO LOGADO -->
+          <ng-container *ngIf="!(isLoggedIn$ | async)">
+            <ion-menu-toggle auto-hide="false">
+              <div class="menu-card card-highlight" routerLink="/login" routerDirection="forward">
+                <div class="card-left">
+                  <div class="icon-wrapper">
+                    <ion-icon name="log-in-outline"></ion-icon>
+                  </div>
+                  <span>Entrar</span>
+                </div>
+                <ion-icon name="chevron-forward-outline" class="arrow-icon"></ion-icon>
+              </div>
+            </ion-menu-toggle>
+
+            <ion-menu-toggle auto-hide="false">
+              <div class="menu-card card-outline" routerLink="/cadastro" routerDirection="forward">
+                <div class="card-left">
+                  <div class="icon-wrapper">
+                    <ion-icon name="person-add-outline"></ion-icon>
+                  </div>
+                  <span>Criar Conta</span>
+                </div>
+                <ion-icon name="chevron-forward-outline" class="arrow-icon"></ion-icon>
+              </div>
+            </ion-menu-toggle>
+          </ng-container>
         </div>
 
         <div class="menu-footer">

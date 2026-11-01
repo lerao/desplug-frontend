@@ -1,0 +1,74 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start"><ion-back-button defaultHref="/visitante" text=""></ion-back-button></ion-buttons>
+    <ion-title>Meu Perfil</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+  <!-- LOADING INICIAL -->
+  <div *ngIf="loading()" class="loading-container">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Carregando perfil...</p>
+  </div>
+
+  <!-- ERRO AO CARREGAR -->
+  <div *ngIf="!loading() && errorMessage() && !name()" class="error-container">
+    <ion-icon name="cloud-offline-outline"></ion-icon>
+    <p>{{ errorMessage() }}</p>
+    <ion-button fill="outline" size="small" (click)="discard()">Tentar novamente</ion-button>
+  </div>
+
+  <!-- CONTEÚDO DO PERFIL -->
+  <ng-container *ngIf="!loading() && (name() || !errorMessage())">
+    <section class="hero">
+      <div class="avatar-wrap">
+        <div class="avatar">
+          <img *ngIf="photo() as p; else initials" [src]="p" alt="Foto de perfil" />
+          <ng-template #initials><span>{{ previewInitials() }}</span></ng-template>
+        </div>
+        <button type="button" class="cam" aria-label="Alterar foto" (click)="file.click()" [disabled]="saving()">
+          <ion-icon name="camera-outline"></ion-icon>
+        </button>
+        <input #file type="file" accept="image/*" hidden (change)="onFile($event)" />
+      </div>
+      <div class="photo-actions">
+        <button type="button" class="link" (click)="file.click()" [disabled]="saving()">Escolher foto</button>
+        <button *ngIf="photo()" type="button" class="link danger" (click)="removePhoto()" [disabled]="saving()">Remover</button>
+      </div>
+      <p *ngIf="errors().photo" class="error">{{ errors().photo }}</p>
+      <span class="role">{{ roleLabel() }}</span>
+    </section>
+
+    <form class="card" (ngSubmit)="save()" novalidate>
+      <h2>Dados pessoais</h2>
+
+      <label class="field">
+        <span>Nome completo</span>
+        <input type="text" name="name" autocomplete="name" [ngModel]="name()" (ngModelChange)="name.set($event)" [class.invalid]="errors().name" />
+        <small *ngIf="errors().name" class="error">{{ errors().name }}</small>
+      </label>
+
+      <label class="field">
+        <span>E-mail institucional</span>
+        <input type="email" name="email" autocomplete="email" [ngModel]="email()" (ngModelChange)="email.set($event)" [class.invalid]="errors().email" />
+        <small *ngIf="errors().email; else emailHint" class="error">{{ errors().email }}</small>
+        <ng-template #emailHint><small *ngIf="!isAdmin()" class="hint">Deve terminar com .br</small></ng-template>
+      </label>
+
+      <!-- ERRO GERAL -->
+      <p *ngIf="errorMessage()" class="error general-error">{{ errorMessage() }}</p>
+
+      <div class="actions">
+        <ion-button fill="outline" type="button" [disabled]="!dirty() || saving()" (click)="discard()">Descartar</ion-button>
+        <ion-button class="save" type="submit" [disabled]="!dirty() || saving()">
+          <ion-spinner *ngIf="saving()" name="crescent" slot="start"></ion-spinner>
+          {{ saving() ? 'Salvando...' : 'Salvar alterações' }}
+        </ion-button>
+      </div>
+    </form>
+  </ng-container>
+
+  <ion-toast [isOpen]="saved()" message="Perfil atualizado!" [duration]="2200" position="bottom" (didDismiss)="saved.set(false)"></ion-toast>
+</ion-content>

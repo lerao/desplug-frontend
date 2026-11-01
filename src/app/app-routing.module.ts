@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
+import { authGuard } from './guards/auth.guard';
 
 const routes: Routes = [
   {
@@ -29,21 +30,19 @@ const routes: Routes = [
   },
   {
     path: 'cadastro',
-    loadChildren: () => import('./cadastro/cadastro.module').then( m => m.CadastroPageModule)
-  },
-  {
-    path: 'cadastro',
-    redirectTo: 'cadastro',
-    pathMatch: 'full'
+    loadChildren: () =>
+      import('./cadastro/cadastro.module').then(m => m.CadastroPageModule)
   },
   {
     path: 'plano-aula',
-    loadChildren: () => import('./plano-aula/plano-aula.module').then( m => m.PlanoAulaPageModule)
+    loadChildren: () =>
+      import('./plano-aula/plano-aula.module').then(m => m.PlanoAulaPageModule)
   },
   {
-    path: 'plano-aula',
-    redirectTo: 'plano-aula',
-    pathMatch: 'full'
+    path: 'perfil',
+    loadChildren: () =>
+      import('./perfil/perfil.module').then(m => m.PerfilPageModule),
+    canActivate: [authGuard]
   },
 ];
 

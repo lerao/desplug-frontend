@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { AlertController } from '@ionic/angular';
 import { Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -11,11 +12,13 @@ import { Router } from '@angular/router';
 export class LoginPage {
   private alertController = inject(AlertController);
   private router = inject(Router);
+  private authService = inject(AuthService);
 
   email: string = '';
   password: string = '';
   showPassword: boolean = false;
   loading: boolean = false;
+  errorMessage: string = '';
 
   selectedRole: 'professor' | 'admin' = 'professor';
 
@@ -38,16 +41,30 @@ export class LoginPage {
   }
 
   fazerLogin() {
+    if (!this.email || !this.password) {
+      this.errorMessage = 'Preencha o e-mail e a senha.';
+      return;
+    }
+
     this.loading = true;
+    this.errorMessage = '';
 
-    setTimeout(() => {
-      this.loading = false;
-
-      console.log('Login executado:', {
-        email: this.email,
-        role: this.selectedRole,
-      });
-    }, 1400);
+    this.authService.login(this.email, this.password).subscribe({
+      next: () => {
+        this.loading = false;
+        this.router.navigate(['/visitante']);
+      },
+      error: (err) => {
+        this.loading = false;
+        if (err.status === 401) {
+          this.errorMessage = 'E-mail ou senha incorretos.';
+        } else if (err.status === 0) {
+          this.errorMessage = 'Não foi possível conectar ao servidor.';
+        } else {
+          this.errorMessage = 'Ocorreu um erro. Tente novamente.';
+        }
+      },
+    });
   }
 
   async esqueciSenha() {
