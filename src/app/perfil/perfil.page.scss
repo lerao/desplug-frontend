@@ -60,6 +60,19 @@ ion-content {
   text-align: center;
 }
 
+.section-hint {
+  margin: -12px 0 20px;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.success-message {
+  margin: 12px 0 0;
+  color: #18794e;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
 .hero,
 .card {
   width: calc(100% - 32px);

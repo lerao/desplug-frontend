@@ -24,6 +24,12 @@ export class PerfilPage implements OnInit {
   readonly loading = signal(false);
   readonly saving = signal(false);
   readonly errorMessage = signal('');
+  readonly currentPassword = signal('');
+  readonly newPassword = signal('');
+  readonly confirmPassword = signal('');
+  readonly passwordSaving = signal(false);
+  readonly passwordError = signal('');
+  readonly passwordSaved = signal(false);
 
   readonly isAdmin = computed(() => this.role() === 'admin');
   readonly roleLabel = computed(() => this.isAdmin() ? 'Administrador' : 'Professor');
@@ -128,6 +134,51 @@ export class PerfilPage implements OnInit {
           this.errorMessage.set('Não foi possível conectar ao servidor.');
         } else {
           this.errorMessage.set('Ocorreu um erro ao salvar. Tente novamente.');
+        }
+      },
+    });
+  }
+
+  changePassword(): void {
+    this.passwordError.set('');
+    this.passwordSaved.set(false);
+    const current = this.currentPassword();
+    const next = this.newPassword();
+
+    if (!current || !next || !this.confirmPassword()) {
+      this.passwordError.set('Preencha todos os campos de senha.');
+      return;
+    }
+    if (next.length < 8) {
+      this.passwordError.set('A nova senha deve ter pelo menos 8 caracteres.');
+      return;
+    }
+    if (next !== this.confirmPassword()) {
+      this.passwordError.set('A confirmação não corresponde à nova senha.');
+      return;
+    }
+    if (current === next) {
+      this.passwordError.set('Escolha uma senha diferente da atual.');
+      return;
+    }
+
+    this.passwordSaving.set(true);
+    this.perfilService.atualizarSenha(current, next).subscribe({
+      next: () => {
+        this.currentPassword.set('');
+        this.newPassword.set('');
+        this.confirmPassword.set('');
+        this.passwordSaving.set(false);
+        this.passwordSaved.set(true);
+      },
+      error: (err) => {
+        this.passwordSaving.set(false);
+        if (err.status === 400 || err.status === 401) {
+          this.passwordError.set('A senha atual está incorreta ou não foi aceita.');
+        } else if (err.status === 0) {
+          this.passwordError.set('Não foi possível conectar ao servidor. Tente novamente.');
+        } else {
+          this.passwordError.set('Não foi possível alterar a senha. Tente novamente.');
         }
       },
     });

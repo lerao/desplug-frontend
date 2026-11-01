@@ -32,4 +32,12 @@ export class PerfilService {
   removerFoto(): Observable<{ photo: null }> {
     return this.http.delete<{ photo: null }>(`${this.baseUrl}/foto`);
   }
+
+  /** Altera a senha da conta do usuário autenticado */
+  atualizarSenha(senhaAtual: string, novaSenha: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/senha`, {
+      currentPassword: senhaAtual,
+      newPassword: novaSenha,
+    });
+  }
 }

@@ -68,6 +68,36 @@
         </ion-button>
       </div>
     </form>
+
+    <form class="card password-card" (ngSubmit)="changePassword()" novalidate>
+      <h2>Segurança</h2>
+      <p class="section-hint">Atualize sua senha para manter sua conta segura.</p>
+
+      <label class="field">
+        <span>Senha atual</span>
+        <input type="password" name="currentPassword" autocomplete="current-password" [ngModel]="currentPassword()" (ngModelChange)="currentPassword.set($event)" />
+      </label>
+
+      <label class="field">
+        <span>Nova senha</span>
+        <input type="password" name="newPassword" autocomplete="new-password" minlength="8" [ngModel]="newPassword()" (ngModelChange)="newPassword.set($event)" />
+        <small class="hint">Use pelo menos 8 caracteres.</small>
+      </label>
+
+      <label class="field">
+        <span>Confirmar nova senha</span>
+        <input type="password" name="confirmPassword" autocomplete="new-password" [ngModel]="confirmPassword()" (ngModelChange)="confirmPassword.set($event)" />
+      </label>
+
+      <p *ngIf="passwordError()" class="error general-error" role="alert">{{ passwordError() }}</p>
+      <p *ngIf="passwordSaved()" class="success-message" role="status">Senha alterada com sucesso.</p>
+      <div class="actions">
+        <ion-button class="save" type="submit" [disabled]="passwordSaving()">
+          <ion-spinner *ngIf="passwordSaving()" name="crescent" slot="start"></ion-spinner>
+          {{ passwordSaving() ? 'Alterando...' : 'Alterar senha' }}
+        </ion-button>
+      </div>
+    </form>
   </ng-container>
 
   <ion-toast [isOpen]="saved()" message="Perfil atualizado!" [duration]="2200" position="bottom" (didDismiss)="saved.set(false)"></ion-toast>
