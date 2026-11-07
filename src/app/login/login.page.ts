@@ -2,7 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { AlertController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
-import { finalize } from 'rxjs';
+import { finalize, catchError, throwError } from 'rxjs'; 
 import { AuthService, PerfilLogin } from '../services/auth.service';
 
 @Component({
@@ -50,13 +50,24 @@ export class LoginPage {
     const dadosLogin = {
       email,
       senha: this.password,
-      perfil: 'ROLE_PROFESSOR_PENDING' as PerfilLogin
+      perfil: 'ROLE_PROFESSOR' as PerfilLogin
     };
 
     this.loading.set(true);
 
     this.authService.login(dadosLogin)
       .pipe(
+        catchError((erro: HttpErrorResponse) => {
+          if (erro.status === 400 || erro.status === 401 || erro.status === 403 || erro.status === 500) {
+            const dadosLoginRoles = {
+              ...dadosLogin,
+              perfil: 'ROLE_PROFESSOR_PENDING' as PerfilLogin
+            };
+            return this.authService.login(dadosLoginRoles);
+          }
+          
+          return throwError(() => erro);
+        }),
         finalize(() => {
           this.loading.set(false);
         })
@@ -66,19 +77,16 @@ export class LoginPage {
         next: resposta => {
           try {
             this.authService.salvarSessao(resposta);
-
             void this.router.navigateByUrl('/home', { replaceUrl: true });
 
           } catch (erro) {
             console.error('Erro ao processar a sessão:', erro);
-
             void this.exibirAlerta(
               'Erro na autenticação', 'O servidor retornou uma sessão inválida.');
           }
         },
 
         error: (erro: HttpErrorResponse) => {
-
           console.error('Erro na requisição de login:', erro.status, erro.error);
 
           let mensagem = 'Não foi possível realizar o login. Verifique suas credenciais e o perfil da sua conta.';
