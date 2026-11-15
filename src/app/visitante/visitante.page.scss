@@ -103,10 +103,12 @@ ion-badge {
   .search-btn {
     border: none;
     border-radius: 10px;
-    padding: 0.6rem 1.1rem;
-    font-weight: 700;
-    font-size: 0.85rem;
     cursor: pointer;
+    text-align: center;
+
+    width: 38px;
+    min-width: 38px;
+    height: 38px;
   }
 }
 
@@ -131,7 +133,6 @@ ion-badge {
     }
 
     .btn-close-modal {
-      --background: #F1F5F9;
       border: none;
       --color: var(--color-text-main);
       --border-radius: 50%;
@@ -150,7 +151,7 @@ ion-badge {
 
   ion-content {
     --padding-top: 0.5rem;
-    --padding-bottom: 0;
+    --padding-bottom: 2rem;
 
     .filtros-subtitle {
       font-size: 1.1rem;
@@ -208,27 +209,46 @@ ion-badge {
 
           ion-item {
             --background: transparent;
-            --padding-start: 2.75rem;
-            --inner-padding-end: 0.5rem;
-            --min-height: 38px;
+            --padding-start: 1rem;
+            --inner-padding-end: 1rem;
+            --min-height: 40px;
+          }
 
-            ion-checkbox {
-              font-size: 0.85rem;
-              color: var(--color-text-muted, #64748B);
-              --size: 18px;
-            }
+          ion-radio {
+            font-size: 0.88rem;
+            color: var(--color-text-muted, #64748B);
           }
         }
       }
     }
+  }
+
+  ion-footer.modal-footer {
+    background: var(--color-bg) !important;
 
     .modal-action-box {
-      position: sticky;
-      bottom: 0;
-      padding: 1.25rem 1rem 2rem 1rem;
-      border-top: 1px solid #F1F5F9;
-      margin-top: 1rem;
-      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem;
+      gap: 1rem;
+      background: transparent;
+
+      .filter-btn-clear {
+        margin: 0;
+        font-weight: 600;
+        font-size: 0.9rem;
+        flex: 0 0 auto;
+        --padding-start: 1rem;
+        --padding-end: 1rem;
+
+        --color: var(--color-text-muted, #64748B);
+        --background: var(--color-border, #F1F5F9);
+
+        border: 1px solid #64748B;
+        border-radius: 12px;
+        height: 48px;
+      }
 
       .filter-btn-apply {
         --border-radius: 12px;
@@ -237,10 +257,68 @@ ion-badge {
         height: 48px;
         margin: 0;
         --box-shadow: none;
+        flex: 1;
       }
     }
   }
 }
+
+.modal-action-box {
+  position: sticky;
+  bottom: 0;
+  padding: 1.25rem 1rem 2rem 1rem;
+  border-top: 1px solid #F1F5F9;
+  margin-top: 1rem;
+  z-index: 10;
+
+  .filter-btn-apply {
+    --border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    height: 48px;
+    margin: 0;
+    --box-shadow: none;
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3rem 1.5rem;
+  margin: 1rem 0;
+  border: 1px dashed var(--border, #dbe7e8);
+  border-radius: 16px;
+
+  .empty-icon {
+    font-size: 3.5rem;
+    color: var(--muted, #687b83);
+    margin-bottom: 1rem;
+  }
+
+  h2 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--ink, #0f1a20);
+    margin: 0 0 0.5rem;
+  }
+
+  p {
+    max-width: 350px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--muted, #687b83);
+    margin: 0 0 1.25rem;
+  }
+
+  ion-button {
+    --border-radius: 10px;
+    font-weight: 600;
+  }
+}
+
 
 /* FEED & CARDS */
 .feed-section {
@@ -379,6 +457,7 @@ ion-card.lesson-card {
           font-weight: 600;
           text-transform: none;
           letter-spacing: normal;
+
           &::part(native) {
             gap: 0.3rem;
           }

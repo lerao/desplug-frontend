@@ -1,7 +1,7 @@
 
 import { Component, inject, computed } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService } from './services/auth.service';
+import { AuthService } from './security/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -14,17 +14,17 @@ export class AppComponent {
   public authService = inject(AuthService);
   private router = inject(Router);
 
-  // Verifica reativamente se existe uma sessão
+  // verifica se existe uma sessão
   readonly usuarioLogado = computed(() => {
     return this.authService.sessaoAtual() !== null;
   });
 
-  // Informações do usuário autenticado
+  // informações do usuário autenticado
   readonly usuarioAtual = computed(() => {
     return this.authService.sessaoAtual();
   });
 
-  // Encerrar sessão
+  // encerra sessão
   async sair(): Promise<void> {
     this.authService.sair();
 

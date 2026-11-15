@@ -38,7 +38,7 @@
           <ion-icon name="lock-closed-outline"></ion-icon>
         </span>
 
-        <ion-input [type]="showPassword ? 'text' : 'password'" placeholder="Senha" [(ngModel)]="password">
+        <ion-input [type]="showPassword ? 'text' : 'password'" placeholder="Senha" [(ngModel)]="password" (keyup.enter)="fazerLogin()">
         </ion-input>
 
         <button type="button" class="mostrar-senha" (click)="togglePassword()">

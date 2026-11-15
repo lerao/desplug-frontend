@@ -1,9 +1,9 @@
 
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map, throwError } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { AuthService } from './auth.service';
+import { AuthService } from '../security/auth.service';
 
 export type TipoAtividade =
   | 'PLANO_AULA'
@@ -81,7 +81,6 @@ export interface PlanoAulaApiResponse {
   } | null;
 }
 
-//
 export interface User {
   id: number;
   nome: string;
@@ -112,7 +111,7 @@ export interface PlanoAula {
   etapaEnsino: 'Educação Infantil' | 'Anos Iniciais' | 'Anos Finais' | 'Ensino Médio';
   eixoBNCC: 'Pensamento Computacional' | 'Mundo Digital' | 'Cultura Digital' | string;
   tipoAtividade: 'Plano de Aula' | 'Desplugada' | 'Maker' | 'Digital' | 'Híbrida';
-  componenteCurricular?: string;
+  componentesCurriculares?: string;
 
   autor: User;
 
@@ -158,10 +157,9 @@ export class PlanoAulaService {
 
   cadastrarPlano(dados: PlanoAulaRequest): Observable<PlanoAulaResponse> {
 
-    const token = this.authService.obterTokenValido();
     const sessao = this.authService.sessaoAtual();
 
-    if (!token || !sessao) {
+    if (!sessao) {
       return throwError(() =>
         new Error('É necessário fazer login para cadastrar um plano.')
       );
@@ -174,36 +172,12 @@ export class PlanoAulaService {
       }
     };
 
-    return this.http.post<PlanoAulaResponse>(
-      `${this.apiUrl}/plano-aula`,
-      dadosUsuario,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }
-    );
+    return this.http.post<PlanoAulaResponse>(`${this.apiUrl}/plano-aula`, dadosUsuario);
   }
 
   // Buscar habilidades BNCC
   getHabilidades(): Observable<HabilidadeBncc[]> {
-
-    const token = this.authService.obterTokenValido();
-
-    if (!token) {
-      return throwError(() =>
-        new Error('É necessário fazer login para consultar as habilidades.')
-      );
-    }
-
-    return this.http.get<HabilidadeBncc[]>(
-      `${this.apiUrl}/habilidade-bncc`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }
-    );
+    return this.http.get<HabilidadeBncc[]>(`${this.apiUrl}/habilidade-bncc`);
   }
 
   // Buscar todos os planos para a tela de visitante (temporário) - alterar para que aceite apenas planos com status "Publicado" 
@@ -228,28 +202,11 @@ export class PlanoAulaService {
 
   // exibe os planos de acordo com o usuário (é usado na home, para listar os planos do usuário logado).
   getPlanosPorAutor(usuarioId: number): Observable<PlanoAula[]> {
-    const token = this.authService.obterTokenValido();
-
-    if (!token) {
-      return throwError(() =>
-        new Error('É necessário fazer login para consultar seus planos.')
-      );
-    }
-
-    return this.http
-      .get<PlanoAulaApiResponse[]>(
-        `${this.apiUrl}/plano-aula/usuario/${usuarioId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      )
-      .pipe(
-        map((resposta) =>
-          resposta.map((plano) => this.montarPlano(plano))
-        )
-      );
+    return this.http.get<PlanoAulaApiResponse[]>(
+      `${this.apiUrl}/plano-aula/usuario/${usuarioId}`
+    ).pipe(
+      map(resposta => resposta.map(plano => this.montarPlano(plano)))
+    );
   }
 
   // Converte dados da API para o modelo usado nos cards.
@@ -303,7 +260,7 @@ export class PlanoAulaService {
         ? (eixos[eixoPrincipal] ?? eixoPrincipal)
         : 'Não informado',
 
-      componenteCurricular: plano.componentesCurriculares,
+      componentesCurriculares: plano.componentesCurriculares,
 
       autor: {
         id: plano.autor?.id ?? 0,
@@ -370,102 +327,118 @@ export class PlanoAulaService {
 
   // exclui o plano, apenas se o usuário for o autor de plano
   excluirPlano(id: number): Observable<{ status: number, mensagem: string }> {
-    const token = this.authService.obterTokenValido();
-
-    if (!token) {
-      return throwError(() =>
-        new Error('É necessário fazer login para excluir o plano.')
-      );
-    }
-
-    return this.http.delete<{ status: number, mensagem: string }>(
-      `${this.apiUrl}/plano-aula/${id}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }
-    );
+    return this.http.delete<{
+      status: number, mensagem: string
+    }>
+      (`${this.apiUrl}/plano-aula/${id}`);
   }
+
 
   // exibe os comentário do plano selecionado
   getFeedbacksPorPlano(planoId: number): Observable<FeedbackPratico[]> {
     return this.http.get<FeedbackPratico[]>(`${this.apiUrl}/feedback-pratico`)
-    .pipe(
-      map(feedbacks => feedbacks.filter(
-        feedback => feedback.plano?.id === planoId
-      ))
-    );
+      .pipe(
+        map(feedbacks => feedbacks.filter(
+          feedback => feedback.plano?.id === planoId
+        ))
+      );
   }
 
   // adiciona um novo comentário
   criarFeedback(dados: FeedbackPraticoRequest): Observable<FeedbackPratico> {
-    const token = this.authService.obterTokenValido();
     const sessao = this.authService.sessaoAtual();
 
-    if (!token || !sessao) {
+    if (!sessao) {
       return throwError(() => new Error('É necessário fazer login para publicar um comentário.'));
     }
 
-    const payloadComUsuario = {
+    const payload = {
       ...dados,
       usuario: { id: sessao.usuarioId }
     };
 
-    return this.http.post<FeedbackPratico>(
-      `${this.apiUrl}/feedback-pratico`, payloadComUsuario,
-      {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      }
-    );
+    return this.http.post<FeedbackPratico>(`${this.apiUrl}/feedback-pratico`, payload);
   }
 
-    // atualizar um comentário
+  // atualizar um comentário
   atualizarFeedback(id: number, dados: FeedbackPraticoRequest): Observable<FeedbackPratico> {
-    const token = this.authService.obterTokenValido();
     const sessao = this.authService.sessaoAtual();
 
-    if (!token || !sessao) {
+    if (!sessao) {
       return throwError(() =>
         new Error('É necessário fazer login para editar um comentário.')
       );
     }
 
-    const payloadComUsuario = {
+    const payload = {
       ...dados,
       usuario: { id: sessao.usuarioId }
     };
 
-    return this.http.put<FeedbackPratico>(
-      `${this.apiUrl}/feedback-pratico/${id}`,
-      payloadComUsuario,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }
-    );
+    return this.http.put<FeedbackPratico>(`${this.apiUrl}/feedback-pratico/${id}`, payload);
   }
 
   // excluir um comentário
-  excluirFeedback( id: number): Observable<{ status: number; mensagem: string }> {
-    const token = this.authService.obterTokenValido();
+  excluirFeedback(id: number): Observable<{ status: number; mensagem: string }> {
+    return this.http.delete<{
+      status: number; mensagem: string
+    }>
+      (`${this.apiUrl}/feedback-pratico/${id}`);
+  }
 
-    if (!token) {
-      return throwError(() =>
-        new Error('É necessário fazer login para excluir um comentário.')
-      );
+  // Pesquisa planos com base nos filtros fornecidos, utilizando barra de pesquisa e modal de filtros.
+  filtrarPlanos(filtros: any): Observable<PlanoAula[]> {
+    let params = new HttpParams();
+
+    // filtros de pesquisa textual (título ou código BNCC)
+    if (filtros.titulo) {
+      params = params.append('titulo', filtros.titulo);
     }
 
-    return this.http.delete<{ status: number; mensagem: string }>(
-      `${this.apiUrl}/feedback-pratico/${id}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }
+    if (filtros.codigoHabilidade) {
+      params = params.append('codigoHabilidade', filtros.codigoHabilidade);
+    }
+
+    // modal de filtros
+    if (filtros.tipoAtividade) {
+      params = params.append('tipoAtividade', filtros.tipoAtividade);
+    }
+
+    if (filtros.etapaEnsino) {
+      params = params.append('etapaEnsino', filtros.etapaEnsino);
+    }
+
+    if (filtros.componentesCurriculares) {
+      params = params.append('componentesCurriculares', filtros.componentesCurriculares);
+    }
+
+    if (filtros.eixoComputacao) {
+      params = params.append('eixoComputacao', filtros.eixoComputacao);
+    }
+
+    if (filtros.isGeradoIA !== undefined && filtros.isGeradoIA !== null) {
+      params = params.append('isGeradoIA', filtros.isGeradoIA);
+    }
+
+    // identifica o autor quando a pesquisa for em Meus Planos
+    if (filtros.idAutor !== undefined && filtros.idAutor !== null) {
+      params = params.append('idAutor', filtros.idAutor);
+    }
+
+    // filtros de ordenação
+    if (filtros.orderBy) {
+      params = params.append('orderBy', filtros.orderBy);
+    } else {
+      params = params.append('orderBy', 'MAIS_RECENTES');
+    }
+
+    return this.http.get<{ content: PlanoAulaApiResponse[] }>(
+      `${this.apiUrl}/plano-aula/pesquisar`,
+      { params }
+    ).pipe(
+      map(resposta =>
+        resposta.content.map(plano => this.montarPlano(plano))
+      )
     );
   }
 }

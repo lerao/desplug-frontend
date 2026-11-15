@@ -753,7 +753,7 @@ ion-button:focus-visible {
       --background-hover: #2563EB;
       --background-activated: #2563EB;
       --background-disabled: #93C5FD;
-      --color: #FFFFFF;
+      --color: var(--color-white);
       --border-radius: 10px;
 
       box-shadow: 0 3px 6px rgba(0, 0, 0, 0.18);
@@ -766,7 +766,7 @@ ion-button:focus-visible {
     }
 
     .btn-cancelar {
-      --background: #FFFFFF;
+      --background: var(--color-white);
       --background-hover: #CBD5E1;
       --background-activated: #CBD5E1;
       --color: #CBD5E1;

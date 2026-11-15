@@ -3,7 +3,7 @@ import { AlertController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { finalize, catchError, throwError } from 'rxjs'; 
-import { AuthService, PerfilLogin } from '../services/auth.service';
+import { AuthService, PerfilLogin } from '../security/auth.service';
 
 @Component({
   selector: 'app-login',

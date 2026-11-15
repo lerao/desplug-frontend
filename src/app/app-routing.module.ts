@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
+import { authGuard } from './security/auth.guard'; 
 
 const routes: Routes = [
   {
@@ -32,6 +33,7 @@ const routes: Routes = [
   },
   {
     path: 'chat-ia',
+    canActivate: [authGuard],
     loadChildren: () => import('./chat-ia/chat-ia.module').then(m => m.ChatIaPageModule)
   },
   {
@@ -44,10 +46,12 @@ const routes: Routes = [
   },
   {
     path: 'plano-aula',
+    canActivate: [authGuard],
     loadChildren: () => import('./plano-aula/plano-aula.module').then(m => m.PlanoAulaPageModule)
   },
   {
     path: 'perfil-professor',
+    canActivate: [authGuard],
     loadChildren: () => import('./perfil-professor/perfil-professor.module').then(m => m.PerfilProfessorPageModule)
   },
   {

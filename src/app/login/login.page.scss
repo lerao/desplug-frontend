@@ -82,7 +82,7 @@ ion-content {
   width: 100%;
   max-width: 390px;
 
-  background: #ffffff;
+  background: var(--color-white);
 
   border-radius: 20px;
 
@@ -154,7 +154,7 @@ ion-content {
 .tipo.ativo {
   background: #3f92cd;
 
-  color: #ffffff;
+  color: var(--color-white);
 
   box-shadow:
     0 2px 8px rgba(37, 101, 144, 0.25);
@@ -203,7 +203,7 @@ ion-content {
 
   border-radius: 12px;
 
-  background: #ffffff;
+  background: var(--color-white);
 
   margin-bottom: 10px;
 
@@ -318,7 +318,7 @@ ion-content {
     #e67b00 100%
   );
 
-  --color: #ffffff;
+  --color: var(--color-white);
 
   --box-shadow:
     0 5px 16px rgba(255, 138, 0, 0.38);
@@ -408,7 +408,7 @@ ion-content {
 /* GOOGLE */
 
 .botao-google {
-  --background: #ffffff;
+  --background: var(--color-white);
 
   --color: #334155;
 
@@ -425,7 +425,7 @@ ion-content {
 .botao-facebook {
   --background: #1877f2;
 
-  --color: #ffffff;
+  --color: var(--color-white);
 
   --box-shadow: none;
 }

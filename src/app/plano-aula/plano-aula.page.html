@@ -85,6 +85,28 @@
         </div>
 
         <div class="input-grupo">
+          <ion-label>Componente Curricular <span class="required">*</span></ion-label>
+          <ion-select formControlName="componente_curricular" fill="outline" placeholder="Selecionar componente..."
+            class="custom-input" [class.input-error]="camposInvalidos('componente_curricular')">
+            <ion-select-option value="computacao">Computação</ion-select-option>
+            <ion-select-option value="portugues">Língua Portuguesa</ion-select-option>
+            <ion-select-option value="matematica">Matemática</ion-select-option>
+            <ion-select-option value="ciencias">Ciências</ion-select-option>
+            <ion-select-option value="ciencias">Biologia</ion-select-option>
+            <ion-select-option value="historia">História</ion-select-option>
+            <ion-select-option value="geografia">Geografia</ion-select-option>
+            <ion-select-option value="fisica">Física</ion-select-option>
+            <ion-select-option value="quimica">Química</ion-select-option>
+            <ion-select-option value="ingles">Língua Inglesa</ion-select-option>
+            <ion-select-option value="espanhol">Língua Espanhola</ion-select-option>
+            <ion-select-option value="educacao_fisica">Educação Física</ion-select-option>
+            <ion-select-option value="filosofia">Filosofia</ion-select-option>
+            <ion-select-option value="sociologia">Sociologia</ion-select-option>
+          </ion-select>
+          <span class="error-msg" *ngIf="camposInvalidos('componente_curricular')">Selecione o componente curricular.</span>
+        </div>
+
+        <div class="input-grupo">
           <ion-label>Anos Indicados <span class="required">*</span></ion-label>
           <ion-input formControlName="anos_indicados" fill="outline" placeholder="Ex.: 4º e 5º Ano, 6º Ano, 1º EM"
             class="custom-input" [class.input-error]="camposInvalidos('anos_indicados')"></ion-input>
@@ -166,7 +188,7 @@
       <ion-icon name="chevron-back-outline" slot="start"></ion-icon> Voltar
     </ion-button>
     <ion-button (click)="proxEtapa()" class="btn-next" [expand]="etapaAtual === 1 ? 'block' : ''" [disabled]="salvando">
-      {{ salvando ? 'Salvando...' : (etapaAtual === 4 ? 'Publicar Plano' : 'Próximo') }}
+      {{ salvando ? 'Salvando...' : (etapaAtual === 4 ? 'Publicar' : 'Próximo') }}
       <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
     </ion-button>
   </div>

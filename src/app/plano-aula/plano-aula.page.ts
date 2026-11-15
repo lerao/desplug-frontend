@@ -6,7 +6,7 @@ import { AppDialogService } from '../shared/app-dialog/app-dialog.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { finalize } from 'rxjs';
 import { Router } from '@angular/router';
-import { AuthService } from '../services/auth.service';
+import { AuthService } from '../security/auth.service';
 @Component({
   selector: 'app-plano-aula',
   templateUrl: './plano-aula.page.html',
@@ -34,7 +34,7 @@ export class PlanoAulaPage implements OnInit {
     code: string;
     tag: string;
     desc: string;
-    componenteCurricular: string;
+    componentesCurriculares: string;
   }[] = [];
 
   constructor(
@@ -72,7 +72,7 @@ export class PlanoAulaPage implements OnInit {
           code: hab.codigo,
           tag: hab.eixoComputacao,
           desc: hab.descricao,
-          componenteCurricular: hab.componenteCurricular
+          componentesCurriculares: hab.componenteCurricular
         }));
       },
 
@@ -159,7 +159,7 @@ export class PlanoAulaPage implements OnInit {
           .filter(hab =>
             this.habilidadesSelecionadas.includes(hab.id)
           )
-          .map(hab => hab.componenteCurricular?.trim())
+          .map(hab => hab.componentesCurriculares?.trim())
           .filter((nome): nome is string => !!nome)
       )
     ].join(', ');

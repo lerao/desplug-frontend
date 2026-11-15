@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { catchError, map, of, startWith, switchMap, combineLatest, forkJoin, BehaviorSubject } from 'rxjs';
 import { PlanoAulaService, PlanoAula, FeedbackPratico, FeedbackPraticoRequest } from '../services/plano-aula.service';
-import { AuthService } from '../services/auth.service';
+import { AuthService } from '../security/auth.service';
 import { AppDialogService } from "../shared/app-dialog/app-dialog.service";
 
 interface DetalhesPlano { plano: PlanoAula | null; feedbacks: FeedbackPratico[]; carregando: boolean; }

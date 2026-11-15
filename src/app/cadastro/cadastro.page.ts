@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AlertController } from '@ionic/angular';
 import { Router } from '@angular/router';
-import { AuthService, CadastroRequest } from '../services/auth.service';
+import { AuthService, CadastroRequest } from '../security/auth.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { finalize } from 'rxjs';
 

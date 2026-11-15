@@ -93,7 +93,7 @@ p {
 
 button.danger {
   background-color: var(--ion-color-danger, #ef4444);
-  color: #ffffff;
+  color: var(--color-white);
   border: 1px solid var(--ion-color-danger, #ef4444);
 
   &:hover {

@@ -19,9 +19,8 @@
         <ion-icon name="options-outline"></ion-icon>
       </button>
 
-      <ion-modal [isOpen]="isFilterOpen" (didDismiss)="fecharFiltros()" class="filter-modal">
+      <ion-modal [isOpen]="abrirFiltro" (didDismiss)="fecharFiltros()" class="filter-modal">
         <ng-template>
-
           <ion-header class="ion-no-border">
             <ion-toolbar>
               <ion-title class="modal-title">Filtrar planos</ion-title>
@@ -35,93 +34,220 @@
 
           <ion-content class="ion-padding">
             <h2 class="filtros-subtitle">Filtros</h2>
-
             <ion-accordion-group [multiple]="true" value="filtros">
               <ion-accordion value="etapa_ensino">
                 <ion-item slot="header">
-                  <ion-icon name="school" slot="start" class="accordion-icon icon-purple"></ion-icon>
+                  <ion-icon name="school" class="accordion-icon icon-purple"></ion-icon>
                   <ion-label>Etapa de Ensino</ion-label>
                 </ion-item>
                 <div slot="content" class="ion-padding-bottom">
-                  <ion-item lines="none"><ion-checkbox labelPlacement="end">Educação Infantil</ion-checkbox></ion-item>
-                  <ion-item lines="none"><ion-checkbox labelPlacement="end">Anos Iniciais (Ensino Fundamental I)</ion-checkbox></ion-item>
-                  <ion-item lines="none"><ion-checkbox labelPlacement="end">Anos Finais (Ensino Fundamental II)</ion-checkbox></ion-item>
-                  <ion-item lines="none"><ion-checkbox labelPlacement="end">Ensino Médio</ion-checkbox></ion-item>
+                  <ion-radio-group [(ngModel)]="filtroEtapaEnsino">
+                    <ion-item lines="none">
+                      <ion-radio value="EDUCACAO_INFANTIL" labelPlacement="end" slot="start">
+                        Educação Infantil
+                      </ion-radio>
+                    </ion-item>
+                    <ion-item lines="none">
+                      <ion-radio value="FUNDAMENTAL_INICIAIS" labelPlacement="end" slot="start">
+                        Anos Iniciais (Ensino Fundamental I)
+                      </ion-radio>
+                    </ion-item>
+                    <ion-item lines="none">
+                      <ion-radio value="FUNDAMENTAL_FINAIS" labelPlacement="end" slot="start">
+                        Anos Finais (Ensino Fundamental II)
+                      </ion-radio>
+                    </ion-item>
+                    <ion-item lines="none">
+                      <ion-radio value="ENSINO_MEDIO" labelPlacement="end" slot="start">Ensino Médio</ion-radio>
+                    </ion-item>
+                  </ion-radio-group>
                 </div>
               </ion-accordion>
 
-              <ion-accordion value="eixos_bncc">
+              <!-- removido para fins de simplicidade no código - aguardando retorno do professor -->
+              <!-- <ion-accordion value="eixos_bncc">
                 <ion-item slot="header">
-                  <ion-icon name="hardware-chip" slot="start" class="accordion-icon icon-pink"></ion-icon>
+                  <ion-icon name="hardware-chip" class="accordion-icon icon-pink"></ion-icon>
                   <ion-label>Eixos BNCC Computação</ion-label>
                 </ion-item>
                 <div slot="content" class="ion-padding-bottom">
-                  <ion-item lines="none"><ion-checkbox labelPlacement="end">Pensamento
-                      Computacional</ion-checkbox></ion-item>
-                  <ion-item lines="none"><ion-checkbox labelPlacement="end">Mundo Digital</ion-checkbox></ion-item>
-                  <ion-item lines="none"><ion-checkbox labelPlacement="end">Cultura Digital</ion-checkbox></ion-item>
+                  <ion-radio-group>
+                    <ion-item lines="none">
+                      <ion-radio value="PENSAMENTO_COMPUTACIONAL" labelPlacement="end" slot="start">
+                        Pensamento Computacional
+                      </ion-radio>
+                    </ion-item>
+                    <ion-item lines="none">
+                      <ion-radio value="MUNDO_DIGITAL" labelPlacement="end" slot="start">
+                        Mundo Digital
+                      </ion-radio>
+                    </ion-item>
+                    <ion-item lines="none">
+                      <ion-radio value="CULTURA_DIGITAL" labelPlacement="end" slot="start">
+                        Cultura Digital
+                      </ion-radio>
+                    </ion-item>
+                  </ion-radio-group>
                 </div>
-              </ion-accordion>
+              </ion-accordion> -->
 
               <ion-accordion value="tipo_atividade">
                 <ion-item slot="header">
-                  <ion-icon name="locate" slot="start" class="accordion-icon icon-red"></ion-icon>
+                  <ion-icon name="locate" class="accordion-icon icon-red"></ion-icon>
                   <ion-label>Tipo de Atividade</ion-label>
                 </ion-item>
                 <div slot="content" class="ion-padding-bottom">
-                  <ion-item lines="none"><ion-checkbox labelPlacement="end">Desplugada</ion-checkbox></ion-item>
-                  <ion-item lines="none"><ion-checkbox labelPlacement="end">Maker</ion-checkbox></ion-item>
-                  <ion-item lines="none"><ion-checkbox labelPlacement="end">Digital</ion-checkbox></ion-item>
-                  <ion-item lines="none"><ion-checkbox labelPlacement="end">Plano de Aula</ion-checkbox></ion-item>
+                  <ion-radio-group [(ngModel)]="filtroTipoAtividade">
+                    <ion-item lines="none">
+                      <ion-radio value="ATIVIDADE_DESPLUGADA" labelPlacement="end" slot="start">
+                        Desplugada
+                      </ion-radio>
+                    </ion-item>
+                    <ion-item lines="none">
+                      <ion-radio value="PROJETO_MAKER" labelPlacement="end" slot="start">
+                        Maker
+                      </ion-radio>
+                    </ion-item>
+                    <ion-item lines="none">
+                      <ion-radio value="ATIVIDADE_DIGITAL" labelPlacement="end" slot="start">
+                        Digital
+                      </ion-radio>
+                    </ion-item>
+                    <ion-item lines="none">
+                      <ion-radio value="PLANO_AULA" labelPlacement="end" slot="start">
+                        Plano de Aula
+                      </ion-radio>
+                    </ion-item>
+                  </ion-radio-group>
                 </div>
               </ion-accordion>
 
-              <ion-accordion value="disciplina">
+              <ion-accordion value="componente_curricular">
                 <ion-item slot="header">
-                  <ion-icon name="library" slot="start" class="accordion-icon icon-green"></ion-icon>
-                  <ion-label>Disciplina</ion-label>
+                  <ion-icon name="library" class="accordion-icon icon-green"></ion-icon>
+                  <ion-label>Componente Curricular</ion-label>
                 </ion-item>
                 <div slot="content" class="ion-padding-bottom">
-                  <ion-item lines="none"><ion-checkbox labelPlacement="end">Língua Portuguesa</ion-checkbox></ion-item>
-                  <ion-item lines="none"><ion-checkbox labelPlacement="end">Matemática</ion-checkbox></ion-item>
-                  <ion-item lines="none"><ion-checkbox labelPlacement="end">Física</ion-checkbox></ion-item>
-                  <ion-item lines="none"><ion-checkbox labelPlacement="end">Química</ion-checkbox></ion-item>
-                  <ion-item lines="none"><ion-checkbox labelPlacement="end">Biologia /
-                      Ciências</ion-checkbox></ion-item>
-                  <ion-item lines="none"><ion-checkbox labelPlacement="end">Geografia</ion-checkbox></ion-item>
-                  <ion-item lines="none"><ion-checkbox labelPlacement="end">História</ion-checkbox></ion-item>
-                  <ion-item lines="none"><ion-checkbox labelPlacement="end">Língua Inglesa</ion-checkbox></ion-item>
-                  <ion-item lines="none"><ion-checkbox labelPlacement="end">Língua Espanhola</ion-checkbox></ion-item>
-                  <ion-item lines="none"><ion-checkbox labelPlacement="end">Educação Física</ion-checkbox></ion-item>
-                  <ion-item lines="none"><ion-checkbox labelPlacement="end">Filosofia</ion-checkbox></ion-item>
-                  <ion-item lines="none"><ion-checkbox labelPlacement="end">Sociologia</ion-checkbox></ion-item>
+                  <ion-radio-group [(ngModel)]="filtroComponentesCurriculares">
+                    <ion-item lines="none">
+                      <ion-radio value="Computação" labelPlacement="end" slot="start">
+                        Computação
+                      </ion-radio>
+                    </ion-item>
+                    <ion-item lines="none">
+                      <ion-radio value="Língua Portuguesa" labelPlacement="end" slot="start">
+                        Língua Portuguesa
+                      </ion-radio>
+                    </ion-item>
+                    <ion-item lines="none">
+                      <ion-radio value="Matemática" labelPlacement="end" slot="start">
+                        Matemática
+                      </ion-radio>
+                    </ion-item>
+                    <ion-item lines="none">
+                      <ion-radio value="Ciências" labelPlacement="end" slot="start">
+                        Ciências
+                      </ion-radio>
+                    </ion-item>
+                    <ion-item lines="none">
+                      <ion-radio value="Biologia" labelPlacement="end" slot="start">
+                        Biologia
+                      </ion-radio>
+                    </ion-item>
+                    <ion-item lines="none">
+                      <ion-radio value="História" labelPlacement="end" slot="start">
+                        História
+                      </ion-radio>
+                    </ion-item>
+                    <ion-item lines="none">
+                      <ion-radio value="Geografia" labelPlacement="end" slot="start">
+                        Geografia
+                      </ion-radio>
+                    </ion-item>
+                    <ion-item lines="none">
+                      <ion-radio value="Física" labelPlacement="end" slot="start">
+                        Física
+                      </ion-radio>
+                    </ion-item>
+                    <ion-item lines="none">
+                      <ion-radio value="Química" labelPlacement="end" slot="start">
+                        Química
+                      </ion-radio>
+                    </ion-item>
+                    <ion-item lines="none">
+                      <ion-radio value="Língua Inglesa" labelPlacement="end" slot="start">
+                        Língua Inglesa
+                      </ion-radio>
+                    </ion-item>
+                    <ion-item lines="none">
+                      <ion-radio value="Língua Espanhola" labelPlacement="end" slot="start">
+                        Língua Espanhola
+                      </ion-radio>
+                    </ion-item>
+                    <ion-item lines="none">
+                      <ion-radio value="Educação Física" labelPlacement="end" slot="start">
+                        Educação
+                        Física
+                      </ion-radio>
+                    </ion-item>
+                    <ion-item lines="none">
+                      <ion-radio value="Filosofia" labelPlacement="end" slot="start">
+                        Filosofia
+                      </ion-radio>
+                    </ion-item>
+                    <ion-item lines="none">
+                      <ion-radio value="Sociologia" labelPlacement="end" slot="start">
+                        Sociologia
+                      </ion-radio>
+                    </ion-item>
+                  </ion-radio-group>
                 </div>
               </ion-accordion>
 
               <ion-accordion value="origem">
                 <ion-item slot="header">
-                  <ion-icon name="sparkles" slot="start" class="accordion-icon icon-orange"></ion-icon>
+                  <ion-icon name="sparkles" class="accordion-icon icon-orange"></ion-icon>
                   <ion-label>Origem do Plano</ion-label>
                 </ion-item>
+
                 <div slot="content" class="ion-padding-bottom">
-                  <ion-item lines="none"><ion-checkbox labelPlacement="end">Comunidade</ion-checkbox></ion-item>
-                  <ion-item lines="none"><ion-checkbox labelPlacement="end">Gerado por IA</ion-checkbox></ion-item>
+                  <ion-radio-group [(ngModel)]="filtroIsGeradoIA">
+                    <ion-item lines="none">
+                      <ion-radio [value]="false" labelPlacement="end" slot="start">
+                        Comunidade
+                      </ion-radio>
+                    </ion-item>
+                    <ion-item lines="none">
+                      <ion-radio [value]="true" labelPlacement="end" slot="start">
+                        Gerado por IA
+                      </ion-radio>
+                    </ion-item>
+                  </ion-radio-group>
                 </div>
               </ion-accordion>
             </ion-accordion-group>
+          </ion-content>
 
+          <ion-footer class="ion-no-border modal-footer">
             <div class="modal-action-box">
-              <ion-button expand="block" color="primary" class="filter-btn-apply" (click)="aplicarFiltros()">
+              <ion-button fill="clear" class="filter-btn-clear" color="medium" (click)="limparFiltros()">
+                Limpar
+              </ion-button>
+              <ion-button color="primary" class="filter-btn-apply" (click)="aplicarFiltros()">
                 Ver resultados
               </ion-button>
             </div>
-          </ion-content>
+          </ion-footer>
         </ng-template>
       </ion-modal>
 
-      <input type="text" [(ngModel)]="searchTerm" placeholder="Buscar por tema, disciplina ou código BNCC..."
-        class="search-input text-main" />
-      <button class="search-btn bg-primary text-white" type="button">Buscar</button>
+      <input type="text" [(ngModel)]="pesquisa" (keyup.enter)="realizarBusca()"
+        placeholder="Buscar por Título ou Código Habilidade BNCC..." class="search-input text-main" />
+        
+      <button class="search-btn bg-primary text-white" type="button" (click)="realizarBusca()"
+        aria-label="Buscar planos" title="Buscar">
+        <ion-icon name="search-outline"></ion-icon>
+      </button>
     </div>
   </header>
 
@@ -134,24 +260,27 @@
   <div class="feed-section" *ngIf="planosAula$ | async as planosAula; else carregando">
     <div class="results-bar">
       <ion-badge class="results-count text-main">
-        <b>{{ planosAula.length }}</b> planos encontrados
+        <b>{{ planosAula.length }}</b>
+        {{planosAula.length === 1 ? 'plano encontrado' : 'planos encontrados'}}
       </ion-badge>
 
-      <ion-select interface="popover" [interfaceOptions]="customPopoverOptions"
+      <ion-select interface="popover" [(ngModel)]="filtroOrdenacao" (ionChange)="realizarBusca()" [interfaceOptions]="customPopoverOptions"
         class="sort-select bg-white border-card text-main" placeholder="Ordenar por">
-        <ion-select-option value="relevantes">Mais relevantes</ion-select-option>
-        <ion-select-option value="recentes">Mais recentes</ion-select-option>
-        <ion-select-option value="favoritos">Mais favoritos</ion-select-option>
-        <ion-select-option value="adaptados">Mais adaptados</ion-select-option>
+        <!-- removido para fins de simplicidade no código - aguardando retorno do professor -->
+        <!-- <ion-select-option value="relevantes">Mais relevantes</ion-select-option> -->
+        <ion-select-option value="MAIS_RECENTES">Mais recentes</ion-select-option>
+        <ion-select-option value="MAIS_FAVORITOS">Mais favoritos</ion-select-option>
+        <ion-select-option value="MAIS_ADAPTADOS">Mais adaptados</ion-select-option>
       </ion-select>
     </div>
 
-    <div class="card-list">
+    <div class="card-list" *ngIf="planosAula.length > 0; else nenhumResultadoFiltro">
       <ion-card *ngFor="let plano of planosAula" class="lesson-card bg-white border-card">
         <div class="card-image-box">
           <img [src]="plano.imagemCapa" [alt]="plano.titulo" class="card-image" />
           <ion-badge class="badge-stage bg-white text-main">{{ plano.etapaEnsino }}</ion-badge>
         </div>
+
         <ion-card-content class="card-body">
           <div class="card-tags">
             <ion-badge class="tag-principal">{{ plano.tipoAtividade }}</ion-badge>
@@ -160,9 +289,11 @@
           </div>
 
           <ion-card-title class="card-title text-main">{{ plano.titulo }}</ion-card-title>
+
           <p class="card-description text-muted">
             {{ plano.resumo }}
           </p>
+
           <div class="author-info">
             <ion-avatar class="author-avatar bg-primary text-white">
               <ion-badge class="author-initials">
@@ -171,12 +302,14 @@
             </ion-avatar>
             <span class="author-name text-main">{{ plano.autor.nome }}</span>
           </div>
+
           <footer class="card-footer">
             <div class="card-metrics">
               <ion-button class="metric-item" title="Favoritos" mode="md" routerLink="/login">
                 <ion-icon name="heart-outline"></ion-icon>
                 {{ plano.quantidadeFavoritos }}
               </ion-button>
+
               <ion-button class="metric-item" title="Adaptações / Derivações" mode="md" routerLink="/login">
                 <ion-icon name="git-branch-outline"></ion-icon>
                 {{ plano.quantidadeAdaptacoes }}
@@ -191,7 +324,22 @@
         </ion-card-content>
       </ion-card>
     </div>
+
+    <ng-template #nenhumResultadoFiltro>
+      <div class="empty-state">
+        <ion-icon name="search-outline" class="empty-icon"></ion-icon>
+        <h2>Nenhum plano encontrado</h2>
+        <p>
+          Não encontramos planos de aula com os filtros selecionados.
+          Experimente alterar os filtros ou realizar uma nova busca.
+        </p>
+        <ion-button fill="outline" color="primary" (click)="limparFiltros()">
+          Limpar filtros
+        </ion-button>
+      </div>
+    </ng-template>
   </div>
+
   <ng-template #carregando>
     <div class="ion-padding ion-text-center" *ngIf="!erroCarregamento">
       <ion-spinner name="crescent" color="primary"></ion-spinner>

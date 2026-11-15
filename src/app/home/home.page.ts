@@ -2,7 +2,7 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { PlanoAulaService, PlanoAula } from '../services/plano-aula.service';
-import { AuthService } from '../services/auth.service';
+import { AuthService } from '../security/auth.service';
 import { AppDialogService } from '../shared/app-dialog/app-dialog.service';
 
 @Component({
@@ -32,7 +32,12 @@ export class HomePage implements OnInit {
   planoSelecionado: PlanoAula | null = null;
   abrirFiltro = false;
   headerCompact = false;
-  meusPlanosCarregados = false;
+
+  // Filtros
+  filtroEtapaEnsino: string = '';
+  filtroTipoAtividade: string = '';
+  filtroComponentesCurriculares: string = '';
+  filtroIsGeradoIA: boolean | null = null;
 
   get nomeUsuario(): string {
     return this.authService.sessaoAtual()?.nome ?? 'Professor';
@@ -60,37 +65,18 @@ export class HomePage implements OnInit {
     return 0;
   }
 
-  // Calcula a quantidade de planos do usuário
+  // Quantidade de planos do usuário
   qtdPlanosPorUsuario = computed(() => this.planosUsuario().length);
 
-  // Filtra os planos conforme a pesquisa
-  planosFiltrados = computed(() => {
-    const query = this.pesquisa().trim().toLocaleLowerCase('pt-BR');
-
-    return this.planos().filter(plano => {
-      const textoPesquisavel = [
-        plano.titulo,
-        plano.resumo,
-        plano.etapaEnsino,
-        plano.eixoBNCC,
-        plano.tipoAtividade,
-        plano.componenteCurricular ?? '',
-        plano.autor?.nome ?? '',
-        plano.materiais?.join(' ') ?? ''
-      ]
-        .join(' ')
-        .toLocaleLowerCase('pt-BR');
-
-      return !query || textoPesquisavel.includes(query);
-    });
-  });
+  // Planos exibidos na tela
+  planosFiltrados = computed(() => this.planos());
 
   ngOnInit(): void {
     this.carregarPlanos();
     this.carregarQtdPlanosUsuario();
-
   }
 
+  // Carrega os planos públicos inicialmente
   private carregarPlanos(): void {
     this.carregando.set(true);
     this.mensagemErro.set('');
@@ -103,11 +89,6 @@ export class HomePage implements OnInit {
 
         this.carregando.set(false);
         this.mensagemErro.set('');
-
-        console.log(
-          'Quantidade de planos públicos:',
-          planosRetornados.length
-        );
       },
 
       error: (erro) => {
@@ -125,6 +106,7 @@ export class HomePage implements OnInit {
     });
   }
 
+  // Carrega a quantidade de planos do usuário
   private carregarQtdPlanosUsuario(): void {
     const usuarioId = this.authService.sessaoAtual()?.usuarioId;
 
@@ -136,12 +118,6 @@ export class HomePage implements OnInit {
     this.planoAulaService.getPlanosPorAutor(usuarioId).subscribe({
       next: (planosRetornados) => {
         this.planosUsuario.set(planosRetornados);
-        this.meusPlanosCarregados = true;
-
-        console.log(
-          'Quantidade de planos do usuário:',
-          this.qtdPlanosPorUsuario()
-        );
       },
 
       error: (erro) => {
@@ -153,9 +129,9 @@ export class HomePage implements OnInit {
     });
   }
 
+  // Abre a visualização dos planos do usuário
   mostrarPlanosPorUsuario(): void {
-    const sessao = this.authService.sessaoAtual();
-    const usuarioId = sessao?.usuarioId;
+    const usuarioId = this.authService.sessaoAtual()?.usuarioId;
 
     if (!usuarioId) {
       this.mensagemErro.set(
@@ -164,50 +140,24 @@ export class HomePage implements OnInit {
       return;
     }
 
-    if (this.meusPlanosCarregados) {
-      this.modoExibicao.set('meus');
-      this.planos.set(this.planosUsuario());
-      this.mensagemErro.set('');
-      return;
-    }
-
-    this.carregando.set(true);
+    this.modoExibicao.set('meus');
+    this.mostrarMenuVisualizacao = false;
     this.mensagemErro.set('');
 
-    this.planoAulaService.getPlanosPorAutor(usuarioId).subscribe({
-      next: (planosRetornados) => {
-        this.planosUsuario.set(planosRetornados);
-        this.meusPlanosCarregados = true;
-
-        this.planos.set(planosRetornados);
-        this.modoExibicao.set('meus');
-
-        this.carregando.set(false);
-      },
-
-      error: (erro) => {
-        console.error('Erro ao carregar os planos do autor:', erro);
-
-        this.mensagemErro.set(
-          'Não foi possível carregar seus planos. Tente novamente.'
-        );
-
-        this.carregando.set(false);
-      }
-    });
+    this.realizarBusca();
   }
 
   mostrarFavoritos(): void {
     this.modoExibicao.set('favoritos');
     this.planos.set([]);
     this.mensagemErro.set('');
+    this.mostrarMenuVisualizacao = false;
   }
 
   mostrarTodosPlanos(): void {
     this.modoExibicao.set('todos');
-    this.planos.set(this.planosPublicos());
-    this.mensagemErro.set('');
     this.mostrarMenuVisualizacao = false;
+    this.realizarBusca();
   }
 
   alternarVisualizacao(): void {
@@ -309,12 +259,100 @@ export class HomePage implements OnInit {
     this.headerCompact = event.detail.scrollTop > 48;
   }
 
+  // Monta os parâmetros de pesquisa
+  private montarFiltros(): any {
+    const filtros: any = {};
+    const termo = this.pesquisa().trim();
+
+    // Pesquisa por título ou código de habilidade BNCC
+    if (termo) {
+      if (/^(EF|EI|EM)\d+/i.test(termo)) {
+        filtros.codigoHabilidade = termo;
+      } else {
+        filtros.titulo = termo;
+      }
+    }
+
+    if (this.filtroEtapaEnsino) {
+      filtros.etapaEnsino = this.filtroEtapaEnsino;
+    }
+
+    if (this.filtroTipoAtividade) {
+      filtros.tipoAtividade = this.filtroTipoAtividade;
+    }
+
+    if (this.filtroComponentesCurriculares) {
+      filtros.componentesCurriculares = this.filtroComponentesCurriculares;
+    }
+
+    if (this.filtroIsGeradoIA !== null) {
+      filtros.isGeradoIA = this.filtroIsGeradoIA;
+    }
+
+    return filtros;
+  }
+
+  realizarBusca(): void {
+    const filtros = this.montarFiltros();
+
+    // no modo Meus Planos, acrescenta o id do autor
+    if (this.modoExibicao() === 'meus') {
+      const usuarioId = this.authService.sessaoAtual()?.usuarioId;
+
+      if (!usuarioId) {
+        this.planos.set([]);
+        this.carregando.set(false);
+        this.mensagemErro.set(
+          'Faça login para consultar seus planos de aula.'
+        );
+        return;
+      }
+
+      filtros.idAutor = usuarioId;
+    }
+
+    // favoritos ainda não implementados
+    if (this.modoExibicao() === 'favoritos') {
+      this.planos.set([]);
+      this.carregando.set(false);
+      return;
+    }
+
+    this.carregando.set(true);
+    this.mensagemErro.set('');
+
+    this.planoAulaService.filtrarPlanos(filtros).subscribe({
+      next: (planosRetornados) => {
+        this.planos.set(planosRetornados);
+
+        if (this.modoExibicao() === 'todos') {
+          this.planosPublicos.set(planosRetornados);
+        }
+
+        this.carregando.set(false);
+        this.mensagemErro.set('');
+      },
+
+      error: (erro) => {
+        console.error('Erro ao pesquisar planos:', erro);
+
+        this.planos.set([]);
+
+        this.mensagemErro.set(
+          'Não foi possível pesquisar os planos. Tente novamente.'
+        );
+        this.carregando.set(false);
+      }
+    });
+  }
+
   abrirFiltros(): void {
     this.abrirFiltro = true;
   }
 
   aplicarFiltros(): void {
     this.abrirFiltro = false;
+    this.realizarBusca();
 
     document.querySelector('.library')?.scrollIntoView({
       behavior: 'smooth',
@@ -327,14 +365,21 @@ export class HomePage implements OnInit {
   }
 
   limparFiltros(): void {
+    this.filtroEtapaEnsino = '';
+    this.filtroTipoAtividade = '';
+    this.filtroComponentesCurriculares = '';
+    this.filtroIsGeradoIA = null;
     this.pesquisa.set('');
+
+    this.realizarBusca();
+    this.fecharFiltros();
   }
 
   favoritar(_planoId: number): void {
-    // implementar posteriormente
+    // Implementar posteriormente
   }
 
   adaptar(_planoId: number): void {
-    // implementar posteriormente
+    // Implementar posteriormente
   }
 }

@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { PlanoAulaService, PlanoAula } from '../services/plano-aula.service';
-import { AuthService } from '../services/auth.service';
+import { AuthService } from '../security/auth.service';
 
 @Component({
   selector: 'app-perfil-professor',
