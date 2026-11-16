@@ -428,8 +428,6 @@ export class PlanoAulaService {
     // filtros de ordenação
     if (filtros.orderBy) {
       params = params.append('orderBy', filtros.orderBy);
-    } else {
-      params = params.append('orderBy', 'MAIS_RECENTES');
     }
 
     return this.http.get<{ content: PlanoAulaApiResponse[] }>(
