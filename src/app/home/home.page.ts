@@ -395,9 +395,9 @@ export class HomePage implements OnInit {
     // Implementar posteriormente
   }
 
-  mudarPagina(novaPagina: number) {
+  mudarPagina(novaPagina: number): void {
     if (novaPagina >= 0 && novaPagina < this.totalPaginas()) {
-      this.paginaAtual.set(novaPagina);
+      this.realizarBusca(novaPagina);
     }
   }
 }
