@@ -404,7 +404,24 @@
           </div>
         </ng-template>
       </section>
+
+      <div class="pagination-container" *ngIf="totalPaginas() > 1">
+        <ion-button class="page-nav-btn" fill="outline" size="small" [disabled]="paginaAtual() === 0"
+          (click)="mudarPagina(paginaAtual() - 1)">
+          Anterior
+        </ion-button>
+
+        <span class="page-info ion-margin-horizontal">
+          Página {{ paginaAtual() + 1 }} de {{ totalPaginas() }}
+        </span>
+
+        <ion-button class="page-nav-btn" fill="outline" size="small" [disabled]="paginaAtual() >= totalPaginas() - 1"
+          (click)="mudarPagina(paginaAtual() + 1)">
+          Próxima
+        </ion-button>
+      </div>
     </main>
+    
     <ng-template #nenhumResultadoFiltro>
       <div class="empty-state">
         <ion-icon name="search-outline" class="empty-icon"></ion-icon>

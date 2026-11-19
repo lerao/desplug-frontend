@@ -146,6 +146,17 @@ export interface FeedbackPraticoRequest {
   usuario?: { id: number };
 }
 
+export interface PageResponse<T> {
+  content: T[];
+  totalPages: number;
+  totalElements: number;
+  size: number;
+  number: number;
+  first: boolean;
+  last: boolean;
+  empty: boolean;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -176,18 +187,27 @@ export class PlanoAulaService {
   }
 
   // Buscar habilidades BNCC
-  getHabilidades(): Observable<HabilidadeBncc[]> {
-    return this.http.get<HabilidadeBncc[]>(`${this.apiUrl}/habilidade-bncc`);
+  getHabilidades(page: number = 0, size: number = 100): Observable<HabilidadeBncc[]> {
+    const params = new HttpParams().set('page', page.toString()).set('size', size.toString());
+
+    return this.http.get<PageResponse<HabilidadeBncc>>(
+      `${this.apiUrl}/habilidade-bncc`, { params }
+    ).pipe(
+      map(resposta => resposta.content)
+    );
   }
 
   // Buscar todos os planos para a tela de visitante (temporário) - alterar para que aceite apenas planos com status "Publicado" 
-  getPlanos(): Observable<PlanoAula[]> {
-    return this.http.get<PlanoAulaApiResponse[]>(
-      `${this.apiUrl}/plano-aula`
+  getPlanos(page: number = 0, size: number = 10): Observable<PageResponse<PlanoAula>> {
+    const params = new HttpParams().set('page', page.toString()).set('size', size.toString());
+
+    return this.http.get<PageResponse<PlanoAulaApiResponse>>(
+      `${this.apiUrl}/plano-aula`, { params }
     ).pipe(
-      map(planos =>
-        planos.map(plano => this.montarPlano(plano))
-      )
+      map(resposta => ({
+        ...resposta,
+        content: resposta.content.map(plano => this.montarPlano(plano))
+      }))
     );
   }
 
@@ -201,11 +221,16 @@ export class PlanoAulaService {
   }
 
   // exibe os planos de acordo com o usuário (é usado na home, para listar os planos do usuário logado).
-  getPlanosPorAutor(usuarioId: number): Observable<PlanoAula[]> {
-    return this.http.get<PlanoAulaApiResponse[]>(
-      `${this.apiUrl}/plano-aula/usuario/${usuarioId}`
+  getPlanosPorAutor(usuarioId: number, page: number = 0, size: number = 10): Observable<PageResponse<PlanoAula>> {
+    const params = new HttpParams().set('page', page.toString()).set('size', size.toString());
+
+    return this.http.get<PageResponse<PlanoAulaApiResponse>>(
+      `${this.apiUrl}/plano-aula/usuario/${usuarioId}`, { params }
     ).pipe(
-      map(resposta => resposta.map(plano => this.montarPlano(plano)))
+      map(resposta => ({
+        ...resposta,
+        content: resposta.content.map(plano => this.montarPlano(plano))
+      }))
     );
   }
 
@@ -336,9 +361,9 @@ export class PlanoAulaService {
 
   // exibe os comentário do plano selecionado
   getFeedbacksPorPlano(planoId: number): Observable<FeedbackPratico[]> {
-    return this.http.get<FeedbackPratico[]>(`${this.apiUrl}/feedback-pratico`)
+    return this.http.get<PageResponse<FeedbackPratico>>(`${this.apiUrl}/feedback-pratico`)
       .pipe(
-        map(feedbacks => feedbacks.filter(
+        map(resposta => resposta.content.filter(
           feedback => feedback.plano?.id === planoId
         ))
       );
@@ -386,9 +411,11 @@ export class PlanoAulaService {
       (`${this.apiUrl}/feedback-pratico/${id}`);
   }
 
-  // Pesquisa planos com base nos filtros fornecidos, utilizando barra de pesquisa e modal de filtros.
-  filtrarPlanos(filtros: any): Observable<PlanoAula[]> {
-    let params = new HttpParams();
+  // Pesquisa planos com base nos filtros fornecidos, utilizando barra de pesquisa e modal de filtros e paginação.
+  filtrarPlanos(filtros: any, page: number = 0, size: number = 10): Observable<PageResponse<PlanoAula>> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
 
     // filtros de pesquisa textual (título ou código BNCC)
     if (filtros.titulo) {
@@ -428,17 +455,16 @@ export class PlanoAulaService {
     // filtros de ordenação
     if (filtros.orderBy) {
       params = params.append('orderBy', filtros.orderBy);
-    } else {
-      params = params.append('orderBy', 'MAIS_RECENTES');
     }
 
-    return this.http.get<{ content: PlanoAulaApiResponse[] }>(
+    return this.http.get<PageResponse<PlanoAulaApiResponse>>(
       `${this.apiUrl}/plano-aula/pesquisar`,
       { params }
     ).pipe(
-      map(resposta =>
-        resposta.content.map(plano => this.montarPlano(plano))
-      )
+      map(resposta => ({
+        ...resposta,
+        content: resposta.content.map(plano => this.montarPlano(plano))
+      }))
     );
   }
 }

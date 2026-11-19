@@ -55,11 +55,6 @@ const routes: Routes = [
     loadChildren: () => import('./perfil-professor/perfil-professor.module').then(m => m.PerfilProfessorPageModule)
   },
   {
-    path: 'perfil',
-    canActivate: [authGuard],
-    loadChildren: () => import('./perfil/perfil.module').then(m => m.PerfilPageModule)
-  },
-  {
     path: 'home',
     loadChildren: () => import('./home/home.module').then( m => m.HomePageModule)
   }
