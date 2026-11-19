@@ -44,6 +44,7 @@ export interface SessaoSalva {
   usuarioId: number;
   nome: string;
   email: string;
+  foto?: string | null;
   token: string;
   perfil: PerfilLogin;
   dataExpiracao: string;
@@ -171,6 +172,15 @@ export class AuthService {
     }
 
     return sessao.token;
+  }
+
+  atualizarPerfilLocal(dados: { nome?: string; email?: string; foto?: string | null }): void {
+    const sessao = this.statusSessao();
+    if (!sessao) return;
+
+    const atualizada: SessaoSalva = { ...sessao, ...dados };
+    sessionStorage.setItem(this.chaveSessao, JSON.stringify(atualizada));
+    this.statusSessao.set(atualizada);
   }
 
   // encerra sessão
