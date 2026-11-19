@@ -1,7 +1,6 @@
-
 import { Component, inject } from '@angular/core';
-import { Observable, BehaviorSubject, catchError, of, switchMap } from 'rxjs';
-import { PlanoAulaService, PlanoAula } from '../services/plano-aula.service';
+import { Observable, BehaviorSubject, catchError, of, switchMap, map } from 'rxjs';
+import { PlanoAulaService, PlanoAula, PageResponse } from '../services/plano-aula.service';
 
 @Component({
   selector: 'app-visitante',
@@ -16,7 +15,7 @@ export class VisitantePage {
   erroCarregamento: string = '';
   pesquisa: string = '';
 
-  // filtros
+  // Filtros
   filtroEtapaEnsino: string = '';
   filtroTipoAtividade: string = '';
   filtroComponentesCurriculares: string = '';
@@ -25,25 +24,33 @@ export class VisitantePage {
 
   filtroOrdenacao: string = '';
 
-  filtrar = new BehaviorSubject<any>(null);
+  // Paginação
+  paginaAtual: number = 0;
+  tamanhoPagina: number = 10;
+  totalPaginas: number = 0;
+  totalElementos: number = 0;
+
+  private filtrar = new BehaviorSubject<{ filtros: any; pagina: number }>({ filtros: null, pagina: 0 });
 
   planosAula$: Observable<PlanoAula[]> = this.filtrar.pipe(
-    switchMap((filtros) => {
+    switchMap(({ filtros, pagina }) => {
       this.erroCarregamento = '';
-      if (filtros === null) {
-        return this.planoAulaService.getPlanos().pipe(
-          catchError(err => {
-            console.error('Erro ao buscar planos iniciais:', err);
-            this.erroCarregamento = 'Erro ao carregar os planos. Por favor, tente novamente.';
-            return of([]);
-          })
-        );
-      }
 
-      return this.planoAulaService.filtrarPlanos(filtros).pipe(
+      const request$ = filtros === null
+        ? this.planoAulaService.getPlanos(pagina, this.tamanhoPagina)
+        : this.planoAulaService.filtrarPlanos(filtros, pagina, this.tamanhoPagina);
+
+      return request$.pipe(
+        map((resposta: PageResponse<PlanoAula>) => {
+          this.paginaAtual = resposta.number;
+          this.totalPaginas = resposta.totalPages;
+          this.totalElementos = resposta.totalElements;
+
+          return resposta.content;
+        }),
         catchError(err => {
-          console.error('Erro ao filtrar planos:', err);
-          this.erroCarregamento = 'Erro ao carregar os planos filtrados. Por favor, tente novamente.';
+          console.error('Erro ao carregar os planos:', err);
+          this.erroCarregamento = 'Erro ao carregar os planos. Por favor, tente novamente.';
           return of([]);
         })
       );
@@ -58,7 +65,7 @@ export class VisitantePage {
 
   abrirFiltro = false;
 
-  realizarBusca() {
+  realizarBusca(pagina: number = 0) {
     const filtros: any = {};
 
     if (this.pesquisa && this.pesquisa.trim() !== '') {
@@ -92,10 +99,17 @@ export class VisitantePage {
     }
 
     if (this.filtroOrdenacao && this.filtroOrdenacao !== '') {
-    filtros.orderBy = this.filtroOrdenacao;
+      filtros.orderBy = this.filtroOrdenacao;
+    }
+
+    this.filtrar.next({ filtros, pagina });
   }
 
-    this.filtrar.next(filtros);
+  mudarPagina(novaPagina: number) {
+    if (novaPagina >= 0 && novaPagina < this.totalPaginas) {
+      const filtrosAtuais = this.filtrar.value.filtros;
+      this.filtrar.next({ filtros: filtrosAtuais, pagina: novaPagina });
+    }
   }
 
   abrirFiltros() {
@@ -108,17 +122,18 @@ export class VisitantePage {
 
   aplicarFiltros() {
     this.abrirFiltro = false;
-    this.realizarBusca();
+    this.realizarBusca(0); 
   }
 
   limparFiltros() {
     this.filtroEtapaEnsino = '';
     this.filtroTipoAtividade = '';
     this.filtroComponentesCurriculares = '';
+    this.filtroEixoComputacao = '';
     this.filtroIsGeradoIA = null;
+    this.filtroOrdenacao = '';
     this.pesquisa = '';
-
-    this.realizarBusca();
+    this.realizarBusca(0);
     this.fecharFiltros();
   }
 }

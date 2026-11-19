@@ -486,3 +486,45 @@ ion-card.lesson-card {
     }
   }
 }
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin: 32px 0 24px 0;
+  width: 100%;
+  flex-wrap: nowrap; 
+
+  .page-info {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--ion-color-medium, #666);
+    white-space: nowrap; 
+    text-align: center;
+  }
+
+  ion-button {
+    --border-radius: 20px;
+    font-weight: 500;
+    font-size: 0.85rem; 
+    text-transform: none;
+    height: 34px;       
+    margin: 0;
+    --padding-start: 12px;
+    --padding-end: 12px;
+
+    &.button-outline {
+      --border-color: var(--ion-color-primary, #3880ff);
+      --color: var(--ion-color-primary, #3880ff);
+    }
+
+    &:disabled {
+      opacity: 0.4;
+    }
+
+    ion-icon {
+      font-size: 0.95rem;
+    }
+  }
+}

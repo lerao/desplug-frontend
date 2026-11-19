@@ -35,6 +35,7 @@ export class PlanoAulaPage implements OnInit {
     tag: string;
     desc: string;
     componentesCurriculares: string;
+    habilidadeExpandida?: boolean;
   }[] = [];
 
   constructor(
@@ -54,7 +55,7 @@ export class PlanoAulaPage implements OnInit {
       etapa_ensino: ['', Validators.required],
       anos_indicados: ['', Validators.required],
       duracao_estimada: ['', Validators.required],
-      componentes_curriculares: [''],
+      componentes_curriculares: ['', Validators.required],
       metodologia: ['', Validators.required],
       materiais_necessarios: ['', Validators.required],
       criterios_avaliacao: ['', Validators.required]
@@ -72,7 +73,8 @@ export class PlanoAulaPage implements OnInit {
           code: hab.codigo,
           tag: hab.eixoComputacao,
           desc: hab.descricao,
-          componentesCurriculares: hab.componenteCurricular
+          componentesCurriculares: hab.componenteCurricular,
+          habilidadeExpandida: false
         }));
       },
 
@@ -80,6 +82,13 @@ export class PlanoAulaPage implements OnInit {
         console.error('Erro ao carregar habilidades BNCC:', erro);
       }
     });
+  }
+
+  expandirHabilidade(id: number) {
+    const hab = this.bnccHab.find(h => h.id === id);
+    if (hab) {
+      hab.habilidadeExpandida = !hab.habilidadeExpandida;
+    }
   }
 
   marcarHabilidade(id: number, selecionada: boolean) {
@@ -276,7 +285,7 @@ export class PlanoAulaPage implements OnInit {
         camposValidacao = ['titulo', 'resumo'];
         break;
       case 2:
-        camposValidacao = ['tipo_atividade', 'etapa_ensino', 'anos_indicados', 'duracao_estimada'];
+        camposValidacao = ['tipo_atividade', 'etapa_ensino', 'anos_indicados', 'duracao_estimada', 'componentes_curriculares'];
         break;
       case 3:
         camposValidacao = ['metodologia', 'materiais_necessarios', 'criterios_avaliacao'];

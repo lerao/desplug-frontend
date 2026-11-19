@@ -1,7 +1,6 @@
-
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
-import { PlanoAulaService, PlanoAula } from '../services/plano-aula.service';
+import { PlanoAulaService, PlanoAula, PageResponse } from '../services/plano-aula.service';
 import { AuthService } from '../security/auth.service';
 import { AppDialogService } from '../shared/app-dialog/app-dialog.service';
 
@@ -27,6 +26,12 @@ export class HomePage implements OnInit {
   pesquisa = signal('');
   carregando = signal(false);
   mensagemErro = signal('');
+
+  // Paginação
+  paginaAtual = signal(0);
+  tamanhoPagina = signal(10);
+  totalPaginas = signal(0);
+  totalElementos = signal(0);
 
   mostrarMenuVisualizacao = false;
   planoSelecionado: PlanoAula | null = null;
@@ -77,15 +82,19 @@ export class HomePage implements OnInit {
   }
 
   // Carrega os planos públicos inicialmente
-  private carregarPlanos(): void {
+  private carregarPlanos(pagina: number = 0): void {
     this.carregando.set(true);
     this.mensagemErro.set('');
 
-    this.planoAulaService.getPlanos().subscribe({
-      next: (planosRetornados) => {
-        this.planosPublicos.set(planosRetornados);
-        this.planos.set(planosRetornados);
+    this.planoAulaService.getPlanos(pagina, this.tamanhoPagina()).subscribe({
+      next: (resposta: PageResponse<PlanoAula>) => {
+        this.planosPublicos.set(resposta.content);
+        this.planos.set(resposta.content);
         this.modoExibicao.set('todos');
+
+        this.paginaAtual.set(resposta.number);
+        this.totalPaginas.set(resposta.totalPages);
+        this.totalElementos.set(resposta.totalElements);
 
         this.carregando.set(false);
         this.mensagemErro.set('');
@@ -107,7 +116,7 @@ export class HomePage implements OnInit {
   }
 
   // Carrega a quantidade de planos do usuário
-  private carregarQtdPlanosUsuario(): void {
+  private carregarQtdPlanosUsuario(pagina: number = 0): void {
     const usuarioId = this.authService.sessaoAtual()?.usuarioId;
 
     if (!usuarioId) {
@@ -115,9 +124,9 @@ export class HomePage implements OnInit {
       return;
     }
 
-    this.planoAulaService.getPlanosPorAutor(usuarioId).subscribe({
-      next: (planosRetornados) => {
-        this.planosUsuario.set(planosRetornados);
+    this.planoAulaService.getPlanosPorAutor(usuarioId, pagina, this.tamanhoPagina()).subscribe({
+      next: (resposta: PageResponse<PlanoAula>) => {
+        this.planosUsuario.set(resposta.content);
       },
 
       error: (erro) => {
@@ -292,7 +301,7 @@ export class HomePage implements OnInit {
     return filtros;
   }
 
-  realizarBusca(): void {
+  realizarBusca(pagina: number = 0): void {
     const filtros = this.montarFiltros();
 
     // no modo Meus Planos, acrescenta o id do autor
@@ -321,13 +330,17 @@ export class HomePage implements OnInit {
     this.carregando.set(true);
     this.mensagemErro.set('');
 
-    this.planoAulaService.filtrarPlanos(filtros).subscribe({
-      next: (planosRetornados) => {
-        this.planos.set(planosRetornados);
+    this.planoAulaService.filtrarPlanos(filtros, pagina, this.tamanhoPagina()).subscribe({
+      next: (resposta: PageResponse<PlanoAula>) => {
+        this.planos.set(resposta.content);
 
         if (this.modoExibicao() === 'todos') {
-          this.planosPublicos.set(planosRetornados);
+          this.planosPublicos.set(resposta.content);
         }
+
+        this.paginaAtual.set(resposta.number);
+        this.totalPaginas.set(resposta.totalPages);
+        this.totalElementos.set(resposta.totalElements);
 
         this.carregando.set(false);
         this.mensagemErro.set('');
@@ -352,7 +365,7 @@ export class HomePage implements OnInit {
 
   aplicarFiltros(): void {
     this.abrirFiltro = false;
-    this.realizarBusca();
+    this.realizarBusca(0);
 
     document.querySelector('.library')?.scrollIntoView({
       behavior: 'smooth',
@@ -370,8 +383,7 @@ export class HomePage implements OnInit {
     this.filtroComponentesCurriculares = '';
     this.filtroIsGeradoIA = null;
     this.pesquisa.set('');
-
-    this.realizarBusca();
+    this.realizarBusca(0);
     this.fecharFiltros();
   }
 
@@ -381,5 +393,11 @@ export class HomePage implements OnInit {
 
   adaptar(_planoId: number): void {
     // Implementar posteriormente
+  }
+
+  mudarPagina(novaPagina: number): void {
+    if (novaPagina >= 0 && novaPagina < this.totalPaginas()) {
+      this.realizarBusca(novaPagina);
+    }
   }
 }

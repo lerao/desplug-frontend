@@ -51,8 +51,8 @@
           <p>Clique para enviar uma imagem</p>
           <span>JPG, PNG ou WebP</span>
         </div>
-        <input type="file" #fileInput (change)="onFileSelected($event)" 
-        accept="image/jpeg, image/png, image/webp" hidden>
+        <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/jpeg, image/png, image/webp"
+          hidden>
       </div>
     </div>
 
@@ -86,8 +86,8 @@
 
         <div class="input-grupo">
           <ion-label>Componente Curricular <span class="required">*</span></ion-label>
-          <ion-select formControlName="componente_curricular" fill="outline" placeholder="Selecionar componente..."
-            class="custom-input" [class.input-error]="camposInvalidos('componente_curricular')">
+          <ion-select formControlName="componentes_curriculares" fill="outline" placeholder="Selecionar componente..."
+            class="custom-input" [class.input-error]="camposInvalidos('componentes_curriculares')">
             <ion-select-option value="computacao">Computação</ion-select-option>
             <ion-select-option value="portugues">Língua Portuguesa</ion-select-option>
             <ion-select-option value="matematica">Matemática</ion-select-option>
@@ -103,7 +103,8 @@
             <ion-select-option value="filosofia">Filosofia</ion-select-option>
             <ion-select-option value="sociologia">Sociologia</ion-select-option>
           </ion-select>
-          <span class="error-msg" *ngIf="camposInvalidos('componente_curricular')">Selecione o componente curricular.</span>
+          <span class="error-msg" *ngIf="camposInvalidos('componentes_curriculares')">Selecione o componente
+            curricular.</span>
         </div>
 
         <div class="input-grupo">
@@ -115,8 +116,8 @@
 
         <div class="input-grupo">
           <ion-label>Duração Estimada <span class="required">*</span></ion-label>
-          <ion-input formControlName="duracao_estimada" fill="outline" placeholder="Ex.: 2 aulas de 50 min" class="custom-input"
-            [class.input-error]="camposInvalidos('duracao_estimada')"></ion-input>
+          <ion-input formControlName="duracao_estimada" fill="outline" placeholder="Ex.: 2 aulas de 50 min"
+            class="custom-input" [class.input-error]="camposInvalidos('duracao_estimada')"></ion-input>
           <span class="error-msg" *ngIf="camposInvalidos('duracao_estimada')">Informe a duração.</span>
         </div>
       </div>
@@ -160,17 +161,28 @@
       <div class="bncc-container">
         <p class="secao-desc mb-3">Selecione as habilidades relacionadas a este plano</p>
 
-        <div class="bncc-card" *ngFor="let hab of bnccHab">
-          <ion-checkbox labelPlacement="end" alignment="start" [checked]="habilidadesSelecionadas.includes(hab.id)"
-          (ionChange)="marcarHabilidade(hab.id, $event.detail.checked)">
-            <div class="bncc-content">
-              <div class="bncc-header">
-                <span class="bncc-code">{{ hab.code }}</span>
-                <span class="bncc-tag"> {{ hab.tag }}</span>
+        <div class="bncc-card" *ngFor="let hab of bnccHab" [class.is-expanded]="hab.habilidadeExpandida">
+          <div class="bncc-card-top">
+            <ion-checkbox labelPlacement="end" alignment="start" [checked]="habilidadesSelecionadas.includes(hab.id)"
+              (ionChange)="marcarHabilidade(hab.id, $event.detail.checked)">
+              <div class="bncc-content">
+                <div class="bncc-header">
+                  <span class="bncc-code">{{ hab.code }}</span>
+                  <span class="bncc-tag tag-blue">{{ hab.tag }}</span>
+                </div>
               </div>
-              <p class="bncc-desc">{{ hab.desc }}</p>
-            </div>
-          </ion-checkbox>
+            </ion-checkbox>
+
+            <ion-button fill="clear" size="small" class="btn-expandir" (click)="expandirHabilidade(hab.id)"
+              [title]="hab.habilidadeExpandida ? 'Recolher' : 'Ver mais'">
+              <ion-icon slot="icon-only"
+                [name]="hab.habilidadeExpandida ? 'chevron-up-outline' : 'chevron-down-outline'"></ion-icon>
+            </ion-button>
+          </div>
+
+          <div class="bncc-content-wrapper">
+            <p class="bncc-desc" [class.expanded]="hab.habilidadeExpandida">{{ hab.desc }}</p>
+          </div>
         </div>
       </div>
 

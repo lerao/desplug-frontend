@@ -243,7 +243,7 @@
 
       <input type="text" [(ngModel)]="pesquisa" (keyup.enter)="realizarBusca()"
         placeholder="Buscar por Título ou Código Habilidade BNCC..." class="search-input text-main" />
-        
+
       <button class="search-btn bg-primary text-white" type="button" (click)="realizarBusca()"
         aria-label="Buscar planos" title="Buscar">
         <ion-icon name="search-outline"></ion-icon>
@@ -264,8 +264,9 @@
         {{planosAula.length === 1 ? 'plano encontrado' : 'planos encontrados'}}
       </ion-badge>
 
-      <ion-select interface="popover" [(ngModel)]="filtroOrdenacao" (ionChange)="realizarBusca()" [interfaceOptions]="customPopoverOptions"
-        class="sort-select bg-white border-card text-main" placeholder="Ordenar por">
+      <ion-select interface="popover" [(ngModel)]="filtroOrdenacao" (ionChange)="realizarBusca()"
+        [interfaceOptions]="customPopoverOptions" class="sort-select bg-white border-card text-main"
+        placeholder="Ordenar por">
         <!-- removido para fins de simplicidade no código - aguardando retorno do professor -->
         <!-- <ion-select-option value="relevantes">Mais relevantes</ion-select-option> -->
         <ion-select-option value="MAIS_RECENTES">Mais recentes</ion-select-option>
@@ -323,6 +324,21 @@
           </footer>
         </ion-card-content>
       </ion-card>
+    </div>
+
+    <div class="pagination-container" *ngIf="totalPaginas > 1">
+      <ion-button class="page-nav-btn" fill="outline" size="small" [disabled]="paginaAtual === 0" (click)="mudarPagina(paginaAtual - 1)">
+        Anterior
+      </ion-button>
+
+      <span class="page-info ion-margin-horizontal">
+        Página {{ paginaAtual + 1 }} de {{ totalPaginas }}
+      </span>
+
+      <ion-button class="page-nav-btn" fill="outline" size="small" [disabled]="paginaAtual >= totalPaginas - 1"
+        (click)="mudarPagina(paginaAtual + 1)">
+        Próxima
+      </ion-button>
     </div>
 
     <ng-template #nenhumResultadoFiltro>
