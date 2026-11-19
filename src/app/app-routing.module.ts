@@ -56,8 +56,8 @@ const routes: Routes = [
   },
   {
     path: 'perfil',
-    canActivate: [authGuard],
-    loadChildren: () => import('./perfil/perfil.module').then(m => m.PerfilPageModule)
+    redirectTo: 'perfil-professor',
+    pathMatch: 'full'
   },
   {
     path: 'home',
