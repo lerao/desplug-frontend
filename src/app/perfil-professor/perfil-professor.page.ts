@@ -220,6 +220,10 @@ export class PerfilProfessorPage implements OnInit {
         }
         if (err.status === 0) {
           this.errorMessage.set('Não foi possível conectar ao servidor.');
+        } else if (err.status === 401 || err.status === 403) {
+          this.errorMessage.set('Sua sessão não foi autorizada. Entre novamente e tente acessar o perfil.');
+        } else if (err.status === 404) {
+          this.errorMessage.set('A rota de perfil não foi encontrada no servidor. Verifique a API.');
         } else {
           this.errorMessage.set('Não foi possível carregar os dados do perfil.');
         }

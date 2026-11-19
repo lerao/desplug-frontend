@@ -66,7 +66,7 @@
     <main class="profile-body">
       <div *ngIf="usingSessionFallback()" class="sync-notice" role="status">
         <ion-icon name="cloud-offline-outline"></ion-icon>
-        <p>Não foi possível sincronizar com o servidor. Exibindo os dados salvos nesta sessão; vínculo e homologação não puderam ser confirmados.</p>
+        <p>{{ errorMessage() }} Exibindo os dados salvos nesta sessão; vínculo e homologação não puderam ser confirmados.</p>
       </div>
       <section class="info-card">
         <div class="card-heading">
