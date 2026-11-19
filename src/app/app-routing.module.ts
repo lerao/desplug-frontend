@@ -55,11 +55,6 @@ const routes: Routes = [
     loadChildren: () => import('./perfil-professor/perfil-professor.module').then(m => m.PerfilProfessorPageModule)
   },
   {
-    path: 'perfil',
-    redirectTo: 'perfil-professor',
-    pathMatch: 'full'
-  },
-  {
     path: 'home',
     loadChildren: () => import('./home/home.module').then( m => m.HomePageModule)
   }
