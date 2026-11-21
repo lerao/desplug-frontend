@@ -126,50 +126,44 @@
         <span class="error-message" *ngIf="secretaria.invalid && secretaria.touched">A seleção da secretaria é obrigatória.</span>
       </div>
 
-      <!-- CAMPO: ESTADO / UF (Apenas PE e PB) -->
       <div class="input-group">
-        <label class="custom-label">ESTADO (UF) *</label>
-        <div class="custom-input-box" [class.input-error]="uf.invalid && uf.touched">
-          <ion-icon name="map-outline" class="input-icon-start"></ion-icon>
-          <ion-select 
-            name="uf"
-            placeholder="Selecione o estado"
-            [(ngModel)]="usuario.uf"
-            #uf="ngModel"
-            (ionChange)="buscarMunicipiosPorUf()"
-            class="custom-input"
-            okText="Selecionar"
-            cancelText="Cancelar"
-            required>
-            <ion-select-option *ngFor="let estado of listaEstados" [value]="estado.sigla">
-              {{ estado.nome }} ({{ estado.sigla }})
-            </ion-select-option>
-          </ion-select>
+        <label class="custom-label">CEP *</label>
+        <div class="custom-input-box" [class.input-error]="cepInvalido() || (cep.invalid && cep.touched)">
+          <ion-icon name="mail-outline" class="input-icon-start"></ion-icon>
+          <ion-input
+            type="text" inputmode="numeric" maxlength="9" name="cep" placeholder="Ex.: 56812-666" [(ngModel)]="usuario.cep"
+            #cep="ngModel" (ionInput)="digitarCep()" (ionBlur)="buscarCep()" class="custom-input" required>
+          </ion-input>
+          <ion-spinner *ngIf="buscandoCep()" slot="end" name="crescent"></ion-spinner>
         </div>
-        <span class="error-message" *ngIf="uf.invalid && uf.touched">A seleção do estado é obrigatória.</span>
+        <span class="helper-text" *ngIf="!buscandoCep() && !cepInvalido()">Digite o CEP para preencher cidade e estado automaticamente.</span>
+        <span class="error-message" *ngIf="cep.invalid && cep.touched && !cepInvalido()">O CEP é obrigatório.</span>
+        <span class="error-message" *ngIf="cepInvalido()">CEP inválido ou não encontrado.</span>
       </div>
 
-      <!-- CAMPO: MUNICÍPIO (Filtrado estritamente pelas opções PE/PB) -->
       <div class="input-group">
-        <label class="custom-label">MUNICÍPIO *</label>
-        <div class="custom-input-box" [class.input-error]="municipio.invalid && municipio.touched">
+        <label class="custom-label">CIDADE *</label>
+        <div class="custom-input-box" [class.input-error]="cidade.invalid && cidade.touched">
           <ion-icon name="location-outline" class="input-icon-start"></ion-icon>
-          <ion-select 
-            name="municipio"
-            placeholder="Selecione a cidade"
-            [(ngModel)]="usuario.municipio"
-            #municipio="ngModel"
-            [disabled]="!usuario.uf"
-            class="custom-input"
-            okText="Selecionar"
-            cancelText="Cancelar"
-            required>
-            <ion-select-option *ngFor="let cidade of listaMunicipios" [value]="cidade">
-              {{ cidade }}
-            </ion-select-option>
-          </ion-select>
+          <ion-input
+            type="text" name="cidade" placeholder="Preenchida pelo CEP" [(ngModel)]="usuario.cidade" 
+            #cidade="ngModel" [readonly]="true" class="custom-input" required>
+          </ion-input>
         </div>
-        <span class="error-message" *ngIf="municipio.invalid && municipio.touched">A seleção da cidade é obrigatória.</span>
+        <span class="error-message" *ngIf="cidade.invalid && cidade.touched">Informe um CEP válido para preencher a cidade.</span>
+      </div>
+
+      <div class="input-group">
+        <label class="custom-label">ESTADO *</label>
+        <div class="custom-input-box" [class.input-error]="cepInvalido() && !usuario.estado">
+          <ion-icon name="location-outline" class="input-icon-start"></ion-icon>
+          <ion-input
+            type="text" name="estado" placeholder="Preenchido pelo CEP"
+            [value]="usuario.estado ? (usuario.uf ? usuario.estado + ' (' + usuario.uf + ')' : usuario.estado) : ''"
+            [readonly]="true" class="custom-input">
+          </ion-input>
+        </div>
+        <span class="error-message" *ngIf="cepInvalido() && !usuario.estado">Informe um CEP válido para preencher o estado.</span>
       </div>
 
       <!-- Alerta Informativo -->
@@ -184,11 +178,9 @@
       <ion-button 
         type="submit" 
         expand="block"
-        [disabled]="cadastrando"
+        [disabled]="cadastrando()"
         class="btn-orange">
-        {{ cadastrando ? 'Cadastrando...' : 'Criar minha conta' }}
-
-        <!-- Criar minha conta -->
+        {{ cadastrando() ? 'Cadastrando...' : 'Criar minha conta' }}
       </ion-button>
       
       <div class="login-footer">
