@@ -13,262 +13,277 @@ export class PerfilProfessorPage implements OnInit {
   private perfilService = inject(PerfilService);
   private authService = inject(AuthService);
 
-  private initialSnapshot = '';
+  private resumoInicial = '';
 
-  readonly name = signal('');
+  readonly nome = signal('');
   readonly email = signal('');
-  readonly photo = signal<string | null>(null);
-  readonly role = signal<'professor' | 'admin'>('professor');
-  readonly errors = signal<PerfilErros>({});
-  readonly saved = signal(false);
-  readonly editing = signal(false);
-  readonly loading = signal(false);
-  readonly saving = signal(false);
-  readonly errorMessage = signal('');
-  readonly usingSessionFallback = signal(false);
-  readonly currentPassword = signal('');
-  readonly newPassword = signal('');
-  readonly confirmPassword = signal('');
-  readonly passwordSaving = signal(false);
-  readonly passwordError = signal('');
-  readonly passwordSaved = signal(false);
+  readonly secretaria = signal('');
+  readonly cep = signal('');
+  readonly cidade = signal('');
+  readonly estado = signal('');
+  readonly uf = signal('');
+  readonly foto = signal<string | null>(null);
+  readonly perfil = signal<'professor' | 'admin'>('professor');
+  readonly erros = signal<PerfilErros>({});
+  readonly salvo = signal(false);
+  readonly editando = signal(false);
+  readonly carregando = signal(false);
+  readonly salvando = signal(false);
+  readonly mensagemErro = signal('');
+  readonly usandoDadosDaSessao = signal(false);
+  readonly senhaAtual = signal('');
+  readonly novaSenha = signal('');
+  readonly confirmarSenha = signal('');
+  readonly salvandoSenha = signal(false);
+  readonly erroSenha = signal('');
+  readonly senhaAtualizada = signal(false);
 
-  readonly isAdmin = computed(() => this.role() === 'admin');
-  readonly roleLabel = computed(() => this.isAdmin() ? 'Administrador' : 'Professor');
-  readonly dirty = computed(() => this.currentSnapshot() !== this.initialSnapshot);
+  readonly ehAdministrador = computed(() => this.perfil() === 'admin');
+  readonly rotuloPerfil = computed(() => this.ehAdministrador() ? 'Administrador' : 'Professor');
+  readonly temAlteracoes = computed(() => this.resumoAtual() !== this.resumoInicial);
 
   ngOnInit(): void {
     this.carregarPerfil();
   }
 
-  previewInitials(): string {
-    const initials = this.name()
+  previsualizarIniciais(): string {
+    const iniciais = this.nome()
       .trim()
       .split(/\s+/)
       .filter(Boolean)
       .slice(0, 2)
-      .map((part) => part.charAt(0).toLocaleUpperCase('pt-BR'))
+      .map((parte) => parte.charAt(0).toLocaleUpperCase('pt-BR'))
       .join('');
 
-    return initials || 'US';
+    return iniciais || 'US';
   }
 
-  onFile(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) return;
+  aoSelecionarArquivo(evento: Event): void {
+    const entrada = evento.target as HTMLInputElement;
+    const arquivo = entrada.files?.[0];
+    if (!arquivo) return;
 
-    if (!file.type.startsWith('image/')) {
-      this.errors.update((errors) => ({ ...errors, photo: 'Selecione um arquivo de imagem válido.' }));
-      input.value = '';
+    if (!arquivo.type.startsWith('image/')) {
+      this.erros.update((erros) => ({ ...erros, photo: 'Selecione um arquivo de imagem válido.' }));
+      entrada.value = '';
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      this.errors.update((errors) => ({ ...errors, photo: 'A imagem deve ter no máximo 5 MB.' }));
-      input.value = '';
+    if (arquivo.size > 5 * 1024 * 1024) {
+      this.erros.update((erros) => ({ ...erros, photo: 'A imagem deve ter no máximo 5 MB.' }));
+      entrada.value = '';
       return;
     }
 
-    this.saving.set(true);
-    this.clearError('photo');
+    this.salvando.set(true);
+    this.limparErro('photo');
 
-    this.perfilService.uploadFoto(file).subscribe({
-      next: (response) => {
-        this.photo.set(response.photo);
-        this.authService.atualizarPerfilLocal({ foto: response.photo });
-        this.initialSnapshot = this.currentSnapshot();
-        this.saving.set(false);
-        this.saved.set(true);
+    this.perfilService.uploadFoto(arquivo).subscribe({
+      next: (resposta) => {
+        this.foto.set(resposta.photo);
+        this.authService.atualizarPerfilLocal({ foto: resposta.photo });
+        this.resumoInicial = this.resumoAtual();
+        this.salvando.set(false);
+        this.salvo.set(true);
       },
       error: () => {
-        this.errors.update((errors) => ({ ...errors, photo: 'Não foi possível enviar a foto. Tente novamente.' }));
-        this.saving.set(false);
+        this.erros.update((erros) => ({ ...erros, photo: 'Não foi possível enviar a foto. Tente novamente.' }));
+        this.salvando.set(false);
       },
     });
 
-    input.value = '';
+    entrada.value = '';
   }
 
-  removePhoto(): void {
-    this.saving.set(true);
-    this.clearError('photo');
+  removerFoto(): void {
+    this.salvando.set(true);
+    this.limparErro('photo');
 
     this.perfilService.removerFoto().subscribe({
       next: () => {
-        this.photo.set(null);
+        this.foto.set(null);
         this.authService.atualizarPerfilLocal({ foto: null });
-        this.initialSnapshot = this.currentSnapshot();
-        this.saving.set(false);
-        this.saved.set(true);
+        this.resumoInicial = this.resumoAtual();
+        this.salvando.set(false);
+        this.salvo.set(true);
       },
       error: () => {
-        this.errors.update((errors) => ({ ...errors, photo: 'Não foi possível remover a foto. Tente novamente.' }));
-        this.saving.set(false);
+        this.erros.update((erros) => ({ ...erros, photo: 'Não foi possível remover a foto. Tente novamente.' }));
+        this.salvando.set(false);
       },
     });
   }
 
-  save(): void {
-    const errors = this.validate();
-    this.errors.set(errors);
-    if (Object.keys(errors).length > 0) return;
+  salvar(): void {
+    const erros = this.validar();
+    this.erros.set(erros);
+    if (Object.keys(erros).length > 0) return;
 
-    this.saving.set(true);
-    this.errorMessage.set('');
+    this.salvando.set(true);
+    this.mensagemErro.set('');
 
-    const dados = { name: this.name().trim(), email: this.email().trim() };
+    const dados = { name: this.nome().trim(), email: this.email().trim() };
 
     this.perfilService.atualizarPerfil(dados).subscribe({
       next: (perfil) => {
-        this.name.set(perfil.name);
+        this.nome.set(perfil.name);
         this.email.set(perfil.email);
         this.authService.atualizarPerfilLocal({ nome: perfil.name, email: perfil.email });
-        this.initialSnapshot = this.currentSnapshot();
-        this.saving.set(false);
-        this.editing.set(false);
-        this.saved.set(true);
+        this.resumoInicial = this.resumoAtual();
+        this.salvando.set(false);
+        this.editando.set(false);
+        this.salvo.set(true);
       },
-      error: (err) => {
-        this.saving.set(false);
-        if (err.status === 409) {
-          this.errors.update((errors) => ({ ...errors, email: 'Este e-mail já está em uso.' }));
-        } else if (err.status === 0) {
-          this.errorMessage.set('Não foi possível conectar ao servidor.');
+      error: (erro) => {
+        this.salvando.set(false);
+        if (erro.status === 409) {
+          this.erros.update((erros) => ({ ...erros, email: 'Este e-mail já está em uso.' }));
+        } else if (erro.status === 0) {
+          this.mensagemErro.set('Não foi possível conectar ao servidor.');
         } else {
-          this.errorMessage.set('Ocorreu um erro ao salvar. Tente novamente.');
+          this.mensagemErro.set('Ocorreu um erro ao salvar. Tente novamente.');
         }
       },
     });
   }
 
-  changePassword(): void {
-    this.passwordError.set('');
-    this.passwordSaved.set(false);
-    const current = this.currentPassword();
-    const next = this.newPassword();
+  alterarSenha(): void {
+    this.erroSenha.set('');
+    this.senhaAtualizada.set(false);
+    const atual = this.senhaAtual();
+    const nova = this.novaSenha();
 
-    if (!current || !next || !this.confirmPassword()) {
-      this.passwordError.set('Preencha todos os campos de senha.');
+    if (!atual || !nova || !this.confirmarSenha()) {
+      this.erroSenha.set('Preencha todos os campos de senha.');
       return;
     }
-    if (next.length < 8) {
-      this.passwordError.set('A nova senha deve ter pelo menos 8 caracteres.');
+    if (nova.length < 8) {
+      this.erroSenha.set('A nova senha deve ter pelo menos 8 caracteres.');
       return;
     }
-    if (next !== this.confirmPassword()) {
-      this.passwordError.set('A confirmação não corresponde à nova senha.');
+    if (nova !== this.confirmarSenha()) {
+      this.erroSenha.set('A confirmação não corresponde à nova senha.');
       return;
     }
-    if (current === next) {
-      this.passwordError.set('Escolha uma senha diferente da atual.');
+    if (atual === nova) {
+      this.erroSenha.set('Escolha uma senha diferente da atual.');
       return;
     }
 
-    this.passwordSaving.set(true);
-    this.perfilService.atualizarSenha(current, next).subscribe({
+    this.salvandoSenha.set(true);
+    this.perfilService.atualizarSenha(atual, nova).subscribe({
       next: () => {
-        this.currentPassword.set('');
-        this.newPassword.set('');
-        this.confirmPassword.set('');
-        this.passwordSaving.set(false);
-        this.passwordSaved.set(true);
+        this.senhaAtual.set('');
+        this.novaSenha.set('');
+        this.confirmarSenha.set('');
+        this.salvandoSenha.set(false);
+        this.senhaAtualizada.set(true);
       },
-      error: (err) => {
-        this.passwordSaving.set(false);
-        if (err.status === 400 || err.status === 401) {
-          this.passwordError.set('A senha atual está incorreta ou não foi aceita.');
-        } else if (err.status === 0) {
-          this.passwordError.set('Não foi possível conectar ao servidor. Tente novamente.');
+      error: (erro) => {
+        this.salvandoSenha.set(false);
+        if (erro.status === 400 || erro.status === 401) {
+          this.erroSenha.set('A senha atual está incorreta ou não foi aceita.');
+        } else if (erro.status === 0) {
+          this.erroSenha.set('Não foi possível conectar ao servidor. Tente novamente.');
         } else {
-          this.passwordError.set('Não foi possível alterar a senha. Tente novamente.');
+          this.erroSenha.set('Não foi possível alterar a senha. Tente novamente.');
         }
       },
     });
   }
 
-  discard(): void {
+  descartarAlteracoes(): void {
     this.carregarPerfil();
   }
 
   private carregarPerfil(): void {
-    this.loading.set(true);
-    this.errorMessage.set('');
-    this.usingSessionFallback.set(false);
+    this.carregando.set(true);
+    this.mensagemErro.set('');
+    this.usandoDadosDaSessao.set(false);
+    this.secretaria.set('');
+    this.cep.set('');
+    this.cidade.set('');
+    this.estado.set('');
+    this.uf.set('');
 
     this.perfilService.getPerfil().subscribe({
       next: (perfil) => {
-        this.name.set(perfil.name);
+        this.nome.set(perfil.name);
         this.email.set(perfil.email);
-        this.photo.set(perfil.photo);
-        this.role.set(perfil.role);
-        this.errors.set({});
-        this.saved.set(false);
-        this.initialSnapshot = this.currentSnapshot();
-        this.loading.set(false);
+        this.secretaria.set(perfil.secretaria?.trim() || '');
+        this.cep.set(perfil.cep?.trim() || '');
+        this.cidade.set(perfil.cidade?.trim() || '');
+        this.estado.set(perfil.estado?.trim() || '');
+        this.uf.set(perfil.uf?.trim() || '');
+        this.foto.set(perfil.photo);
+        this.perfil.set(perfil.role);
+        this.erros.set({});
+        this.salvo.set(false);
+        this.resumoInicial = this.resumoAtual();
+        this.carregando.set(false);
       },
-      error: (err) => {
-        this.loading.set(false);
-        const session = this.authService.sessaoAtual();
-        if (session) {
-          this.name.set(session.nome);
-          this.email.set(session.email);
-          this.photo.set(session.foto ?? null);
-          this.role.set(session.perfil === 'ROLE_ADMIN' ? 'admin' : 'professor');
-          this.usingSessionFallback.set(true);
-          this.initialSnapshot = this.currentSnapshot();
+      error: (erro) => {
+        this.carregando.set(false);
+        const sessao = this.authService.sessaoAtual();
+        if (sessao) {
+          this.nome.set(sessao.nome);
+          this.email.set(sessao.email);
+          this.foto.set(sessao.foto ?? null);
+          this.perfil.set(sessao.perfil === 'ROLE_ADMIN' ? 'admin' : 'professor');
+          this.usandoDadosDaSessao.set(true);
+          this.resumoInicial = this.resumoAtual();
         }
-        if (err.status === 0) {
-          this.errorMessage.set('Não foi possível conectar ao servidor.');
-        } else if (err.status === 401 || err.status === 403) {
-          this.errorMessage.set('Sua sessão não foi autorizada. Entre novamente e tente acessar o perfil.');
-        } else if (err.status === 404) {
-          this.errorMessage.set('A rota de perfil não foi encontrada no servidor. Verifique a API.');
+        if (erro.status === 0) {
+          this.mensagemErro.set('Não foi possível conectar ao servidor.');
+        } else if (erro.status === 401 || erro.status === 403) {
+          this.mensagemErro.set('Sua sessão não foi autorizada. Entre novamente e tente acessar o perfil.');
+        } else if (erro.status === 404) {
+          this.mensagemErro.set('A rota de perfil não foi encontrada no servidor. Verifique a API.');
         } else {
-          this.errorMessage.set('Não foi possível carregar os dados do perfil.');
+          this.mensagemErro.set('Não foi possível carregar os dados do perfil.');
         }
       },
     });
   }
 
-  private validate(): PerfilErros {
-    const errors: PerfilErros = {};
-    const name = this.name().trim();
+  private validar(): PerfilErros {
+    const erros: PerfilErros = {};
+    const nome = this.nome().trim();
     const email = this.email().trim();
 
-    if (!name) {
-      errors.name = 'Informe seu nome completo.';
+    if (!nome) {
+      erros.name = 'Informe seu nome completo.';
     }
 
     if (!email) {
-      errors.email = 'Informe seu e-mail.';
+      erros.email = 'Informe seu e-mail.';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      errors.email = 'Informe um endereço de e-mail válido.';
-    } else if (!this.isAdmin() && !email.toLocaleLowerCase('pt-BR').endsWith('.br')) {
-      errors.email = 'O e-mail deve terminar com .br.';
+      erros.email = 'Informe um endereço de e-mail válido.';
+    } else if (!this.ehAdministrador() && !email.toLocaleLowerCase('pt-BR').endsWith('.br')) {
+      erros.email = 'O e-mail deve terminar com .br.';
     }
 
-    return errors;
+    return erros;
   }
 
-  private getCurrentProfile(): PerfilDados {
+  private obterPerfilAtual(): PerfilDados {
     return {
-      name: this.name().trim(),
+      name: this.nome().trim(),
       email: this.email().trim(),
-      photo: this.photo(),
-      role: this.role(),
+      photo: this.foto(),
+      role: this.perfil(),
     };
   }
 
-  private currentSnapshot(): string {
-    return JSON.stringify(this.getCurrentProfile());
+  private resumoAtual(): string {
+    return JSON.stringify(this.obterPerfilAtual());
   }
 
-  private clearError(field: keyof PerfilErros): void {
-    this.errors.update((errors) => {
-      const next = { ...errors };
-      delete next[field];
-      return next;
+  private limparErro(campo: keyof PerfilErros): void {
+    this.erros.update((erros) => {
+      const proximo = { ...erros };
+      delete proximo[campo];
+      return proximo;
     });
   }
 }
