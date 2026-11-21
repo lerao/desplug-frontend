@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
-import { AlertController } from '@ionic/angular';
+import { Component, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService, CadastroRequest } from '../security/auth.service';
+import { Localidade, LocalidadeService } from '../services/localidade.service';
+import { AppDialogService } from '../shared/app-dialog/app-dialog.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { finalize } from 'rxjs';
 
@@ -19,45 +20,110 @@ export class CadastroPage implements OnInit {
     senha: '',
     confirmarSenha: '',
     secretaria: '',
-    uf: '',          // Armazena a sigla do estado selecionado (PE ou PB)
-    municipio: ''    // Armazena o nome do município selecionado
+    cep: '',
+    cidade: '',
+    estado: '',
+    uf: ''
   };
 
-  cadastrando: boolean = false;
-
-  // Lista fixa contendo estritamente Pernambuco e Paraíba
-  listaEstados = [
-    { sigla: 'PE', nome: 'Pernambuco' },
-    { sigla: 'PB', nome: 'Paraíba' }
-  ];
-
-  listaMunicipios: string[] = [];
+  cadastrando = signal(false);
+  buscandoCep = signal(false);
+  cepInvalido = signal(false);
+  private ultimoCepConsultado = '';
 
   exibirSenha1: boolean = false;
   exibirSenha2: boolean = false;
 
-  constructor(private alertController: AlertController, private authService: AuthService, private router: Router) { }
+  constructor(
+    private dialogService: AppDialogService,
+    private authService: AuthService,
+    private localidadeService: LocalidadeService,
+    private router: Router
+  ) { }
 
   ngOnInit() { }
 
-  // Filtra as cidades de forma estrita dependendo da UF selecionada
-  buscarMunicipiosPorUf() {
-    this.usuario.municipio = '';
-    this.listaMunicipios = [];
-
-    if (this.usuario.uf === 'PE') {
-      this.listaMunicipios = [
-        'Afogados da Ingazeira',
-        'Recife',
-        'Caruaru'
-      ];
-    } else if (this.usuario.uf === 'PB') {
-      this.listaMunicipios = [
-        'Água Branca',
-        'João Pessoa',
-        'Campina Grande'
-      ];
+  private formatarCep(valor: string): string {
+    const digitos = (valor || '').replace(/\D/g, '').slice(0, 8);
+    if (digitos.length <= 5) {
+      return digitos;
     }
+    return `${digitos.slice(0, 5)}-${digitos.slice(5)}`;
+  }
+
+  private limparLocalidade() {
+    this.usuario.cidade = '';
+    this.usuario.estado = '';
+    this.usuario.uf = '';
+    this.ultimoCepConsultado = '';
+  }
+
+  digitarCep() {
+    const cepFormatado = this.formatarCep(this.usuario.cep);
+    this.usuario.cep = cepFormatado;
+
+    const cepLimpo = cepFormatado.replace(/\D/g, '');
+    this.cepInvalido.set(false);
+
+    if (cepLimpo.length < 8) {
+      this.limparLocalidade();
+      return;
+    }
+
+    if (cepLimpo.length === 8 && cepLimpo !== this.ultimoCepConsultado) {
+      this.buscarCep(cepLimpo);
+    }
+  }
+
+  buscarCep(cepInformado?: string) {
+    const cepFormatado = this.formatarCep(cepInformado ?? this.usuario.cep);
+    this.usuario.cep = cepFormatado;
+
+    const cepLimpo = cepFormatado.replace(/\D/g, '');
+
+    if (cepLimpo.length !== 8) {
+      this.limparLocalidade();
+      if (cepLimpo.length > 0) {
+        this.cepInvalido.set(true);
+      }
+      return;
+    }
+
+    if (this.buscandoCep() || (cepLimpo === this.ultimoCepConsultado && !!this.usuario.cidade)) {
+      return;
+    }
+
+    this.buscandoCep.set(true);
+    this.cepInvalido.set(false);
+
+    this.localidadeService.buscarPorCep(cepLimpo)
+      .pipe(
+        finalize(() => {
+          this.buscandoCep.set(false);
+        })
+      )
+      .subscribe({
+        next: (localidade: Localidade) => {
+          this.ultimoCepConsultado = cepLimpo;
+          this.usuario.cep = this.formatarCep(localidade.cep || cepLimpo);
+          this.usuario.cidade = localidade.cidade;
+          this.usuario.estado = localidade.estado;
+          this.usuario.uf = localidade.uf;
+          this.cepInvalido.set(false);
+        },
+        error: (erro: HttpErrorResponse) => {
+          this.limparLocalidade();
+          this.cepInvalido.set(true);
+
+          if (erro.status === 404) {
+            void this.exibirErroValidacao('CEP não encontrado. Verifique e tente novamente.');
+          } else if (erro.status === 0) {
+            void this.exibirErroValidacao('Não foi possível conectar ao servidor para consultar o CEP.');
+          } else {
+            void this.exibirErroValidacao('Não foi possível consultar os dados do CEP.');
+          }
+        }
+      });
   }
 
   senhasConferem(): boolean {
@@ -67,7 +133,7 @@ export class CadastroPage implements OnInit {
 
   validarSenhaForte(): boolean {
     if (!this.usuario.senha) return false;
-    
+
     const senhaLimpa = this.usuario.senha.trim();
     const temLetra = /[a-zA-Z]/.test(senhaLimpa);
     const temNumero = /[0-9]/.test(senhaLimpa);
@@ -75,74 +141,63 @@ export class CadastroPage implements OnInit {
   }
 
   async exibirErroValidacao(mensagem: string) {
-    const alert = await this.alertController.create({
-      header: 'Atenção',
-      message: mensagem,
-      buttons: ['Entendido']
-    });
-    await alert.present();
+    await this.dialogService.alert(mensagem, 'Atenção');
   }
 
-  submeterCadastro(form: any) {
+  async submeterCadastro(form: any) {
+    const cepLimpo = (this.usuario.cep || '').replace(/\D/g, '');
+
     if (!this.usuario.nome || this.usuario.nome.trim() === '') {
-      this.exibirErroValidacao('Por favor, digite seu nome completo.');
+      await this.exibirErroValidacao('Por favor, digite seu nome completo.');
       return;
     }
     if (!this.usuario.email || form.controls['email']?.invalid) {
-      this.exibirErroValidacao('Por favor, insira um e-mail válido.');
+      await this.exibirErroValidacao('Por favor, insira um e-mail válido.');
       return;
     }
     if (!this.validarSenhaForte()) {
-      this.exibirErroValidacao('A senha deve ter no mínimo 8 caracteres, contendo letras e números.');
+      await this.exibirErroValidacao('A senha deve ter no mínimo 8 caracteres, contendo letras e números.');
       return;
     }
     if (!this.senhasConferem()) {
-      this.exibirErroValidacao('As duas senhas informadas não são iguais.');
+      await this.exibirErroValidacao('As duas senhas informadas não são iguais.');
       return;
     }
     if (!this.usuario.secretaria) {
-      this.exibirErroValidacao('Por favor, selecione a sua Secretaria de Educação.');
+      await this.exibirErroValidacao('Por favor, selecione a sua Secretaria de Educação.');
       return;
     }
-    if (!this.usuario.uf) {
-      this.exibirErroValidacao('Por favor, selecione o seu Estado (UF).');
-      return;
-    }
-    if (!this.usuario.municipio) {
-      this.exibirErroValidacao('Por favor, selecione o seu Município.');
+    if (cepLimpo.length !== 8 || !this.usuario.cidade || !this.usuario.uf) {
+      await this.exibirErroValidacao('Por favor, informe um CEP válido para preencher a cidade e o estado.');
       return;
     }
 
+    if (this.cadastrando()) return;
 
-    if (this.cadastrando) return;
+    this.cadastrando.set(true);
 
-    this.cadastrando = true;
-
-    const dadosCadastro : CadastroRequest = {
+    const dadosCadastro: CadastroRequest = {
       nome: this.usuario.nome.trim(),
       email: this.usuario.email.trim().toLowerCase(),
       senha: this.usuario.senha,
-       perfisUsuario: [
-    {
-      perfil: 'ROLE_PROFESSOR_PENDING'
-    }
-  ]
+      perfisUsuario: [
+        {
+          perfil: 'ROLE_PROFESSOR_PENDING'
+        }
+      ]
     };
 
-    // Enviando dados para a API
     this.authService.cadastrarUsuario(dadosCadastro)
       .pipe(
         finalize(() => {
-          this.cadastrando = false;
+          this.cadastrando.set(false);
         })
       )
       .subscribe({
-
-        next: (resposta) => {
+        next: () => {
           console.log('Cadastro realizado com sucesso!');
-          this.exibirSucesso();
+          void this.exibirSucesso();
         },
-
         error: (erro: HttpErrorResponse) => {
           console.error('Erro ao cadastrar usuário:', erro);
 
@@ -160,22 +215,18 @@ export class CadastroPage implements OnInit {
             mensagem = 'Ocorreu um erro interno no servidor.';
           }
 
-          this.exibirErroValidacao(mensagem);
+          void this.exibirErroValidacao(mensagem);
         }
       });
   }
 
   async exibirSucesso() {
-    const alert = await this.alertController.create({
-      header: 'Cadastro Realizado!',
-      subHeader: 'Seja bem-vindo(a)',
-      message: 'Seu perfil foi criado com sucesso e passará por homologação pela Secretaria de Educação.',
-      buttons: ['OK'],
-      backdropDismiss: false
-    });
+    await this.dialogService.alert(
+      'Seu perfil foi criado com sucesso e passará por homologação pela Secretaria de Educação.',
+      'Cadastro Realizado!'
+    );
 
-    await alert.present();
-    await alert.onDidDismiss();
-    await this.router.navigateByUrl('/login', { replaceUrl: true })
+    await new Promise(resolve => setTimeout(resolve, 800));
+    await this.router.navigateByUrl('/login', { replaceUrl: true });
   }
 }
