@@ -43,6 +43,41 @@ export class CadastroPage implements OnInit {
 
   ngOnInit() { }
 
+  secretariaError = false;
+
+  readonly opcoesSecretaria = [
+    { value: 'estadual', label: 'Secretaria Estadual de Educação' },
+    { value: 'municipal', label: 'Secretaria Municipal de Educação' }
+  ];
+
+  obterLabelSecretaria(): string {
+    const encontrada = this.opcoesSecretaria.find(o => o.value === this.usuario.secretaria);
+    return encontrada ? encontrada.label : 'Selecione sua secretaria';
+  }
+
+  async abrirSelecaoSecretaria(): Promise<void> {
+    const resultado = await this.dialogService.confirm({
+      title: 'Secretaria de Educação',
+      message: 'Escolha a secretaria vinculada ao seu cadastro:',
+      select: {
+        name: 'secretaria',
+        value: this.usuario.secretaria,
+        options: this.opcoesSecretaria
+      },
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        { text: 'Selecionar', role: 'confirm' }
+      ]
+    });
+
+    if (resultado.role === 'confirm' && resultado.data?.['secretaria']) {
+      this.usuario.secretaria = resultado.data['secretaria'];
+      this.secretariaError = false;
+    } else if (resultado.role === 'confirm' && !resultado.data?.['secretaria']) {
+      this.secretariaError = true;
+    }
+  }
+
   private formatarCep(valor: string): string {
     const digitos = (valor || '').replace(/\D/g, '').slice(0, 8);
     if (digitos.length <= 5) {
@@ -164,6 +199,7 @@ export class CadastroPage implements OnInit {
       return;
     }
     if (!this.usuario.secretaria) {
+      this.secretariaError = true;
       await this.exibirErroValidacao('Por favor, selecione a sua Secretaria de Educação.');
       return;
     }

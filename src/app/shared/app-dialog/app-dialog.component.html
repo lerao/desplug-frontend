@@ -1,4 +1,10 @@
-<section class="dialog-card" [class.alert-dialog]="autoClose" role="dialog" aria-modal="true" [attr.aria-label]="title">
+<section
+  class="dialog-card"
+  [class.alert-dialog]="autoClose"
+  [class.confirm-dialog]="isConfirm"
+  role="dialog"
+  aria-modal="true"
+  [attr.aria-label]="title">
 
   <h2>{{ title }}</h2>
   <p>{{ message }}</p>
@@ -14,6 +20,18 @@
       autocomplete="email">
   </ng-container>
 
+  <div class="dialog-select-list" *ngIf="select as selectField" role="radiogroup" [attr.aria-label]="title">
+    <button
+      *ngFor="let opt of selectField.options"
+      type="button"
+      class="dialog-select-option"
+      [class.selected]="selectedValue === opt.value"
+      (click)="selecionarOpcao(opt.value)">
+      <span class="radio-indicator" aria-hidden="true"></span>
+      <span class="option-label">{{ opt.label }}</span>
+    </button>
+  </div>
+
   <div class="dialog-actions" *ngIf="buttons.length > 0">
     <button
       *ngFor="let button of buttons"
@@ -21,7 +39,7 @@
       [class.primary]="button.role === 'confirm' || button.role === 'publish'"
       [class.secondary]="button.role === 'cancel'"
       [class.danger]="button.role === 'destructive'"
-      (click)="close(button.role)">
+      (click)="fechar(button.role)">
       {{ button.text }}
     </button>
   </div>

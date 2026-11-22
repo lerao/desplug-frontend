@@ -8,14 +8,26 @@ export interface AppDialogButton {
   role: 'cancel' | 'confirm' | 'publish' | 'destructive';
 }
 
+export interface AppDialogSelectOption {
+  value: string;
+  label: string;
+}
+
 export interface AppDialogOptions {
   title: string;
   message: string;
+  isConfirm?: boolean;
   input?: {
     name: string;
     type: 'email' | 'text';
     placeholder: string;
     value?: string;
+  };
+  select?: {
+    name: string;
+    placeholder?: string;
+    value?: string;
+    options: AppDialogSelectOption[];
   };
   buttons: AppDialogButton[];
   autoClose?: boolean;
@@ -33,20 +45,33 @@ export class AppDialogComponent implements OnInit {
 
   @Input() title = '';
   @Input() message = '';
+  @Input() isConfirm = false;
   @Input() input?: AppDialogOptions['input'];
+  @Input() select?: AppDialogOptions['select'];
   @Input() buttons: AppDialogButton[] = [];
   @Input() autoClose = false;
 
   inputValue = '';
+  selectedValue = '';
 
   ngOnInit(): void {
     this.inputValue = this.input?.value ?? '';
+    this.selectedValue = this.select?.value ?? '';
   }
 
-  close(role: AppDialogButton['role']): void {
-    void this.modalController.dismiss(
-      this.input ? { [this.input.name]: this.inputValue } : undefined,
-      role
-    );
+  selecionarOpcao(value: string): void {
+    this.selectedValue = value;
+  }
+
+  fechar(role: AppDialogButton['role']): void {
+    let payload: Record<string, string> | undefined;
+
+    if (this.input) {
+      payload = { [this.input.name]: this.inputValue };
+    } else if (this.select) {
+      payload = { [this.select.name]: this.selectedValue };
+    }
+
+    void this.modalController.dismiss(payload, role);
   }
 }
