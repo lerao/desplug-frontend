@@ -364,13 +364,13 @@
               <footer>
                 <button type="button" class="metric-item metric-favorites" title="Favoritos">
                   <ion-icon name="heart-outline"></ion-icon>
-                  {{ plano.quantidadeFavoritos ?? 0 }}
+                  {{ plano.quantidadeFavoritos }}
                 </button>
 
                 <button type="button" class="metric-item metric-adaptations" title="Adaptações / Derivações"
                   routerLink="/chat-ia">
                   <ion-icon name="git-branch-outline"></ion-icon>
-                  {{ plano.quantidadeAdaptacoes ?? 0 }}
+                  {{ plano.quantidadeAdaptacoes }}
                 </button>
 
                 <button type="button" class="delete-plan" title="Excluir" *ngIf="isAutor(plano)"
