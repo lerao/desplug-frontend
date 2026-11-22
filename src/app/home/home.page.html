@@ -362,11 +362,18 @@
               <p>{{ plano.resumo }}</p>
 
               <footer>
-                <button type="button" class="metric-item metric-favorites" title="Favoritos">
-                  <ion-icon name="heart-outline"></ion-icon>
-                  {{ plano.quantidadeFavoritos ?? 0 }}
-                </button>
-
+              <button
+                type="button"
+                class="metric-item metric-favorites"
+                [class.is-favorited]="isFavorito(plano.id)"
+                [title]="isFavorito(plano.id) ? 'Desfavoritar' : 'Favoritar'"
+                [disabled]="isFavoritoEmProcessamento(plano.id)"
+                (click)="favoritar(plano.id)">
+                <ion-icon
+                  [name]="isFavorito(plano.id) ? 'heart' : 'heart-outline'">
+                </ion-icon>
+                <span>{{ quantidadeCurtidas(plano.id) }}</span>
+              </button>
                 <button type="button" class="metric-item metric-adaptations" title="Adaptações / Derivações"
                   routerLink="/chat-ia">
                   <ion-icon name="git-branch-outline"></ion-icon>
