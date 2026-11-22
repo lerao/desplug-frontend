@@ -4,15 +4,16 @@
       <ion-back-button defaultHref="/" icon="chevron-back" text=""></ion-back-button>
     </ion-buttons>
   </ion-toolbar>
+</ion-header>
+
+<ion-content class="custom-content">
   <div class="header-title-block">
     <div class="header-logo-container">
       <img src="/assets/image/logo.png" alt="DesplugAI Logo" class="header-logo" />
     </div>
     <h1>Criar conta</h1>
   </div>
-</ion-header>
 
-<ion-content class="custom-content">
   <div class="form-container">
     <form #cadastroForm="ngForm" (ngSubmit)="submeterCadastro(cadastroForm)" class="cadastro-form" novalidate>
 
@@ -34,7 +35,6 @@
         <span class="error-message" *ngIf="nome.invalid && nome.touched">O nome completo é obrigatório.</span>
       </div>
 
-      <!-- CAMPO: E-mail Comum -->
       <div class="input-group">
         <label class="custom-label">E-MAIL *</label>
         <div class="custom-input-box" [class.input-error]="email.invalid && email.touched">
@@ -123,7 +123,7 @@
             <ion-select-option value="municipal">Secretaria Municipal de Educação</ion-select-option>
           </ion-select>
         </div>
-        <span class="error-message" *ngIf="secretaria.invalid && secretaria.touched">A seleção da secretaria é obrigatória.</span>
+        <span class="error-message" *ngIf="secretariaError">A seleção da secretaria é obrigatória.</span>
       </div>
 
       <div class="input-group">
@@ -182,7 +182,6 @@
         class="btn-orange">
         {{ cadastrando() ? 'Cadastrando...' : 'Criar minha conta' }}
       </ion-button>
-      
       <div class="login-footer">
         Já tem uma conta? <a href="/login">Fazer login</a>
       </div>
