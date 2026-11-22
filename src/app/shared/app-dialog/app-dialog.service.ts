@@ -15,8 +15,11 @@ export class AppDialogService {
   }> {
     const modal = await this.modalController.create({
       component: AppDialogComponent,
-      componentProps: options,
-      cssClass: 'app-dialog-modal',
+      componentProps: {
+        ...options,
+        isConfirm: true
+      },
+      cssClass: ['app-dialog-modal', 'app-dialog-confirm'],
       backdropDismiss: true
     });
 

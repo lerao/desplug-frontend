@@ -29,6 +29,10 @@ p {
   line-height: 1.45;
 }
 
+.dialog-card.alert-dialog p {
+  margin-bottom: 0;
+}
+
 .dialog-input {
   width: 100%;
   box-sizing: border-box;
@@ -62,7 +66,7 @@ p {
   border-radius: 999px;
   font-family: inherit;
   font-size: 12px;
-  font-weight: 750;
+  font-weight: 400;
   cursor: pointer;
   transition: background-color 120ms ease, transform 120ms ease;
 }
@@ -93,7 +97,7 @@ p {
 
 button.danger {
   background-color: var(--ion-color-danger, #ef4444);
-  color: var(--color-white);
+  color: var(--color-white, #fff);
   border: 1px solid var(--ion-color-danger, #ef4444);
 
   &:hover {
@@ -102,6 +106,104 @@ button.danger {
 
   &:active {
     background-color: var(--ion-color-danger-tint, #f87171);
+  }
+}
+
+.dialog-select-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 240px;
+  overflow-y: auto;
+  padding-right: 4px;
+  margin: 0 0 18px;
+  text-align: left;
+  -webkit-overflow-scrolling: touch;
+
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 999px;
+  }
+}
+
+.dialog-select-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d7e4e6;
+  border-radius: 10px;
+  background: #fff;
+  color: #17252d;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 400;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 120ms ease, background-color 120ms ease;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+
+  &:hover {
+    background: #f5f8f8;
+  }
+
+  &.selected {
+    border-color: var(--color-primary, #3f92cd);
+    background: #e7f3ff;
+  }
+}
+
+.radio-indicator {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid #94a3b8;
+  flex-shrink: 0;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.dialog-select-option.selected .radio-indicator {
+  border-color: var(--color-primary, #3f92cd);
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-primary, #3f92cd);
+    transform: translate(-50%, -50%);
+  }
+}
+
+.option-label {
+  line-height: 1.35;
+}
+
+.dialog-card.alert-dialog {
+  background: var(--ion-color-success, #16a34a);
+  color: #fff;
+
+  h2,
+  p {
+    color: #fff;
+  }
+
+  p {
+    opacity: 0.92;
   }
 }
 

@@ -1,12 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, computed, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { PlanoAulaService, PlanoAulaRequest, HabilidadeBncc, TipoAtividade, EtapaEnsino } from '../services/plano-aula.service';
 import { AppDialogService } from '../shared/app-dialog/app-dialog.service';
+import { AppDialogSelectOption } from '../shared/app-dialog/app-dialog.component';
 import { HttpErrorResponse } from '@angular/common/http';
 import { finalize } from 'rxjs';
 import { Router } from '@angular/router';
 import { AuthService } from '../security/auth.service';
+
+type CampoSelectEtapa2 = 'tipo_atividade' | 'etapa_ensino' | 'componentes_curriculares';
+
 @Component({
   selector: 'app-plano-aula',
   templateUrl: './plano-aula.page.html',
@@ -22,12 +26,59 @@ export class PlanoAulaPage implements OnInit {
   salvando: boolean = false;
   habilidadesSelecionadas: number[] = [];
 
+  readonly tipoAtividadeSelecionado = signal<string>('');
+  readonly etapaEnsinoSelecionada = signal<string>('');
+  readonly componenteCurricularSelecionado = signal<string>('');
+
+  readonly labelTipoAtividade = computed(() =>
+    this.obterLabelOpcao(this.opcoesTipoAtividade, this.tipoAtividadeSelecionado(), 'Selecionar tipo')
+  );
+
+  readonly labelEtapaEnsino = computed(() =>
+    this.obterLabelOpcao(this.opcoesEtapaEnsino, this.etapaEnsinoSelecionada(), 'Selecionar etapa...')
+  );
+
+  readonly labelComponenteCurricular = computed(() =>
+    this.obterLabelOpcao(this.opcoesComponenteCurricular, this.componenteCurricularSelecionado(), 'Selecionar componente...')
+  );
+
   etapasTitulos: Record<number, string> = {
     1: 'Identificação',
     2: 'Classificação',
     3: 'Conteúdo',
     4: 'BNCC & Publicação'
   };
+
+  readonly opcoesTipoAtividade: AppDialogSelectOption[] = [
+    { value: 'plano_aula', label: 'Plano de Aula' },
+    { value: 'desplugada', label: 'Desplugada' },
+    { value: 'maker', label: 'Maker' },
+    { value: 'digital', label: 'Digital' }
+  ];
+
+  readonly opcoesEtapaEnsino: AppDialogSelectOption[] = [
+    { value: 'infantil', label: 'Ed. Infantil' },
+    { value: 'fundamental1', label: 'Ensino Fundamental I (Anos Iniciais)' },
+    { value: 'fundamental2', label: 'Ensino Fundamental II (Anos Finais)' },
+    { value: 'medio', label: 'Ensino Médio' }
+  ];
+
+  readonly opcoesComponenteCurricular: AppDialogSelectOption[] = [
+    { value: 'computacao', label: 'Computação' },
+    { value: 'portugues', label: 'Língua Portuguesa' },
+    { value: 'matematica', label: 'Matemática' },
+    { value: 'ciencias', label: 'Ciências' },
+    { value: 'biologia', label: 'Biologia' },
+    { value: 'historia', label: 'História' },
+    { value: 'geografia', label: 'Geografia' },
+    { value: 'fisica', label: 'Física' },
+    { value: 'quimica', label: 'Química' },
+    { value: 'ingles', label: 'Língua Inglesa' },
+    { value: 'espanhol', label: 'Língua Espanhola' },
+    { value: 'educacao_fisica', label: 'Educação Física' },
+    { value: 'filosofia', label: 'Filosofia' },
+    { value: 'sociologia', label: 'Sociologia' }
+  ];
 
   bnccHab: {
     id: number;
@@ -61,7 +112,74 @@ export class PlanoAulaPage implements OnInit {
       criterios_avaliacao: ['', Validators.required]
     });
 
+    this.tipoAtividadeSelecionado.set(this.planoForm.get('tipo_atividade')?.value ?? '');
+    this.etapaEnsinoSelecionada.set(this.planoForm.get('etapa_ensino')?.value ?? '');
+    this.componenteCurricularSelecionado.set(this.planoForm.get('componentes_curriculares')?.value ?? '');
+
     this.carregarHabilidades();
+  }
+
+  private getSignalDoCampo(campo: CampoSelectEtapa2) {
+    switch (campo) {
+      case 'tipo_atividade':
+        return this.tipoAtividadeSelecionado;
+      case 'etapa_ensino':
+        return this.etapaEnsinoSelecionada;
+      case 'componentes_curriculares':
+        return this.componenteCurricularSelecionado;
+    }
+  }
+
+  obterLabelOpcao(
+    opcoes: AppDialogSelectOption[],
+    valor: string | null | undefined,
+    placeholder = ''
+  ): string {
+    if (!valor) {
+      return placeholder;
+    }
+    return opcoes.find(opt => opt.value === valor)?.label ?? placeholder;
+  }
+
+  async abrirSelectDialog(
+    campo: CampoSelectEtapa2,
+    titulo: string,
+    opcoes: AppDialogSelectOption[],
+    mensagem = ''
+  ): Promise<void> {
+    const control = this.planoForm.get(campo);
+    const campoSignal = this.getSignalDoCampo(campo);
+    if (!control) {
+      return;
+    }
+
+    const valorAtual = campoSignal() || (control.value ?? '');
+
+    const resultado: any = await this.appDialog.confirm({
+      title: titulo,
+      message: mensagem,
+      select: {
+        name: campo,
+        value: valorAtual,
+        options: opcoes
+      },
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        { text: 'Confirmar', role: 'confirm' }
+      ]
+    });
+
+    control.markAsTouched();
+
+    const confirmou = resultado?.role === 'confirm';
+    const valorSelecionado = resultado?.data?.[campo] ?? resultado?.[campo];
+
+    if (confirmou && valorSelecionado !== undefined && valorSelecionado !== '') {
+      campoSignal.set(valorSelecionado);
+      control.setValue(valorSelecionado);
+      control.markAsDirty();
+      control.updateValueAndValidity();
+    }
   }
 
   carregarHabilidades() {
@@ -229,11 +347,11 @@ export class PlanoAulaPage implements OnInit {
           );
 
           await this.appDialog.alert(
-          'Seu plano de aula foi cadastrado e enviado para moderação.',
-          'Plano Enviado!'
-        );
+            'Seu plano de aula foi cadastrado e enviado para moderação.',
+            'Plano Enviado!'
+          );
 
-          window.location.href='/home';
+          window.location.href = '/home';
         },
 
         error: async (erro: HttpErrorResponse) => {

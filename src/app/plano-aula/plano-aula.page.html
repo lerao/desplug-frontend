@@ -62,47 +62,35 @@
 
         <div class="input-grupo">
           <ion-label>Tipo de Atividade <span class="required">*</span></ion-label>
-          <ion-select formControlName="tipo_atividade" fill="outline" placeholder="Selecionar tipo" class="custom-input"
-            [class.input-error]="camposInvalidos('tipo_atividade')">
-            <ion-select-option value="plano_aula">Plano de Aula</ion-select-option>
-            <ion-select-option value="desplugada">Desplugada</ion-select-option>
-            <ion-select-option value="maker">Maker</ion-select-option>
-            <ion-select-option value="digital">Digital</ion-select-option>
-          </ion-select>
+          <button type="button" class="custom-input select-trigger"
+            [class.input-error]="camposInvalidos('tipo_atividade')" [class.is-placeholder]="!tipoAtividadeSelecionado()"
+            (click)="abrirSelectDialog('tipo_atividade', 'Tipo de Atividade', opcoesTipoAtividade)">
+            <span>{{ labelTipoAtividade() }}</span>
+            <ion-icon name="chevron-down-outline"></ion-icon>
+          </button>
           <span class="error-msg" *ngIf="camposInvalidos('tipo_atividade')">Selecione o tipo de atividade.</span>
         </div>
 
         <div class="input-grupo">
           <ion-label>Etapa de Ensino <span class="required">*</span></ion-label>
-          <ion-select formControlName="etapa_ensino" fill="outline" placeholder="Selecionar etapa..."
-            class="custom-input" [class.input-error]="camposInvalidos('etapa_ensino')">
-            <ion-select-option value="infantil">Ed. Infantil</ion-select-option>
-            <ion-select-option value="fundamental1">Ensino Fundamental I (Anos Iniciais)</ion-select-option>
-            <ion-select-option value="fundamental2">Ensino Fundamental II (Anos Finais)</ion-select-option>
-            <ion-select-option value="medio">Ensino Médio</ion-select-option>
-          </ion-select>
+          <button type="button" class="custom-input select-trigger"
+            [class.input-error]="camposInvalidos('etapa_ensino')" [class.is-placeholder]="!etapaEnsinoSelecionada()"
+            (click)="abrirSelectDialog('etapa_ensino', 'Etapa de Ensino', opcoesEtapaEnsino)">
+            <span>{{ labelEtapaEnsino() }}</span>
+            <ion-icon name="chevron-down-outline"></ion-icon>
+          </button>
           <span class="error-msg" *ngIf="camposInvalidos('etapa_ensino')">Selecione a etapa de ensino.</span>
         </div>
 
         <div class="input-grupo">
           <ion-label>Componente Curricular <span class="required">*</span></ion-label>
-          <ion-select formControlName="componentes_curriculares" fill="outline" placeholder="Selecionar componente..."
-            class="custom-input" [class.input-error]="camposInvalidos('componentes_curriculares')">
-            <ion-select-option value="computacao">Computação</ion-select-option>
-            <ion-select-option value="portugues">Língua Portuguesa</ion-select-option>
-            <ion-select-option value="matematica">Matemática</ion-select-option>
-            <ion-select-option value="ciencias">Ciências</ion-select-option>
-            <ion-select-option value="ciencias">Biologia</ion-select-option>
-            <ion-select-option value="historia">História</ion-select-option>
-            <ion-select-option value="geografia">Geografia</ion-select-option>
-            <ion-select-option value="fisica">Física</ion-select-option>
-            <ion-select-option value="quimica">Química</ion-select-option>
-            <ion-select-option value="ingles">Língua Inglesa</ion-select-option>
-            <ion-select-option value="espanhol">Língua Espanhola</ion-select-option>
-            <ion-select-option value="educacao_fisica">Educação Física</ion-select-option>
-            <ion-select-option value="filosofia">Filosofia</ion-select-option>
-            <ion-select-option value="sociologia">Sociologia</ion-select-option>
-          </ion-select>
+          <button type="button" class="custom-input select-trigger"
+            [class.input-error]="camposInvalidos('componentes_curriculares')"
+            [class.is-placeholder]="!componenteCurricularSelecionado()"
+            (click)="abrirSelectDialog('componentes_curriculares', 'Componente Curricular', opcoesComponenteCurricular)">
+            <span>{{ labelComponenteCurricular() }}</span>
+            <ion-icon name="chevron-down-outline"></ion-icon>
+          </button>
           <span class="error-msg" *ngIf="camposInvalidos('componentes_curriculares')">Selecione o componente
             curricular.</span>
         </div>
@@ -163,15 +151,16 @@
 
         <div class="bncc-card" *ngFor="let hab of bnccHab" [class.is-expanded]="hab.habilidadeExpandida">
           <div class="bncc-card-top">
-            <ion-checkbox labelPlacement="end" alignment="start" [checked]="habilidadesSelecionadas.includes(hab.id)"
+            <ion-checkbox alignment="start" [checked]="habilidadesSelecionadas.includes(hab.id)"
               (ionChange)="marcarHabilidade(hab.id, $event.detail.checked)">
-              <div class="bncc-content">
-                <div class="bncc-header">
-                  <span class="bncc-code">{{ hab.code }}</span>
-                  <span class="bncc-tag tag-blue">{{ hab.tag }}</span>
-                </div>
-              </div>
             </ion-checkbox>
+
+            <div class="bncc-content" (click)="marcarHabilidade(hab.id, !habilidadesSelecionadas.includes(hab.id))">
+              <div class="bncc-header">
+                <span class="bncc-code">{{ hab.code }}</span>
+                <span class="bncc-tag tag-blue">{{ hab.tag }}</span>
+              </div>
+            </div>
 
             <ion-button fill="clear" size="small" class="btn-expandir" (click)="expandirHabilidade(hab.id)"
               [title]="hab.habilidadeExpandida ? 'Recolher' : 'Ver mais'">
