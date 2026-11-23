@@ -53,7 +53,7 @@
         <div class="identity-copy">
           <h2>{{ nome() || 'Professor' }}</h2>
           <p>{{ email() }}</p>
-          <span class="role-badge"><span></span>{{ usandoDadosDaSessao() ? (ehAdministrador() ? 'Administrador · sincronização pendente' : 'Professor · sincronização pendente') : (ehAdministrador() ? 'Administrador' : 'Professor homologado') }}</span>
+          <span class="role-badge"><span></span>{{ rotuloStatusHomologacao() }}</span>
         </div>
       </div>
       <div *ngIf="editando()" class="photo-actions">
@@ -71,7 +71,7 @@
       <section class="info-card">
         <div class="card-heading">
           <span class="section-icon"><ion-icon name="school-outline"></ion-icon></span>
-          <div><h2>Vínculo educacional</h2><p>Informações cadastradas</p></div>
+          <div><h2>Vínculo educacional</h2><p>Informações fornecidas no cadastro</p></div>
         </div>
         <div class="detail-row">
           <ion-icon name="business-outline"></ion-icon>
@@ -96,15 +96,15 @@
           <span class="section-icon approval-icon"><ion-icon name="shield-checkmark-outline"></ion-icon></span>
           <div><h2>Cadastro e homologação</h2><p>Situação de acesso à plataforma</p></div>
         </div>
-        <div class="approval-status" [class.unverified]="usandoDadosDaSessao()">
-          <div class="status-title"><strong>{{ usandoDadosDaSessao() ? 'Status não verificado' : (ehAdministrador() ? 'Acesso administrativo' : 'Professor homologado') }}</strong><span>{{ usandoDadosDaSessao() ? 'PENDENTE' : (ehAdministrador() ? 'ATIVO' : 'APROVADO') }}</span></div>
-          <p>{{ usandoDadosDaSessao() ? 'Conecte-se ao servidor para consultar a situação real do cadastro.' : (ehAdministrador() ? 'Seu perfil administrativo está ativo.' : 'Seu cadastro está aprovado e você possui acesso a todos os recursos para professores.') }}</p>
+        <div class="approval-status" [class.unverified]="usandoDadosDaSessao() || statusHomologacao() === 'PENDENTE'">
+          <div class="status-title"><strong>{{ tituloStatusHomologacao() }}</strong><span>{{ badgeStatusHomologacao() }}</span></div>
+          <p>{{ descricaoStatusHomologacao() }}</p>
         </div>
         <div class="dates-row">
-          <div class="date-tile"><ion-icon name="calendar-outline"></ion-icon><span>Cadastro</span><strong>{{ usandoDadosDaSessao() ? '—' : '08/02/2026' }}</strong></div>
-          <div class="date-tile"><ion-icon name="calendar-outline"></ion-icon><span>Homologação</span><strong>{{ usandoDadosDaSessao() ? '—' : '10/02/2026' }}</strong></div>
+          <div class="date-tile"><ion-icon name="calendar-outline"></ion-icon><span>Cadastro</span><strong>{{ formatarData(dataRegistro()) }}</strong></div>
+          <div class="date-tile"><ion-icon name="calendar-outline"></ion-icon><span>Homologação</span><strong>{{ formatarData(dataHomologacao()) }}</strong></div>
         </div>
-        <div class="institutional-link"><span class="section-icon"><ion-icon name="business-outline"></ion-icon></span><div><span>Vínculo com a Secretaria</span><strong>{{ usandoDadosDaSessao() ? 'Aguardando confirmação do servidor' : 'Vínculo institucional confirmado' }}</strong></div></div>
+        <div class="institutional-link"><span class="section-icon"><ion-icon name="business-outline"></ion-icon></span><div><span>Vínculo com a Secretaria</span><strong>{{ rotuloVinculoSecretaria() }}</strong></div></div>
       </section>
 
       <form *ngIf="editando()" class="edit-card" (ngSubmit)="salvar()" novalidate>

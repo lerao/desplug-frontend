@@ -15,6 +15,7 @@ export class PerfilProfessorPage implements OnInit {
 
   private resumoInicial = '';
 
+  readonly usuarioId = signal<number | null>(null);
   readonly nome = signal('');
   readonly email = signal('');
   readonly secretaria = signal('');
@@ -24,6 +25,11 @@ export class PerfilProfessorPage implements OnInit {
   readonly uf = signal('');
   readonly foto = signal<string | null>(null);
   readonly perfil = signal<'professor' | 'admin'>('professor');
+  readonly statusHomologacao = signal<string>('PENDENTE');
+  readonly statusVinculo = signal<string>('PENDENTE');
+  readonly dataRegistro = signal<string>('');
+  readonly dataHomologacao = signal<string>('');
+  readonly dataVinculacao = signal<string>('');
   readonly erros = signal<PerfilErros>({});
   readonly salvo = signal(false);
   readonly editando = signal(false);
@@ -124,7 +130,7 @@ export class PerfilProfessorPage implements OnInit {
 
     const dados = { name: this.nome().trim(), email: this.email().trim() };
 
-    this.perfilService.atualizarPerfil(dados).subscribe({
+    this.perfilService.atualizarPerfil(dados, this.usuarioId() || undefined).subscribe({
       next: (perfil) => {
         this.nome.set(perfil.name);
         this.email.set(perfil.email);
@@ -196,6 +202,78 @@ export class PerfilProfessorPage implements OnInit {
     this.carregarPerfil();
   }
 
+  formatarData(valor?: string | null): string {
+    if (!valor) return '—';
+    try {
+      const data = new Date(valor);
+      if (isNaN(data.getTime())) return valor;
+      return new Intl.DateTimeFormat('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      }).format(data);
+    } catch {
+      return valor;
+    }
+  }
+
+  rotuloStatusHomologacao(): string {
+    if (this.ehAdministrador()) return 'Administrador';
+    if (this.usandoDadosDaSessao()) return 'Professor · sincronização pendente';
+    if (this.statusHomologacao() === 'APROVADO') return 'Professor homologado';
+    if (this.statusHomologacao() === 'REPROVADO') return 'Professor · homologação reprovada';
+    return 'Professor · homologação pendente';
+  }
+
+  badgeStatusHomologacao(): string {
+    if (this.usandoDadosDaSessao()) return 'PENDENTE';
+    if (this.ehAdministrador()) return 'ATIVO';
+    return this.statusHomologacao() || 'PENDENTE';
+  }
+
+  tituloStatusHomologacao(): string {
+    if (this.usandoDadosDaSessao()) return 'Status não verificado';
+    if (this.ehAdministrador()) return 'Acesso administrativo';
+    if (this.statusHomologacao() === 'APROVADO') return 'Professor homologado';
+    if (this.statusHomologacao() === 'REPROVADO') return 'Cadastro reprovado';
+    return 'Homologação pendente';
+  }
+
+  descricaoStatusHomologacao(): string {
+    if (this.usandoDadosDaSessao()) {
+      return 'Conecte-se ao servidor para consultar a situação real do cadastro.';
+    }
+    if (this.ehAdministrador()) {
+      return 'Seu perfil administrativo está ativo.';
+    }
+    if (this.statusHomologacao() === 'APROVADO') {
+      return 'Seu cadastro está aprovado e você possui acesso a todos os recursos para professores.';
+    }
+    if (this.statusHomologacao() === 'REPROVADO') {
+      return 'Seu cadastro não foi homologado pela secretaria ou administração.';
+    }
+    return 'Seu cadastro foi realizado e está aguardando homologação da secretaria.';
+  }
+
+  rotuloVinculoSecretaria(): string {
+    if (this.usandoDadosDaSessao()) {
+      return 'Aguardando confirmação do servidor';
+    }
+    if (this.statusVinculo() === 'VINCULADO') {
+      return 'Vínculo institucional confirmado';
+    }
+    if (this.statusVinculo() === 'DESVINCULADO') {
+      return 'Vínculo institucional desvinculado';
+    }
+    if (this.statusVinculo() === 'PENDENTE') {
+      return 'Aguardando confirmação da secretaria';
+    }
+    if (this.secretaria()) {
+      return `Vínculo com ${this.secretaria()}`;
+    }
+    return 'Sem vínculo registrado';
+  }
+
   private carregarPerfil(): void {
     this.carregando.set(true);
     this.mensagemErro.set('');
@@ -208,6 +286,7 @@ export class PerfilProfessorPage implements OnInit {
 
     this.perfilService.getPerfil().subscribe({
       next: (perfil) => {
+        this.usuarioId.set(perfil.id ?? null);
         this.nome.set(perfil.name);
         this.email.set(perfil.email);
         this.secretaria.set(perfil.secretaria?.trim() || '');
@@ -217,6 +296,11 @@ export class PerfilProfessorPage implements OnInit {
         this.uf.set(perfil.uf?.trim() || '');
         this.foto.set(perfil.photo);
         this.perfil.set(perfil.role);
+        this.statusHomologacao.set(perfil.statusHomologacao || 'PENDENTE');
+        this.statusVinculo.set(perfil.statusVinculo || 'PENDENTE');
+        this.dataRegistro.set(perfil.dataRegistro || '');
+        this.dataHomologacao.set(perfil.dataHomologacao || '');
+        this.dataVinculacao.set(perfil.dataVinculacao || '');
         this.erros.set({});
         this.salvo.set(false);
         this.resumoInicial = this.resumoAtual();
@@ -226,6 +310,7 @@ export class PerfilProfessorPage implements OnInit {
         this.carregando.set(false);
         const sessao = this.authService.sessaoAtual();
         if (sessao) {
+          this.usuarioId.set(sessao.usuarioId ?? null);
           this.nome.set(sessao.nome);
           this.email.set(sessao.email);
           this.foto.set(sessao.foto ?? null);
