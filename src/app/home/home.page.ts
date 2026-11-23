@@ -1,8 +1,14 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
-import { PlanoAulaService, PlanoAula, PageResponse } from '../services/plano-aula.service';
+import {
+  PlanoAulaService,
+  PlanoAula,
+  PageResponse
+} from '../services/plano-aula.service';
+import { FavoritosService, Favorito } from '../services/favoritos.service';
 import { AuthService } from '../security/auth.service';
 import { AppDialogService } from '../shared/app-dialog/app-dialog.service';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-home',
@@ -15,19 +21,22 @@ export class HomePage implements OnInit {
   private readonly router = inject(Router);
   private readonly planoAulaService = inject(PlanoAulaService);
   private readonly authService = inject(AuthService);
+  private readonly favoritosService = inject(FavoritosService);
   private readonly appDialog = inject(AppDialogService);
 
   planos = signal<PlanoAula[]>([]);
   planosUsuario = signal<PlanoAula[]>([]);
   planosPublicos = signal<PlanoAula[]>([]);
+  favoritosUsuario = signal<Favorito[]>([]);
 
-  // Interface
+  curtidasPorPlano = signal<Record<number, number>>({});
+  ajustesCurtidasPorPlano = signal<Record<number, number>>({});
+
   modoExibicao = signal<'todos' | 'meus' | 'favoritos'>('todos');
   pesquisa = signal('');
   carregando = signal(false);
   mensagemErro = signal('');
 
-  // Paginação
   paginaAtual = signal(0);
   tamanhoPagina = signal(10);
   totalPaginas = signal(0);
@@ -39,10 +48,12 @@ export class HomePage implements OnInit {
   headerCompact = false;
 
   // Filtros
-  filtroEtapaEnsino: string = '';
-  filtroTipoAtividade: string = '';
-  filtroComponentesCurriculares: string = '';
+  filtroEtapaEnsino = '';
+  filtroTipoAtividade = '';
+  filtroComponentesCurriculares = '';
   filtroIsGeradoIA: boolean | null = null;
+
+  private favoritosEmProcessamento = new Set<number>();
 
   get nomeUsuario(): string {
     return this.authService.sessaoAtual()?.nome ?? 'Professor';
@@ -67,21 +78,86 @@ export class HomePage implements OnInit {
   }
 
   get favoritos(): number {
-    return 0;
+    return this.favoritosUsuario().length;
   }
 
-  // Quantidade de planos do usuário
   qtdPlanosPorUsuario = computed(() => this.planosUsuario().length);
-
-  // Planos exibidos na tela
   planosFiltrados = computed(() => this.planos());
 
   ngOnInit(): void {
     this.carregarPlanos();
     this.carregarQtdPlanosUsuario();
+    this.carregarFavoritos();
   }
 
-  // Carrega os planos públicos inicialmente
+  private carregarFavoritos(): void {
+    const usuarioId = this.authService.sessaoAtual()?.usuarioId;
+
+    if (!usuarioId) {
+      this.favoritosUsuario.set([]);
+      return;
+    }
+
+    this.favoritosService.listar().subscribe({
+      next: (favoritos: Favorito[]) => {
+        this.atualizarContagemCurtidas(favoritos);
+
+        const favoritosDoUsuario = favoritos.filter(
+          favorito => favorito.usuario?.id === usuarioId
+        );
+
+        this.favoritosUsuario.set(favoritosDoUsuario);
+      },
+      error: erro => {
+        console.error('Erro ao carregar favoritos:', erro);
+        this.favoritosUsuario.set([]);
+      }
+    });
+  }
+
+  quantidadeCurtidas(planoId: number): number {
+    const totalDaApi = this.planos().find(plano => plano.id === planoId)
+      ?.quantidadeFavoritos;
+    const totalDaLista = this.curtidasPorPlano()[planoId];
+
+    const base = Math.max(totalDaApi ?? 0, totalDaLista ?? 0);
+    const ajusteLocal = this.ajustesCurtidasPorPlano()[planoId] ?? 0;
+    return Math.max(0, base + ajusteLocal);
+  }
+
+  private atualizarContagemCurtidas(favoritos: Favorito[]): void {
+    const contagens: Record<number, number> = {};
+    const curtidasUnicas = new Set<string>();
+
+    favoritos.forEach(favorito => {
+      const planoId = favorito.planoAula?.id;
+      const usuarioId = favorito.usuario?.id;
+
+      if (planoId == null || usuarioId == null) {
+        return;
+      }
+
+      const chave = `${usuarioId}-${planoId}`;
+
+      if (!curtidasUnicas.has(chave)) {
+        curtidasUnicas.add(chave);
+        contagens[planoId] = (contagens[planoId] ?? 0) + 1;
+      }
+    });
+
+    this.curtidasPorPlano.set(contagens);
+    this.ajustesCurtidasPorPlano.set({});
+  }
+
+  // Atualiza o número no card imediatamente após a API confirmar a ação.
+  private ajustarCurtidas(planoId: number, variacao: number): void {
+    this.ajustesCurtidasPorPlano.update(ajustes => ({
+      ...ajustes,
+      [planoId]: (ajustes[planoId] ?? 0) + variacao
+    }));
+  }
+
+  // Carrega os planos públicos inicialmente.
   private carregarPlanos(pagina: number = 0): void {
     this.carregando.set(true);
     this.mensagemErro.set('');
@@ -99,23 +175,19 @@ export class HomePage implements OnInit {
         this.carregando.set(false);
         this.mensagemErro.set('');
       },
-
-      error: (erro) => {
+      error: erro => {
         console.error('Erro ao carregar os planos públicos:', erro);
-
         this.planosPublicos.set([]);
         this.planos.set([]);
-
         this.mensagemErro.set(
           'Não foi possível carregar os planos. Tente novamente.'
         );
-
         this.carregando.set(false);
       }
     });
   }
 
-  // Carrega a quantidade de planos do usuário
+  // Carrega os planos do autor logado para o indicador "Meus Planos".
   private carregarQtdPlanosUsuario(pagina: number = 0): void {
     const usuarioId = this.authService.sessaoAtual()?.usuarioId;
 
@@ -124,12 +196,15 @@ export class HomePage implements OnInit {
       return;
     }
 
-    this.planoAulaService.getPlanosPorAutor(usuarioId, pagina, this.tamanhoPagina()).subscribe({
+    this.planoAulaService.getPlanosPorAutor(
+      usuarioId,
+      pagina,
+      this.tamanhoPagina()
+    ).subscribe({
       next: (resposta: PageResponse<PlanoAula>) => {
         this.planosUsuario.set(resposta.content);
       },
-
-      error: (erro) => {
+      error: erro => {
         console.error(
           'Erro ao carregar a quantidade de planos do usuário:',
           erro
@@ -138,29 +213,106 @@ export class HomePage implements OnInit {
     });
   }
 
-  // Abre a visualização dos planos do usuário
   mostrarPlanosPorUsuario(): void {
     const usuarioId = this.authService.sessaoAtual()?.usuarioId;
 
     if (!usuarioId) {
-      this.mensagemErro.set(
-        'Faça login para consultar seus planos de aula.'
-      );
+      this.mensagemErro.set('Faça login para consultar seus planos de aula.');
       return;
     }
 
     this.modoExibicao.set('meus');
     this.mostrarMenuVisualizacao = false;
     this.mensagemErro.set('');
-
     this.realizarBusca();
   }
 
+
   mostrarFavoritos(): void {
+    const usuarioId = this.authService.sessaoAtual()?.usuarioId;
+
     this.modoExibicao.set('favoritos');
-    this.planos.set([]);
-    this.mensagemErro.set('');
     this.mostrarMenuVisualizacao = false;
+    this.mensagemErro.set('');
+    this.planos.set([]);
+    this.paginaAtual.set(0);
+    this.totalPaginas.set(0);
+    this.totalElementos.set(0);
+
+    if (!usuarioId) {
+      this.carregando.set(false);
+      this.mensagemErro.set('Faça login para visualizar seus favoritos.');
+      return;
+    }
+
+    this.carregando.set(true);
+
+    this.favoritosService.listar().subscribe({
+      next: (favoritos: Favorito[]) => {
+        this.atualizarContagemCurtidas(favoritos);
+
+        const meusFavoritos = favoritos.filter(
+          favorito => favorito.usuario?.id === usuarioId
+        );
+
+        this.favoritosUsuario.set(meusFavoritos);
+
+        if (this.modoExibicao() !== 'favoritos') {
+          return;
+        }
+
+        if (meusFavoritos.length === 0) {
+          this.carregando.set(false);
+          return;
+        }
+
+        const requisicoes = meusFavoritos.map(favorito =>
+          this.planoAulaService.getPlanoPorId(favorito.planoAula.id)
+        );
+
+        forkJoin(requisicoes).subscribe({
+          next: (planos: PlanoAula[]) => {
+            if (this.modoExibicao() !== 'favoritos') {
+              return;
+            }
+
+            // Pesquisa textual simples na visualização de favoritos.
+            const termo = this.pesquisa().trim().toLowerCase();
+            const planosFiltrados = termo
+              ? planos.filter(plano =>
+                  plano.titulo.toLowerCase().includes(termo) ||
+                  (plano.habilidadesBncc ?? []).some(hab =>
+                    hab.codigo.toLowerCase().includes(termo)
+                  )
+                )
+              : planos;
+
+            this.planos.set(planosFiltrados);
+            this.totalElementos.set(planosFiltrados.length);
+            this.totalPaginas.set(planosFiltrados.length > 0 ? 1 : 0);
+            this.carregando.set(false);
+          },
+          error: erro => {
+            if (this.modoExibicao() !== 'favoritos') {
+              return;
+            }
+            console.error('Erro ao buscar planos favoritos:', erro);
+            this.mensagemErro.set(
+              'Não foi possível carregar os planos favoritos.'
+            );
+            this.carregando.set(false);
+          }
+        });
+      },
+      error: erro => {
+        if (this.modoExibicao() !== 'favoritos') {
+          return;
+        }
+        console.error('Erro ao listar favoritos:', erro);
+        this.mensagemErro.set('Não foi possível consultar os favoritos.');
+        this.carregando.set(false);
+      }
+    });
   }
 
   mostrarTodosPlanos(): void {
@@ -177,10 +329,8 @@ export class HomePage implements OnInit {
     }
   }
 
-  // Verifica se o usuário logado é o autor do plano
   isAutor(plano: PlanoAula): boolean {
     const usuarioId = this.authService.sessaoAtual()?.usuarioId;
-
     return !!usuarioId && plano.autor?.id === usuarioId;
   }
 
@@ -189,14 +339,8 @@ export class HomePage implements OnInit {
       await this.appDialog.confirm({
         title: 'Ação não permitida',
         message: 'Você só pode excluir seus próprios planos de aula.',
-        buttons: [
-          {
-            text: 'Entendi',
-            role: 'confirm'
-          }
-        ]
+        buttons: [{ text: 'Entendi', role: 'confirm' }]
       });
-
       return;
     }
 
@@ -204,14 +348,8 @@ export class HomePage implements OnInit {
       title: 'Excluir plano de aula?',
       message: `Tem certeza de que deseja excluir o plano "${plano.titulo}"? Essa ação não poderá ser desfeita.`,
       buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel'
-        },
-        {
-          text: 'Excluir plano',
-          role: 'destructive'
-        }
+        { text: 'Cancelar', role: 'cancel' },
+        { text: 'Excluir plano', role: 'destructive' }
       ]
     });
 
@@ -226,35 +364,20 @@ export class HomePage implements OnInit {
 
     this.planoAulaService.excluirPlano(plano.id).subscribe({
       next: () => {
-        this.planos.update(lista =>
-          lista.filter(p => p.id !== plano.id)
-        );
+        this.planos.update(lista => lista.filter(p => p.id !== plano.id));
+        this.planosUsuario.update(lista => lista.filter(p => p.id !== plano.id));
+        this.planosPublicos.update(lista => lista.filter(p => p.id !== plano.id));
 
-        this.planosUsuario.update(lista =>
-          lista.filter(p => p.id !== plano.id)
-        );
-
-        this.planosPublicos.update(lista =>
-          lista.filter(p => p.id !== plano.id)
-        );
-
+        this.carregarFavoritos();
         this.carregando.set(false);
-
-        void this.appDialog.alert(
-          'Plano excluído com sucesso.',
-          'Sucesso!'
-        );
+        void this.appDialog.alert('Plano excluído com sucesso.', 'Sucesso!');
       },
-
       error: erro => {
         console.error('Erro ao excluir plano:', erro);
-
         this.mensagemErro.set(
           'Não foi possível excluir o plano. Tente novamente mais tarde.'
         );
-
         this.carregando.set(false);
-
         void this.appDialog.alert(
           'Não foi possível excluir o plano. Tente novamente.',
           'Ops!'
@@ -263,17 +386,14 @@ export class HomePage implements OnInit {
     });
   }
 
-  // Header compacto ao rolar a tela
   onHeaderCompact(event: CustomEvent<{ scrollTop: number }>): void {
     this.headerCompact = event.detail.scrollTop > 48;
   }
 
-  // Monta os parâmetros de pesquisa
   private montarFiltros(): any {
     const filtros: any = {};
     const termo = this.pesquisa().trim();
 
-    // Pesquisa por título ou código de habilidade BNCC
     if (termo) {
       if (/^(EF|EI|EM)\d+/i.test(termo)) {
         filtros.codigoHabilidade = termo;
@@ -285,15 +405,12 @@ export class HomePage implements OnInit {
     if (this.filtroEtapaEnsino) {
       filtros.etapaEnsino = this.filtroEtapaEnsino;
     }
-
     if (this.filtroTipoAtividade) {
       filtros.tipoAtividade = this.filtroTipoAtividade;
     }
-
     if (this.filtroComponentesCurriculares) {
       filtros.componentesCurriculares = this.filtroComponentesCurriculares;
     }
-
     if (this.filtroIsGeradoIA !== null) {
       filtros.isGeradoIA = this.filtroIsGeradoIA;
     }
@@ -304,33 +421,32 @@ export class HomePage implements OnInit {
   realizarBusca(pagina: number = 0): void {
     const filtros = this.montarFiltros();
 
-    // no modo Meus Planos, acrescenta o id do autor
     if (this.modoExibicao() === 'meus') {
       const usuarioId = this.authService.sessaoAtual()?.usuarioId;
 
       if (!usuarioId) {
         this.planos.set([]);
         this.carregando.set(false);
-        this.mensagemErro.set(
-          'Faça login para consultar seus planos de aula.'
-        );
+        this.mensagemErro.set('Faça login para consultar seus planos de aula.');
         return;
       }
 
       filtros.idAutor = usuarioId;
     }
 
-    // favoritos ainda não implementados
     if (this.modoExibicao() === 'favoritos') {
-      this.planos.set([]);
-      this.carregando.set(false);
+      this.mostrarFavoritos();
       return;
     }
 
     this.carregando.set(true);
     this.mensagemErro.set('');
 
-    this.planoAulaService.filtrarPlanos(filtros, pagina, this.tamanhoPagina()).subscribe({
+    this.planoAulaService.filtrarPlanos(
+      filtros,
+      pagina,
+      this.tamanhoPagina()
+    ).subscribe({
       next: (resposta: PageResponse<PlanoAula>) => {
         this.planos.set(resposta.content);
 
@@ -341,19 +457,13 @@ export class HomePage implements OnInit {
         this.paginaAtual.set(resposta.number);
         this.totalPaginas.set(resposta.totalPages);
         this.totalElementos.set(resposta.totalElements);
-
         this.carregando.set(false);
         this.mensagemErro.set('');
       },
-
-      error: (erro) => {
+      error: erro => {
         console.error('Erro ao pesquisar planos:', erro);
-
         this.planos.set([]);
-
-        this.mensagemErro.set(
-          'Não foi possível pesquisar os planos. Tente novamente.'
-        );
+        this.mensagemErro.set('Não foi possível pesquisar os planos. Tente novamente.');
         this.carregando.set(false);
       }
     });
@@ -387,12 +497,75 @@ export class HomePage implements OnInit {
     this.fecharFiltros();
   }
 
-  favoritar(_planoId: number): void {
-    // Implementar posteriormente
+  isFavorito(planoId: number): boolean {
+    return this.favoritosUsuario().some(
+      favorito => favorito.planoAula?.id === planoId
+    );
+  }
+
+  isFavoritoEmProcessamento(planoId: number): boolean {
+    return this.favoritosEmProcessamento.has(planoId);
+  }
+
+  favoritar(planoId: number): void {
+    const usuarioId = this.authService.sessaoAtual()?.usuarioId;
+
+    if (!usuarioId) {
+      void this.appDialog.alert('Faça login para favoritar planos.', 'Atenção');
+      return;
+    }
+
+    if (this.favoritosEmProcessamento.has(planoId)) {
+      return;
+    }
+    this.favoritosEmProcessamento.add(planoId);
+
+    const favoritoExistente = this.favoritosUsuario().find(
+      favorito => favorito.planoAula?.id === planoId
+    );
+
+    if (favoritoExistente) {
+      this.favoritosService.remover(favoritoExistente.id).subscribe({
+        next: () => {
+          this.favoritosEmProcessamento.delete(planoId);
+
+          this.favoritosUsuario.update(lista =>
+            lista.filter(f => f.id !== favoritoExistente.id)
+          );
+
+          if (this.modoExibicao() === 'favoritos') {
+            this.planos.update(lista => lista.filter(plano => plano.id !== planoId));
+            this.totalElementos.set(this.planos().length);
+            this.totalPaginas.set(this.planos().length > 0 ? 1 : 0);
+          }
+
+          this.ajustarCurtidas(planoId, -1);
+        },
+        error: erro => {
+          this.favoritosEmProcessamento.delete(planoId);
+          console.error('Erro ao remover favorito:', erro);
+          void this.appDialog.alert('Não foi possível remover o favorito.', 'Erro');
+        }
+      });
+      return;
+    }
+
+    this.favoritosService.adicionar(usuarioId, planoId).subscribe({
+      next: novoFavorito => {
+        this.favoritosEmProcessamento.delete(planoId);
+        this.favoritosUsuario.update(lista => [...lista, novoFavorito]);
+        this.ajustarCurtidas(planoId, +1);
+      },
+      error: erro => {
+        this.favoritosEmProcessamento.delete(planoId);
+        console.error('Erro ao adicionar favorito:', erro);
+        void this.appDialog.alert('Não foi possível adicionar o favorito.', 'Erro');
+      }
+    });
   }
 
   adaptar(_planoId: number): void {
-    // Implementar posteriormente
+    // Implementar posteriormente.
   }
 
   mudarPagina(novaPagina: number): void {

@@ -1460,6 +1460,9 @@ ion-content::part(scroll)::-webkit-scrollbar {
       --border-color: var(--ion-color-primary, #3880ff);
       --color: var(--ion-color-primary, #3880ff);
     }
+    .metric-favorites.is-favorited {
+  color: #e53935;
+}
 
     &:disabled {
       opacity: 0.4;
