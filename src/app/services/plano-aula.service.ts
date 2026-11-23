@@ -56,6 +56,7 @@ export interface PlanoAulaApiResponse {
   id: number;
   titulo: string;
   resumo: string;
+  totalFavoritos?: number;
   tipoAtividade: TipoAtividade;
   etapaEnsino: EtapaEnsino;
   statusPublicacao: string;
@@ -293,7 +294,7 @@ export class PlanoAulaService {
         email: plano.autor?.email ?? ''
       },
 
-      quantidadeFavoritos: 0,
+      quantidadeFavoritos: plano.totalFavoritos ?? 0,
       quantidadeAdaptacoes: 0,
 
       isGeradoIA: plano.isGeradoIA ?? false,
