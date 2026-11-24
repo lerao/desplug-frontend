@@ -108,22 +108,15 @@
       <!-- CAMPO: Secretaria de Educação -->
       <div class="input-group">
         <label class="custom-label">SECRETARIA DE EDUCAÇÃO *</label>
-        <div class="custom-input-box" [class.input-error]="secretaria.invalid && secretaria.touched">
+        <div class="custom-input-box" [class.input-error]="secretariaInvalida()" (click)="abrirSelecaoSecretaria()"
+          style="cursor: pointer;">
           <ion-icon name="business-outline" class="input-icon-start"></ion-icon>
-          <ion-select 
-            name="secretaria"
-            placeholder="Selecione sua secretaria"
-            [(ngModel)]="usuario.secretaria"
-            #secretaria="ngModel"
-            class="custom-input"
-            okText="Selecionar"
-            cancelText="Cancelar"
-            required>
-            <ion-select-option value="estadual">Secretaria Estadual de Educação</ion-select-option>
-            <ion-select-option value="municipal">Secretaria Municipal de Educação</ion-select-option>
-          </ion-select>
+          <span class="select-display-text" [class.placeholder]="!usuario.secretaria">
+            {{ abrirInfoSecretaria() }}
+          </span>
+          <ion-icon name="chevron-down-outline" class="input-icon-end"></ion-icon>
         </div>
-        <span class="error-message" *ngIf="secretariaError">A seleção da secretaria é obrigatória.</span>
+        <span class="error-message" *ngIf="secretariaInvalida()">A seleção da secretaria é obrigatória.</span>
       </div>
 
       <div class="input-group">
