@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService, CadastroRequest } from '../security/auth.service';
 import { Localidade, LocalidadeService } from '../services/localidade.service';
@@ -43,25 +43,27 @@ export class CadastroPage implements OnInit {
 
   ngOnInit() { }
 
-  secretariaError = false;
+  secretariaSelecionada = signal<string>('');
+  secretariaInvalida = signal<boolean>(false);
 
   readonly opcoesSecretaria = [
     { value: 'estadual', label: 'Secretaria Estadual de Educação' },
     { value: 'municipal', label: 'Secretaria Municipal de Educação' }
   ];
 
-  obterLabelSecretaria(): string {
-    const encontrada = this.opcoesSecretaria.find(o => o.value === this.usuario.secretaria);
+  abrirInfoSecretaria = computed(() => {
+    const valorAtual = this.secretariaSelecionada();
+    const encontrada = this.opcoesSecretaria.find(o => o.value === valorAtual);
     return encontrada ? encontrada.label : 'Selecione sua secretaria';
-  }
+  });
 
   async abrirSelecaoSecretaria(): Promise<void> {
     const resultado = await this.dialogService.confirm({
       title: 'Secretaria de Educação',
-      message: 'Escolha a secretaria vinculada ao seu cadastro:',
+      message: '',
       select: {
         name: 'secretaria',
-        value: this.usuario.secretaria,
+        value: this.secretariaSelecionada(),
         options: this.opcoesSecretaria
       },
       buttons: [
@@ -70,11 +72,16 @@ export class CadastroPage implements OnInit {
       ]
     });
 
-    if (resultado.role === 'confirm' && resultado.data?.['secretaria']) {
-      this.usuario.secretaria = resultado.data['secretaria'];
-      this.secretariaError = false;
-    } else if (resultado.role === 'confirm' && !resultado.data?.['secretaria']) {
-      this.secretariaError = true;
+    if (resultado.role === 'confirm') {
+      const valorEscolhido = resultado.data?.['secretaria'];
+
+      if (valorEscolhido) {
+        this.secretariaSelecionada.set(valorEscolhido);
+        this.usuario.secretaria = valorEscolhido;
+        this.secretariaInvalida.set(false);
+      } else {
+        this.secretariaInvalida.set(true);
+      }
     }
   }
 
@@ -198,8 +205,8 @@ export class CadastroPage implements OnInit {
       await this.exibirErroValidacao('As duas senhas informadas não são iguais.');
       return;
     }
-    if (!this.usuario.secretaria) {
-      this.secretariaError = true;
+    if (!this.secretariaSelecionada()) {
+      this.secretariaInvalida.set(true);
       await this.exibirErroValidacao('Por favor, selecione a sua Secretaria de Educação.');
       return;
     }
