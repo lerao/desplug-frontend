@@ -185,7 +185,6 @@ export class PlanoAulaPage implements OnInit {
   carregarHabilidades() {
     this.planoAulaApi.getHabilidades().subscribe({
       next: (habilidades: HabilidadeBncc[]) => {
-        console.log('Habilidades BNCC carregadas:', habilidades);
         this.bnccHab = habilidades.map(hab => ({
           id: hab.id,
           code: hab.codigo,

@@ -238,7 +238,6 @@ export class CadastroPage implements OnInit {
       )
       .subscribe({
         next: () => {
-          console.log('Cadastro realizado com sucesso!');
           void this.exibirSucesso();
         },
         error: (erro: HttpErrorResponse) => {
